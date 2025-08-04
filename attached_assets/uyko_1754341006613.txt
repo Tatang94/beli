@@ -1,0 +1,743 @@
+import os
+import sqlite3
+import logging
+from datetime import datetime
+import requests
+import hashlib
+from telegram import (
+    Update,
+    InlineKeyboardButton,
+    InlineKeyboardMarkup,
+)
+from telegram.ext import (
+    Updater,
+    CommandHandler,
+    MessageHandler,
+    Filters,
+    CallbackContext,
+    CallbackQueryHandler,
+    ConversationHandler,
+)
+
+# Konfigurasi Bot dan API
+TOKEN = "8216106872:AAEQ_DxjYtZL0t6vD-y4Pfj90c94wHgXDcc"
+DIGIFLAZZ_USERNAME = "miwewogwOZ2g"
+DIGIFLAZZ_KEY = "8c2f1f52-6e36-56de-a1cd-3662bd5eb375"
+ADMIN_IDS = [7044289974]  # Ganti dengan ID admin Anda
+
+# Setup logging
+logging.basicConfig(
+    format='%(asctime)s - %(name)s - %(levelname)s - %(message)s',
+    level=logging.INFO
+)
+logger = logging.getLogger(__name__)
+
+# States untuk ConversationHandler
+MENU_UTAMA, ADMIN_MENU, DEPOSIT_FLOW, CONFIRM_DEPOSIT_FLOW, BUY_FLOW, TRANSACTION_ID_FLOW = range(6)
+ADMIN_DELETE_PRODUCT_FLOW, ADMIN_MANAGE_FLOW = range(6, 8)
+
+# Inisialisasi database
+def init_db():
+    conn = sqlite3.connect('bot_database.db')
+    cursor = conn.cursor()
+
+    # Tabel users
+    cursor.execute('''
+    CREATE TABLE IF NOT EXISTS users (
+        user_id INTEGER PRIMARY KEY,
+        username TEXT,
+        first_name TEXT,
+        last_name TEXT,
+        balance INTEGER DEFAULT 0,
+        is_admin INTEGER DEFAULT 0,
+        join_date TEXT
+    )
+    ''')
+
+    # Tambahkan admin awal jika belum ada
+    for admin_id in ADMIN_IDS:
+        cursor.execute('SELECT 1 FROM users WHERE user_id = ?', (admin_id,))
+        if not cursor.fetchone():
+            cursor.execute('''
+            INSERT INTO users (user_id, username, first_name, is_admin, join_date)
+            VALUES (?, ?, ?, ?, ?)
+            ''', (admin_id, 'admin_username', 'Admin', 1, datetime.now().strftime('%Y-%m-%d %H:%M:%S')))
+
+    # Tabel products (diperbarui untuk data dari Digiflazz)
+    cursor.execute('''
+    CREATE TABLE IF NOT EXISTS products (
+        product_id INTEGER PRIMARY KEY AUTOINCREMENT,
+        name TEXT,
+        price INTEGER,
+        digiflazz_code TEXT,
+        description TEXT,
+        brand TEXT,
+        type TEXT,
+        seller TEXT
+    )
+    ''')
+
+    # Tabel transactions
+    cursor.execute('''
+    CREATE TABLE IF NOT EXISTS transactions (
+        transaction_id INTEGER PRIMARY KEY AUTOINCREMENT,
+        user_id INTEGER,
+        product_id INTEGER,
+        amount INTEGER,
+        digiflazz_refid TEXT,
+        status TEXT,
+        date TEXT,
+        FOREIGN KEY(user_id) REFERENCES users(user_id),
+        FOREIGN KEY(product_id) REFERENCES products(product_id)
+    )
+    ''')
+
+    # Tabel deposits
+    cursor.execute('''
+    CREATE TABLE IF NOT EXISTS deposits (
+        deposit_id INTEGER PRIMARY KEY AUTOINCREMENT,
+        user_id INTEGER,
+        amount INTEGER,
+        method TEXT,
+        status TEXT DEFAULT 'pending',
+        proof TEXT,
+        date TEXT,
+        FOREIGN KEY(user_id) REFERENCES users(user_id)
+    )
+    ''')
+
+    conn.commit()
+    conn.close()
+
+# Fungsi bantu database
+def get_db_connection():
+    conn = sqlite3.connect('bot_database.db')
+    conn.row_factory = sqlite3.Row
+    return conn
+
+def is_admin(user_id):
+    conn = get_db_connection()
+    user = conn.execute('SELECT is_admin FROM users WHERE user_id = ?', (user_id,)).fetchone()
+    conn.close()
+    return user and user['is_admin'] == 1
+
+def get_user_balance(user_id):
+    conn = get_db_connection()
+    user = conn.execute('SELECT balance FROM users WHERE user_id = ?', (user_id,)).fetchone()
+    conn.close()
+    return user['balance'] if user else 0
+
+def register_user(user):
+    conn = get_db_connection()
+    user_exists = conn.execute('SELECT 1 FROM users WHERE user_id = ?', (user.id,)).fetchone()
+    if not user_exists:
+        conn.execute('''
+        INSERT INTO users (user_id, username, first_name, last_name, join_date)
+        VALUES (?, ?, ?, ?, ?)
+        ''', (user.id, user.username, user.first_name, user.last_name if user.last_name else '', datetime.now().strftime('%Y-%m-%d %H:%M:%S')))
+        conn.commit()
+    conn.close()
+
+# --- Handlers Umum (Main Menu & Admin Menu) ---
+def start(update: Update, context: CallbackContext) -> int:
+    user = update.effective_user
+    register_user(user)
+
+    welcome_message = (
+        f"👋 Halo {user.first_name}!\n\n"
+        "Selamat datang di Bot Pulsa & PPOB Digital!\n"
+        "Silakan pilih menu di bawah:"
+    )
+
+    keyboard = [[InlineKeyboardButton("🛍 Beli Produk", callback_data='buy_product')],
+                [InlineKeyboardButton("💰 Deposit Saldo", callback_data='deposit')],
+                [InlineKeyboardButton("💼 Cek Saldo", callback_data='check_balance')]]
+
+    if is_admin(user.id):
+        keyboard.append([InlineKeyboardButton("👑 Admin Menu", callback_data='admin_menu')])
+
+    reply_markup = InlineKeyboardMarkup(keyboard)
+    update.message.reply_text(welcome_message, reply_markup=reply_markup)
+    return MENU_UTAMA
+
+def main_menu(update: Update, context: CallbackContext) -> int:
+    query = update.callback_query
+    query.answer()
+
+    user = update.effective_user
+    keyboard = [[InlineKeyboardButton("🛍 Beli Produk", callback_data='buy_product')],
+                [InlineKeyboardButton("💰 Deposit Saldo", callback_data='deposit')],
+                [InlineKeyboardButton("💼 Cek Saldo", callback_data='check_balance')]]
+
+    if is_admin(user.id):
+        keyboard.append([InlineKeyboardButton("👑 Admin Menu", callback_data='admin_menu')])
+
+    reply_markup = InlineKeyboardMarkup(keyboard)
+    query.edit_message_text(text="📱 Menu Utama\n\nSilakan pilih menu di bawah:", reply_markup=reply_markup)
+    return MENU_UTAMA
+
+def admin_menu(update: Update, context: CallbackContext) -> int:
+    query = update.callback_query
+    query.answer()
+
+    keyboard = [[InlineKeyboardButton("➕ Update Produk", callback_data='update_products_from_api')],
+                [InlineKeyboardButton("➖ Hapus Produk", callback_data='delete_product_start')],
+                [InlineKeyboardButton("👥 Kelola Admin", callback_data='manage_admin_start')],
+                [InlineKeyboardButton("📊 Statistik Bot", callback_data='bot_stats')],
+                [InlineKeyboardButton("💵 Konfirmasi Deposit", callback_data='confirm_deposit_list')],
+                [InlineKeyboardButton("🔙 Kembali", callback_data='main_menu')]]
+
+    reply_markup = InlineKeyboardMarkup(keyboard)
+    query.edit_message_text(text="👑 Menu Admin\n\nSilakan pilih menu admin:", reply_markup=reply_markup)
+    return ADMIN_MENU
+
+def check_balance(update: Update, context: CallbackContext) -> int:
+    query = update.callback_query
+    query.answer()
+
+    user_id = update.effective_user.id
+    balance = get_user_balance(user_id)
+
+    keyboard = [[InlineKeyboardButton("💰 Deposit", callback_data='deposit')],
+                [InlineKeyboardButton("🔙 Kembali", callback_data='main_menu')]]
+
+    reply_markup = InlineKeyboardMarkup(keyboard)
+    query.edit_message_text(text=f"💼 Saldo Anda\n\n💰 Saldo: Rp {balance:,}\n\nSilakan pilih menu di bawah:", reply_markup=reply_markup)
+    return MENU_UTAMA
+
+def cancel(update: Update, context: CallbackContext) -> int:
+    update.message.reply_text("Aksi dibatalkan. Kembali ke menu utama.")
+    return ConversationHandler.END
+
+# --- Handler Beli Produk (BUY_FLOW) ---
+def buy_product_menu(update: Update, context: CallbackContext) -> int:
+    query = update.callback_query
+    query.answer("Mengambil daftar kategori produk...")
+
+    conn = get_db_connection()
+    categories = conn.execute('SELECT DISTINCT brand FROM products ORDER BY brand').fetchall()
+    conn.close()
+
+    if not categories:
+        try:
+            query.edit_message_text("❌ Maaf, saat ini tidak ada produk yang tersedia.", reply_markup=InlineKeyboardMarkup([[InlineKeyboardButton("🔙 Kembali", callback_data='main_menu')]]))
+        except Exception as e:
+            logger.error(f"Error editing message in buy_product_menu (no products): {e}")
+            update.effective_chat.send_message("❌ Maaf, saat ini tidak ada produk yang tersedia.", reply_markup=InlineKeyboardMarkup([[InlineKeyboardButton("🔙 Kembali", callback_data='main_menu')]]))
+        return BUY_FLOW
+
+    keyboard = [[InlineKeyboardButton(cat['brand'], callback_data=f"category_{cat['brand']}")] for cat in categories]
+    keyboard.append([InlineKeyboardButton("🔙 Kembali", callback_data='main_menu')])
+    reply_markup = InlineKeyboardMarkup(keyboard)
+    
+    try:
+        query.edit_message_text("🛍 Pilih Kategori Produk\n\nSilakan pilih kategori produk yang ingin Anda beli:", reply_markup=reply_markup)
+    except Exception as e:
+        logger.error(f"Error editing message in buy_product_menu: {e}")
+        update.effective_chat.send_message("🛍 Pilih Kategori Produk\n\nSilakan pilih kategori produk yang ingin Anda beli:", reply_markup=reply_markup)
+
+    return BUY_FLOW
+def show_products(update: Update, context: CallbackContext) -> int:
+    query = update.callback_query
+    query.answer("Mengambil daftar produk...") # Ini menghentikan loading spinner di sisi Telegram
+    category = query.data.split('_', 1)[1]
+    context.user_data['selected_category'] = category
+
+    conn = get_db_connection()
+    products = conn.execute('SELECT * FROM products WHERE brand = ? ORDER BY price', (category,)).fetchall()
+    conn.close()
+
+    if not products:
+        try:
+            query.edit_message_text(f"❌ Tidak ada produk tersedia dalam kategori {category}.", reply_markup=InlineKeyboardMarkup([[InlineKeyboardButton("🔙 Kembali", callback_data='buy_product')]]))
+        except Exception as e:
+            logger.error(f"Error editing message in show_products (no products): {e}")
+            update.effective_chat.send_message(f"❌ Tidak ada produk tersedia dalam kategori {category}.", reply_markup=InlineKeyboardMarkup([[InlineKeyboardButton("🔙 Kembali", callback_data='buy_product')]]))
+        return BUY_FLOW
+
+    keyboard = [[InlineKeyboardButton(f"{p['name']} - Rp {p['price']:,}", callback_data=f"select_product_{p['product_id']}")] for p in products]
+    keyboard.append([InlineKeyboardButton("🔙 Kembali", callback_data='buy_product')])
+    reply_markup = InlineKeyboardMarkup(keyboard)
+
+    try:
+        query.edit_message_text(f"📋 Produk {category}\n\nSilakan pilih produk yang ingin Anda beli:", reply_markup=reply_markup)
+    except Exception as e:
+        logger.error(f"Error editing message in show_products: {e}")
+        # Jika gagal mengedit pesan, kirim pesan baru sebagai fallback
+        update.effective_chat.send_message(f"📋 Produk {category}\n\nSilakan pilih produk yang ingin Anda beli:", reply_markup=reply_markup)
+    
+    return BUY_FLOW
+
+def select_product(update: Update, context: CallbackContext) -> int:
+    query = update.callback_query
+    query.answer()
+    product_id = int(query.data.split('_')[-1])
+
+    conn = get_db_connection()
+    product = conn.execute('SELECT * FROM products WHERE product_id = ?', (product_id,)).fetchone()
+    conn.close()
+
+    if not product:
+        try:
+            query.edit_message_text("❌ Produk tidak ditemukan.", reply_markup=InlineKeyboardMarkup([[InlineKeyboardButton("🔙 Kembali", callback_data='buy_product')]]))
+        except Exception as e:
+            logger.error(f"Error editing message in select_product: {e}")
+            update.effective_chat.send_message("❌ Produk tidak ditemukan.", reply_markup=InlineKeyboardMarkup([[InlineKeyboardButton("🔙 Kembali", callback_data='buy_product')]]))
+        return BUY_FLOW
+
+    context.user_data['selected_product'] = product_id
+    try:
+        query.edit_message_text(
+            f"📋 Detail Produk\n\n🏷 Nama: {product['name']}\n💰 Harga: Rp {product['price']:,}\n📝 Deskripsi: {product['description']}\n\nSilakan kirimkan ID tujuan (misal: nomor HP, nomor token PLN, dll):"
+        )
+    except Exception as e:
+        logger.error(f"Error editing message in select_product: {e}")
+        update.effective_chat.send_message(
+            f"📋 Detail Produk\n\n🏷 Nama: {product['name']}\n💰 Harga: Rp {product['price']:,}\n📝 Deskripsi: {product['description']}\n\nSilakan kirimkan ID tujuan (misal: nomor HP, nomor token PLN, dll):"
+        )
+    return TRANSACTION_ID_FLOW
+
+def get_transaction_id(update: Update, context: CallbackContext) -> int:
+    transaction_id = update.message.text
+    context.user_data['transaction_id'] = transaction_id
+
+    product_id = context.user_data.get('selected_product')
+    conn = get_db_connection()
+    product = conn.execute('SELECT * FROM products WHERE product_id = ?', (product_id,)).fetchone()
+    conn.close()
+
+    if not product:
+        update.message.reply_text("❌ Terjadi kesalahan. Silakan mulai pembelian dari awal.")
+        return start(update, context)
+
+    keyboard = [[InlineKeyboardButton("✅ Beli Sekarang", callback_data='confirm_buy')],
+                [InlineKeyboardButton("🔙 Kembali", callback_data=f"category_{product['brand']}")]]
+    reply_markup = InlineKeyboardMarkup(keyboard)
+    update.message.reply_text(
+        f"🛒 Konfirmasi Pembelian\n\nProduk: {product['name']}\nHarga: Rp {product['price']:,}\nID Tujuan: {transaction_id}\n\nApakah Anda yakin ingin melanjutkan?",
+        reply_markup=reply_markup
+    )
+    return BUY_FLOW
+
+def confirm_buy(update: Update, context: CallbackContext) -> int:
+    query = update.callback_query
+    query.answer()
+    user_id = update.effective_user.id
+    product_id = context.user_data.get('selected_product')
+    transaction_id = context.user_data.get('transaction_id')
+
+    conn = get_db_connection()
+    user = conn.execute('SELECT balance FROM users WHERE user_id = ?', (user_id,)).fetchone()
+    product = conn.execute('SELECT * FROM products WHERE product_id = ?', (product_id,)).fetchone()
+
+    if not user or not product:
+        conn.close()
+        query.edit_message_text("❌ Terjadi kesalahan. Silakan mulai pembelian dari awal.")
+        return ConversationHandler.END
+
+    if user['balance'] < product['price']:
+        conn.close()
+        query.edit_message_text(f"❌ Saldo tidak cukup! Saldo Anda: Rp {user['balance']:,}, Harga: Rp {product['price']:,}\n\nSilakan deposit terlebih dahulu.", reply_markup=InlineKeyboardMarkup([[InlineKeyboardButton("🔙 Kembali", callback_data='main_menu')]]))
+        return ConversationHandler.END
+
+    conn.execute('UPDATE users SET balance = balance - ? WHERE user_id = ?', (product['price'], user_id))
+    cursor = conn.cursor()
+    cursor.execute('''
+    INSERT INTO transactions (user_id, product_id, amount, status, date)
+    VALUES (?, ?, ?, ?, ?)
+    ''', (user_id, product_id, product['price'], 'pending', datetime.now().strftime('%Y-%m-%d %H:%M:%S')))
+    db_trans_id = cursor.lastrowid
+    conn.commit()
+    conn.close()
+
+    try:
+        ref_id = f"REF{db_trans_id}"
+        sign = hashlib.md5(f"{DIGIFLAZZ_USERNAME}{DIGIFLAZZ_KEY}{ref_id}".encode('utf-8')).hexdigest()
+
+        payload = {"cmd": "prepaid", "username": DIGIFLAZZ_USERNAME, "sign": sign, "ref_id": ref_id,
+                   "hp": transaction_id, "pulsa_code": product['digiflazz_code']}
+
+        response = requests.post("https://api.digiflazz.com/v1/transaction", json=payload, timeout=30)
+        response.raise_for_status()
+        digiflazz_data = response.json().get('data')
+
+        if digiflazz_data and digiflazz_data.get('status') == 'Sukses':
+            update.effective_chat.send_message(f"✅ Pembelian berhasil!\n\nProduk: {product['name']}\nID Tujuan: {transaction_id}\n\nTerima kasih!", reply_markup=InlineKeyboardMarkup([[InlineKeyboardButton("🔙 Kembali ke Menu Utama", callback_data='main_menu')]]))
+        else:
+            conn = get_db_connection()
+            conn.execute('UPDATE users SET balance = balance + ? WHERE user_id = ?', (product['price'], user_id))
+            conn.execute('UPDATE transactions SET status = ? WHERE transaction_id = ?', ('failed', db_trans_id))
+            conn.commit()
+            conn.close()
+            update.effective_chat.send_message("❌ Pembelian gagal. Saldo Anda telah dikembalikan. Silakan coba lagi.", reply_markup=InlineKeyboardMarkup([[InlineKeyboardButton("🔙 Kembali ke Menu Utama", callback_data='main_menu')]]))
+
+    except requests.RequestException as e:
+        conn = get_db_connection()
+        conn.execute('UPDATE users SET balance = balance + ? WHERE user_id = ?', (product['price'], user_id))
+        conn.execute('UPDATE transactions SET status = ? WHERE transaction_id = ?', ('failed', db_trans_id))
+        conn.commit()
+        conn.close()
+        logger.error(f"Error calling Digiflazz API: {e}")
+        update.effective_chat.send_message("❌ Gagal menghubungi server Digiflazz. Saldo Anda telah dikembalikan. Silakan coba lagi nanti.", reply_markup=InlineKeyboardMarkup([[InlineKeyboardButton("🔙 Kembali ke Menu Utama", callback_data='main_menu')]]))
+
+    context.user_data.clear() # Membersihkan data user
+    return ConversationHandler.END
+
+# --- Handler Deposit (DEPOSIT_FLOW & CONFIRM_DEPOSIT_FLOW) ---
+def deposit_menu(update: Update, context: CallbackContext) -> int:
+    query = update.callback_query
+    query.answer()
+    keyboard = [[InlineKeyboardButton("💳 Transfer Bank", callback_data='deposit_bank')],
+                [InlineKeyboardButton("📱 E-Wallet", callback_data='deposit_ewallet')],
+                [InlineKeyboardButton("🔙 Kembali", callback_data='main_menu')]]
+    reply_markup = InlineKeyboardMarkup(keyboard)
+    query.edit_message_text("💰 Deposit Saldo\n\nPilih metode deposit:", reply_markup=reply_markup)
+    return DEPOSIT_FLOW
+
+def process_deposit_amount(update: Update, context: CallbackContext) -> int:
+    query = update.callback_query
+    query.answer()
+    context.user_data['deposit_method'] = query.data.split('_')[1]
+    query.edit_message_text(f"💰 Deposit via {context.user_data['deposit_method'].upper()}\n\nSilakan kirim jumlah deposit (minimal Rp 10,000):", reply_markup=InlineKeyboardMarkup([[InlineKeyboardButton("🔙 Kembali", callback_data='deposit')]]))
+    return CONFIRM_DEPOSIT_FLOW
+
+def get_deposit_amount_and_confirm(update: Update, context: CallbackContext) -> int:
+    try:
+        amount = int(update.message.text)
+        if amount < 10000:
+            update.message.reply_text("❌ Minimal deposit adalah Rp 10,000. Silakan coba lagi.")
+            return CONFIRM_DEPOSIT_FLOW
+        context.user_data['deposit_amount'] = amount
+        method = context.user_data['deposit_method']
+
+        if method == 'bank':
+            payment_info = (
+                "📌 Informasi Transfer Bank:\n\n"
+                "Bank: BCA\n"
+                "No. Rekening: 0542219716\n"
+                "Atas Nama: TATANG TARIA EDI\n\n"
+                "Setelah transfer, kirim bukti transfer sebagai foto atau dokumen."
+            )
+        else: # method == 'ewallet'
+            payment_info = (
+                "📌 Informasi E-Wallet:\n\n"
+                "DANA: 089663596711\n"
+                "Atas Nama: Tatang Taria Edi\n\n"
+                "Setelah transfer, kirim bukti transfer sebagai foto atau dokumen."
+            )
+
+        update.message.reply_text(f"💰 Konfirmasi Deposit\n\nMetode: {method.upper()}\nJumlah: Rp {amount:,}\n\n{payment_info}\n\nKirim bukti transfer sekarang atau ketik /batal untuk membatalkan.")
+        return CONFIRM_DEPOSIT_FLOW
+    except (ValueError, TypeError):
+        update.message.reply_text("❌ Format jumlah tidak valid. Harap masukkan angka saja.")
+        return CONFIRM_DEPOSIT_FLOW
+
+def save_deposit_proof(update: Update, context: CallbackContext) -> int:
+    user_id = update.effective_user.id
+    amount = context.user_data.get('deposit_amount')
+    method = context.user_data.get('deposit_method')
+    if not amount or not method:
+        update.message.reply_text("❌ Terjadi kesalahan. Silakan mulai deposit dari awal.")
+        return ConversationHandler.END
+    proof_file = update.message.photo[-1].file_id if update.message.photo else update.message.document.file_id
+    conn = get_db_connection()
+    conn.execute('''
+    INSERT INTO deposits (user_id, amount, method, proof, date)
+    VALUES (?, ?, ?, ?, ?)
+    ''', (user_id, amount, method, proof_file, datetime.now().strftime('%Y-%m-%d %H:%M:%S')))
+    conn.commit()
+    conn.close()
+    for admin_id in ADMIN_IDS:
+        context.bot.send_message(admin_id, f"⚠️ Deposit Baru!\n\nUser: @{update.effective_user.username}\nJumlah: Rp {amount:,}\nMetode: {method}\n\nSilakan verifikasi di menu admin.")
+    update.message.reply_text("✅ Bukti deposit telah diterima. Admin akan memverifikasi deposit Anda segera.")
+    context.user_data.clear()
+    return ConversationHandler.END
+
+# --- Handler Admin (ADMIN_MENU) ---
+def update_products_from_api(update: Update, context: CallbackContext) -> int:
+    query = update.callback_query
+    query.answer("Sedang mengambil produk dari Digiflazz...")
+    query.edit_message_text("🔄 Sedang mengambil daftar produk dari Digiflazz. Ini mungkin memakan waktu beberapa detik...")
+    conn = get_db_connection()
+    cursor = conn.cursor()
+    cursor.execute('DELETE FROM products')
+    conn.commit()
+    sign = hashlib.md5(f"{DIGIFLAZZ_USERNAME}{DIGIFLAZZ_KEY}pricelist".encode('utf-8')).hexdigest()
+    payload = {"cmd": "prepaid", "username": DIGIFLAZZ_USERNAME, "sign": sign}
+    try:
+        response = requests.post("https://api.digiflazz.com/v1/price-list", json=payload, timeout=30)
+        response.raise_for_status()
+        products = response.json()['data']
+        if not products:
+            update.effective_chat.send_message("❌ Gagal mengambil produk. Tidak ada data yang diterima.")
+            conn.close()
+            return ADMIN_MENU
+        added_count = 0
+        for product in products:
+            if product.get('buyer_sku_code') not in ['T01', 'T02', 'T10']:
+                cursor.execute('''
+                INSERT INTO products (name, price, digiflazz_code, description, brand, type, seller)
+                VALUES (?, ?, ?, ?, ?, ?, ?)
+                ''', (product['product_name'], product['price'], product['buyer_sku_code'],
+                      product['desc'], product['brand'], product['type'], product['seller_name']))
+                added_count += 1
+        conn.commit()
+        conn.close()
+        update.effective_chat.send_message(f"✅ Berhasil! {added_count} produk dari Digiflazz telah ditambahkan ke database.")
+    except requests.RequestException as e:
+        logger.error(f"Error fetching products from Digiflazz: {e}")
+        update.effective_chat.send_message(f"❌ Gagal mengambil produk dari Digiflazz: {e}")
+    return ADMIN_MENU
+
+def admin_confirm_deposit_list(update: Update, context: CallbackContext) -> int:
+    query = update.callback_query
+    query.answer()
+    conn = get_db_connection()
+    pending_deposits = conn.execute('''
+    SELECT d.deposit_id, u.username, d.amount, d.date
+    FROM deposits d JOIN users u ON d.user_id = u.user_id
+    WHERE d.status = 'pending' ORDER BY d.date DESC
+    ''').fetchall()
+    conn.close()
+    if not pending_deposits:
+        query.edit_message_text("✅ Tidak ada deposit yang perlu dikonfirmasi.", reply_markup=InlineKeyboardMarkup([[InlineKeyboardButton("🔙 Kembali", callback_data='admin_menu')]]))
+        return ADMIN_MENU
+    keyboard = [[InlineKeyboardButton(f"{d['username']} - Rp {d['amount']:,} - {d['date']}", callback_data=f"view_deposit_{d['deposit_id']}")] for d in pending_deposits]
+    keyboard.append([InlineKeyboardButton("🔙 Kembali", callback_data='admin_menu')])
+    reply_markup = InlineKeyboardMarkup(keyboard)
+    query.edit_message_text("💰 Deposit Menunggu Konfirmasi\n\nPilih deposit untuk melihat detail:", reply_markup=reply_markup)
+    return ADMIN_MENU
+
+def view_deposit_detail(update: Update, context: CallbackContext) -> int:
+    query = update.callback_query
+    query.answer()
+    deposit_id = int(query.data.split('_')[-1])
+    conn = get_db_connection()
+    deposit = conn.execute('SELECT d.*, u.username, u.first_name FROM deposits d JOIN users u ON d.user_id = u.user_id WHERE d.deposit_id = ?', (deposit_id,)).fetchone()
+    conn.close()
+    if not deposit:
+        query.edit_message_text("❌ Deposit tidak ditemukan.", reply_markup=InlineKeyboardMarkup([[InlineKeyboardButton("🔙 Kembali", callback_data='confirm_deposit_list')]]))
+        return ADMIN_MENU
+    keyboard = [[InlineKeyboardButton("✅ Setujui", callback_data=f"approve_deposit_{deposit_id}"),
+                 InlineKeyboardButton("❌ Tolak", callback_data=f"reject_deposit_{deposit_id}")],
+                [InlineKeyboardButton("🔙 Kembali", callback_data='confirm_deposit_list')]]
+    reply_markup = InlineKeyboardMarkup(keyboard)
+    context.bot.send_photo(chat_id=update.effective_chat.id, photo=deposit['proof'], caption=(
+        f"📋 Detail Deposit\n\n👤 User: @{deposit['username']} ({deposit['first_name']})\n💰 Jumlah: Rp {deposit['amount']:,}\n📌 Metode: {deposit['method']}\n📅 Tanggal: {deposit['date']}\n\nSilakan pilih tindakan:"), reply_markup=reply_markup)
+    return ADMIN_MENU
+
+def approve_deposit(update: Update, context: CallbackContext) -> int:
+    query = update.callback_query
+    query.answer()
+    deposit_id = int(query.data.split('_')[-1])
+    conn = get_db_connection()
+    deposit = conn.execute('SELECT * FROM deposits WHERE deposit_id = ?', (deposit_id,)).fetchone()
+    if not deposit or deposit['status'] != 'pending':
+        query.edit_message_text("⚠️ Deposit tidak ditemukan atau sudah diproses.", reply_markup=InlineKeyboardMarkup([[InlineKeyboardButton("🔙 Kembali", callback_data='confirm_deposit_list')]]))
+        conn.close()
+        return ADMIN_MENU
+    conn.execute('UPDATE deposits SET status = ? WHERE deposit_id = ?', ('approved', deposit_id))
+    conn.execute('UPDATE users SET balance = balance + ? WHERE user_id = ?', (deposit['amount'], deposit['user_id']))
+    conn.commit()
+    conn.close()
+    context.bot.send_message(deposit['user_id'], f"✅ Deposit Anda senilai Rp {deposit['amount']:,} telah disetujui!\n\n💳 Saldo Anda sekarang: Rp {get_user_balance(deposit['user_id']):,}\n\nTerima kasih!")
+    query.edit_message_text("✅ Deposit telah disetujui dan saldo user telah ditambahkan.", reply_markup=InlineKeyboardMarkup([[InlineKeyboardButton("🔙 Kembali", callback_data='confirm_deposit_list')]]))
+    return ADMIN_MENU
+
+def reject_deposit(update: Update, context: CallbackContext) -> int:
+    query = update.callback_query
+    query.answer()
+    deposit_id = int(query.data.split('_')[-1])
+    conn = get_db_connection()
+    deposit = conn.execute('SELECT * FROM deposits WHERE deposit_id = ?', (deposit_id,)).fetchone()
+    if not deposit or deposit['status'] != 'pending':
+        query.edit_message_text("⚠️ Deposit tidak ditemukan atau sudah diproses.", reply_markup=InlineKeyboardMarkup([[InlineKeyboardButton("🔙 Kembali", callback_data='confirm_deposit_list')]]))
+        conn.close()
+        return ADMIN_MENU
+    conn.execute('UPDATE deposits SET status = ? WHERE deposit_id = ?', ('rejected', deposit_id))
+    conn.commit()
+    conn.close()
+    context.bot.send_message(deposit['user_id'], f"❌ Deposit Anda senilai Rp {deposit['amount']:,} ditolak!\n\nSilakan hubungi admin jika Anda merasa ini kesalahan.")
+    query.edit_message_text("✅ Deposit telah ditolak.", reply_markup=InlineKeyboardMarkup([[InlineKeyboardButton("🔙 Kembali", callback_data='confirm_deposit_list')]]))
+    return ADMIN_MENU
+
+def delete_product_start(update: Update, context: CallbackContext) -> int:
+    query = update.callback_query
+    query.answer()
+    conn = get_db_connection()
+    products = conn.execute('SELECT product_id, name FROM products ORDER BY name').fetchall()
+    conn.close()
+    if not products:
+        query.edit_message_text("❌ Tidak ada produk untuk dihapus.", reply_markup=InlineKeyboardMarkup([[InlineKeyboardButton("🔙 Kembali", callback_data='admin_menu')]]))
+        return ADMIN_DELETE_PRODUCT_FLOW
+    keyboard = [[InlineKeyboardButton(p['name'], callback_data=f"delete_product_{p['product_id']}")] for p in products]
+    keyboard.append([InlineKeyboardButton("🔙 Kembali", callback_data='admin_menu')])
+    reply_markup = InlineKeyboardMarkup(keyboard)
+    query.edit_message_text("➖ Hapus Produk\n\nPilih produk yang ingin dihapus:", reply_markup=reply_markup)
+    return ADMIN_DELETE_PRODUCT_FLOW
+
+def delete_product_confirm(update: Update, context: CallbackContext) -> int:
+    query = update.callback_query
+    query.answer()
+    product_id = int(query.data.split('_')[-1])
+    conn = get_db_connection()
+    conn.execute('DELETE FROM products WHERE product_id = ?', (product_id,))
+    conn.commit()
+    conn.close()
+    query.edit_message_text(f"✅ Produk berhasil dihapus.", reply_markup=InlineKeyboardMarkup([[InlineKeyboardButton("🔙 Kembali", callback_data='admin_menu')]]))
+    return ADMIN_DELETE_PRODUCT_FLOW
+
+def manage_admin_start(update: Update, context: CallbackContext) -> int:
+    query = update.callback_query
+    query.answer()
+    keyboard = [[InlineKeyboardButton("➕ Tambah Admin", callback_data='add_admin_start')],
+                [InlineKeyboardButton("➖ Hapus Admin", callback_data='remove_admin_start')],
+                [InlineKeyboardButton("🔙 Kembali", callback_data='admin_menu')]]
+    reply_markup = InlineKeyboardMarkup(keyboard)
+    query.edit_message_text("👥 Kelola Admin\n\nPilih aksi:", reply_markup=reply_markup)
+    return ADMIN_MANAGE_FLOW
+
+def add_admin_start(update: Update, context: CallbackContext) -> int:
+    query = update.callback_query
+    query.answer()
+    query.edit_message_text("➕ Tambah Admin\n\nSilakan kirim user ID admin baru:")
+    return ADMIN_MANAGE_FLOW
+
+def add_admin_process(update: Update, context: CallbackContext) -> int:
+    try:
+        user_id = int(update.message.text)
+        conn = get_db_connection()
+        user = conn.execute('SELECT * FROM users WHERE user_id = ?', (user_id,)).fetchone()
+        if not user:
+            update.message.reply_text("❌ User tidak ditemukan di database bot.")
+        elif user['is_admin'] == 1:
+            update.message.reply_text("⚠️ User ini sudah menjadi admin.")
+        else:
+            conn.execute('UPDATE users SET is_admin = 1 WHERE user_id = ?', (user_id,))
+            conn.commit()
+            update.message.reply_text(f"✅ User ID {user_id} berhasil ditambahkan sebagai admin.")
+            context.bot.send_message(user_id, "🎉 Selamat! Anda sekarang adalah admin di bot ini.")
+        conn.close()
+    except (ValueError, TypeError):
+        update.message.reply_text("❌ User ID tidak valid. Harap masukkan angka.")
+    return ConversationHandler.END
+
+def remove_admin_start(update: Update, context: CallbackContext) -> int:
+    query = update.callback_query
+    query.answer()
+    query.edit_message_text("➖ Hapus Admin\n\nSilakan kirim user ID admin yang ingin dihapus:")
+    return ADMIN_MANAGE_FLOW
+
+def remove_admin_process(update: Update, context: CallbackContext) -> int:
+    try:
+        user_id = int(update.message.text)
+        if user_id in ADMIN_IDS:
+            update.message.reply_text("❌ Anda tidak bisa menghapus admin utama.")
+            return ConversationHandler.END
+        conn = get_db_connection()
+        user = conn.execute('SELECT * FROM users WHERE user_id = ?', (user_id,)).fetchone()
+        if not user or user['is_admin'] == 0:
+            update.message.reply_text("⚠️ User ini bukan admin.")
+        else:
+            conn.execute('UPDATE users SET is_admin = 0 WHERE user_id = ?', (user_id,))
+            conn.commit()
+            update.message.reply_text(f"✅ User ID {user_id} berhasil dihapus dari daftar admin.")
+            context.bot.send_message(user_id, "Anda tidak lagi menjadi admin di bot ini.")
+        conn.close()
+    except (ValueError, TypeError):
+        update.message.reply_text("❌ User ID tidak valid. Harap masukkan angka.")
+    return ConversationHandler.END
+
+def bot_stats(update: Update, context: CallbackContext) -> int:
+    query = update.callback_query
+    query.answer()
+    conn = get_db_connection()
+    user_count = conn.execute('SELECT COUNT(*) FROM users').fetchone()[0]
+    transaction_count = conn.execute('SELECT COUNT(*) FROM transactions').fetchone()[0]
+    total_revenue = conn.execute('SELECT SUM(amount) FROM transactions').fetchone()[0] or 0
+    conn.close()
+    stats_message = (
+        "📊 Statistik Bot\n\n"
+        f"👥 Total Pengguna: {user_count}\n"
+        f"🛒 Total Transaksi: {transaction_count}\n"
+        f"💰 Total Pendapatan: Rp {total_revenue:,}"
+    )
+    keyboard = [[InlineKeyboardButton("🔙 Kembali", callback_data='admin_menu')]]
+    reply_markup = InlineKeyboardMarkup(keyboard)
+    query.edit_message_text(stats_message, reply_markup=reply_markup)
+    return ADMIN_MENU
+
+# --- Pengaturan Handler Utama ---
+def main():
+    init_db()
+    updater = Updater(TOKEN)
+    dispatcher = updater.dispatcher
+
+    # Handler untuk alur Beli Produk
+    buy_product_handler = ConversationHandler(
+        entry_points=[CallbackQueryHandler(buy_product_menu, pattern='^buy_product$')],
+        states={
+            BUY_FLOW: [CallbackQueryHandler(show_products, pattern='^category_'),
+                       CallbackQueryHandler(select_product, pattern='^select_product_')],
+            TRANSACTION_ID_FLOW: [MessageHandler(Filters.text & ~Filters.command, get_transaction_id),
+                                  CallbackQueryHandler(confirm_buy, pattern='^confirm_buy$')],
+        },
+        fallbacks=[CommandHandler('batal', cancel), CallbackQueryHandler(main_menu, pattern='^main_menu$')],
+    )
+
+    # Handler untuk alur Deposit
+    deposit_handler = ConversationHandler(
+        entry_points=[CallbackQueryHandler(deposit_menu, pattern='^deposit$')],
+        states={
+            DEPOSIT_FLOW: [CallbackQueryHandler(process_deposit_amount, pattern='^deposit_')],
+            CONFIRM_DEPOSIT_FLOW: [MessageHandler(Filters.text & ~Filters.command, get_deposit_amount_and_confirm),
+                                  MessageHandler(Filters.photo | Filters.document, save_deposit_proof)],
+        },
+        fallbacks=[CommandHandler('batal', cancel), CallbackQueryHandler(main_menu, pattern='^main_menu$')],
+    )
+
+    # Handler untuk alur Hapus Produk Admin
+    admin_delete_product_handler = ConversationHandler(
+        entry_points=[CallbackQueryHandler(delete_product_start, pattern='^delete_product_start$')],
+        states={
+            ADMIN_DELETE_PRODUCT_FLOW: [CallbackQueryHandler(delete_product_confirm, pattern='^delete_product_')],
+        },
+        fallbacks=[CallbackQueryHandler(admin_menu, pattern='^admin_menu$')],
+    )
+
+    # Handler untuk alur Kelola Admin
+    admin_manage_handler = ConversationHandler(
+        entry_points=[CallbackQueryHandler(manage_admin_start, pattern='^manage_admin_start$')],
+        states={
+            ADMIN_MANAGE_FLOW: [CallbackQueryHandler(add_admin_start, pattern='^add_admin_start$'),
+                                CallbackQueryHandler(remove_admin_start, pattern='^remove_admin_start$'),
+                                MessageHandler(Filters.text & ~Filters.command, add_admin_process)],
+        },
+        fallbacks=[CallbackQueryHandler(admin_menu, pattern='^admin_menu$')],
+    )
+
+    # Handlers utama & global
+    dispatcher.add_handler(CommandHandler("start", start))
+    dispatcher.add_handler(CallbackQueryHandler(main_menu, pattern='^main_menu$'))
+    dispatcher.add_handler(CallbackQueryHandler(admin_menu, pattern='^admin_menu$'))
+    dispatcher.add_handler(CallbackQueryHandler(check_balance, pattern='^check_balance$'))
+    dispatcher.add_handler(CallbackQueryHandler(update_products_from_api, pattern='^update_products_from_api$'))
+    dispatcher.add_handler(CallbackQueryHandler(admin_confirm_deposit_list, pattern='^confirm_deposit_list$'))
+    dispatcher.add_handler(CallbackQueryHandler(view_deposit_detail, pattern='^view_deposit_'))
+    dispatcher.add_handler(CallbackQueryHandler(approve_deposit, pattern='^approve_deposit_'))
+    dispatcher.add_handler(CallbackQueryHandler(reject_deposit, pattern='^reject_deposit_'))
+    dispatcher.add_handler(CallbackQueryHandler(bot_stats, pattern='^bot_stats$'))
+    dispatcher.add_handler(CallbackQueryHandler(buy_product_menu, pattern='^buy_product$'))
+    dispatcher.add_handler(CallbackQueryHandler(deposit_menu, pattern='^deposit$'))
+
+    # Tambahkan semua ConversationHandler
+    dispatcher.add_handler(buy_product_handler)
+    dispatcher.add_handler(deposit_handler)
+    dispatcher.add_handler(admin_delete_product_handler)
+    dispatcher.add_handler(admin_manage_handler)
+
+    updater.start_polling()
+    updater.idle()
+
+if __name__ == '__main__':
+    main()
