@@ -326,6 +326,36 @@ def get_target_id(update: Update, context: CallbackContext) -> int:
     )
     return CONFIRMING_PURCHASE
 
+def process_digiflazz_transaction(product_code, target_id, ref_id):
+    """Process transaction through Digiflazz API"""
+    try:
+        username = DIGIFLAZZ_USERNAME
+        api_key = DIGIFLAZZ_KEY
+        
+        # Create signature
+        sign_string = f"{username}{api_key}{ref_id}"
+        sign = hashlib.md5(sign_string.encode()).hexdigest()
+        
+        payload = {
+            "username": username,
+            "buyer_sku_code": product_code,
+            "customer_no": target_id,
+            "ref_id": ref_id,
+            "sign": sign
+        }
+        
+        response = requests.post("https://api.digiflazz.com/v1/transaction", json=payload, timeout=30)
+        
+        if response.status_code == 200:
+            data = response.json()
+            return True, data
+        else:
+            return False, f"API returned status: {response.status_code}"
+            
+    except Exception as e:
+        logger.error(f"Error processing Digiflazz transaction: {e}")
+        return False, str(e)
+
 def confirm_purchase(update: Update, context: CallbackContext) -> int:
     query = update.callback_query
     query.answer("Memproses pembelian...")
@@ -338,24 +368,51 @@ def confirm_purchase(update: Update, context: CallbackContext) -> int:
     product = conn.execute('SELECT * FROM products WHERE product_id = ?', (product_id,)).fetchone()
     balance = get_user_balance(user_id)
 
-    # Deduct balance
-    new_balance = balance - product['price']
-    conn.execute('UPDATE users SET balance = ? WHERE user_id = ?', (new_balance, user_id))
-
-    # Create transaction
+    # Create transaction reference
     ref_id = f"TRX{int(datetime.now().timestamp())}{user_id}"
-    conn.execute('''
-    INSERT INTO transactions (user_id, product_id, amount, digiflazz_refid, status, date, target_id)
-    VALUES (?, ?, ?, ?, ?, ?, ?)
-    ''', (user_id, product_id, product['price'], ref_id, 'success', datetime.now().strftime('%Y-%m-%d %H:%M:%S'), target_id))
     
-    conn.commit()
-    conn.close()
+    # Process with Digiflazz API
+    success, result = process_digiflazz_transaction(product['digiflazz_code'], target_id, ref_id)
+    
+    if success:
+        # Deduct balance
+        new_balance = balance - product['price']
+        conn.execute('UPDATE users SET balance = ? WHERE user_id = ?', (new_balance, user_id))
 
-    safe_edit_message(query, 
-        f"✅ Pembelian Berhasil!\n\n🏷 Produk: {product['name']}\n🎯 Target: {target_id}\n💰 Harga: Rp {product['price']:,}\n📋 Ref ID: {ref_id}\n💼 Sisa Saldo: Rp {new_balance:,}\n\n✨ Terima kasih telah menggunakan layanan kami!"
-    )
+        # Create transaction record
+        conn.execute('''
+        INSERT INTO transactions (user_id, product_id, amount, digiflazz_refid, status, date, target_id)
+        VALUES (?, ?, ?, ?, ?, ?, ?)
+        ''', (user_id, product_id, product['price'], ref_id, 'success', datetime.now().strftime('%Y-%m-%d %H:%M:%S'), target_id))
+        
+        conn.commit()
+        
+        keyboard = [[InlineKeyboardButton("🔙 Kembali ke Menu", callback_data='main_menu')]]
+        reply_markup = InlineKeyboardMarkup(keyboard)
+        
+        safe_edit_message(query, 
+            f"✅ Pembelian Berhasil!\n\n🏷 Produk: {product['name']}\n🎯 Target: {target_id}\n💰 Harga: Rp {product['price']:,}\n📋 Ref ID: {ref_id}\n💼 Sisa Saldo: Rp {new_balance:,}\n\n✨ Terima kasih telah menggunakan layanan kami!",
+            reply_markup
+        )
+    else:
+        # Transaction failed, don't deduct balance
+        conn.execute('''
+        INSERT INTO transactions (user_id, product_id, amount, digiflazz_refid, status, date, target_id)
+        VALUES (?, ?, ?, ?, ?, ?, ?)
+        ''', (user_id, product_id, product['price'], ref_id, 'failed', datetime.now().strftime('%Y-%m-%d %H:%M:%S'), target_id))
+        
+        conn.commit()
+        
+        keyboard = [[InlineKeyboardButton("🔄 Coba Lagi", callback_data='buy_product')],
+                    [InlineKeyboardButton("🔙 Kembali", callback_data='main_menu')]]
+        reply_markup = InlineKeyboardMarkup(keyboard)
+        
+        safe_edit_message(query, 
+            f"❌ Pembelian Gagal!\n\n🏷 Produk: {product['name']}\n🎯 Target: {target_id}\n📋 Ref ID: {ref_id}\n⚠️ Error: {result}\n\n💰 Saldo Anda tidak dikurangi.",
+            reply_markup
+        )
     
+    conn.close()
     context.user_data.clear()
     return MENU_UTAMA
 
@@ -384,7 +441,7 @@ def get_deposit_amount(update: Update, context: CallbackContext) -> int:
         reply_markup = InlineKeyboardMarkup(keyboard)
         
         update.message.reply_text(
-            f"💰 Deposit: Rp {amount:,}\n\n📋 Instruksi Pembayaran:\n1. Transfer ke rekening berikut:\n   Bank BCA: 1234567890\n   a.n Bot Store\n\n2. Setelah transfer, klik tombol di bawah untuk upload bukti transfer\n\n⚠️ Pastikan jumlah transfer sesuai dengan yang tertera!",
+            f"💰 Deposit: Rp {amount:,}\n\n📋 Instruksi Pembayaran:\n\n🏦 Bank BCA: 0542219716\n   a.n Tatang Taria Edi\n\n💳 E-Wallet DANA: 089663596711\n   a.n Tatang Taria Edi\n\n📝 Setelah transfer, klik tombol di bawah untuk upload bukti transfer\n\n⚠️ Pastikan jumlah transfer sesuai dengan yang tertera!",
             reply_markup=reply_markup
         )
         return WAITING_DEPOSIT_PROOF
@@ -433,36 +490,95 @@ def get_deposit_proof(update: Update, context: CallbackContext) -> int:
         return WAITING_DEPOSIT_PROOF
 
 # --- Admin Handlers ---
+def get_digiflazz_products():
+    """Fetch products from Digiflazz API"""
+    try:
+        import hashlib
+        import time
+        
+        username = DIGIFLAZZ_USERNAME
+        api_key = DIGIFLAZZ_KEY
+        
+        # Create signature
+        sign_string = f"{username}{api_key}pricelist"
+        sign = hashlib.md5(sign_string.encode()).hexdigest()
+        
+        payload = {
+            "cmd": "prepaid",
+            "username": username,
+            "sign": sign
+        }
+        
+        response = requests.post("https://api.digiflazz.com/v1/price-list", json=payload, timeout=30)
+        
+        if response.status_code == 200:
+            data = response.json()
+            if data.get('data'):
+                return data['data']
+        
+        return None
+        
+    except Exception as e:
+        logger.error(f"Error fetching Digiflazz products: {e}")
+        return None
+
 def update_products_from_api(update: Update, context: CallbackContext) -> int:
     query = update.callback_query
-    query.answer("Mengupdate produk dari API...")
+    query.answer("Mengupdate produk dari API Digiflazz...")
 
     if not is_admin(update.effective_user.id):
         safe_edit_message(query, "❌ Anda tidak memiliki akses admin.")
         return MENU_UTAMA
 
-    # Simulate product update (replace with actual API call)
-    conn = get_db_connection()
-    # Add sample products
-    sample_products = [
-        ("Telkomsel 5k", 6000, "tsel5", "Pulsa Telkomsel 5.000", "Telkomsel", "pulsa", "digiflazz"),
-        ("Telkomsel 10k", 11000, "tsel10", "Pulsa Telkomsel 10.000", "Telkomsel", "pulsa", "digiflazz"),
-        ("XL 5k", 6500, "xl5", "Pulsa XL 5.000", "XL", "pulsa", "digiflazz"),
-        ("PLN Token 20k", 20500, "pln20", "Token PLN 20.000", "PLN", "token listrik", "digiflazz")
-    ]
+    # Get products from Digiflazz API
+    products_data = get_digiflazz_products()
     
-    for product in sample_products:
-        conn.execute('''
-        INSERT OR IGNORE INTO products (name, price, digiflazz_code, description, brand, type, seller)
-        VALUES (?, ?, ?, ?, ?, ?, ?)
-        ''', product)
+    if not products_data:
+        keyboard = [[InlineKeyboardButton("🔙 Kembali", callback_data='admin_menu')]]
+        reply_markup = InlineKeyboardMarkup(keyboard)
+        safe_edit_message(query, "❌ Gagal mengambil data dari API Digiflazz. Silakan coba lagi nanti.", reply_markup)
+        return ADMIN_MENU
+
+    conn = get_db_connection()
+    
+    # Clear existing products
+    conn.execute('DELETE FROM products')
+    
+    # Insert new products from API
+    products_added = 0
+    for item in products_data:
+        try:
+            # Only add active products with reasonable prices
+            if (item.get('product_name') and 
+                item.get('price') and 
+                item.get('buyer_sku_code') and
+                item.get('brand') and
+                float(item.get('price', 0)) > 0 and
+                float(item.get('price', 0)) < 1000000):  # Max 1 million
+                
+                conn.execute('''
+                INSERT INTO products (name, price, digiflazz_code, description, brand, type, seller)
+                VALUES (?, ?, ?, ?, ?, ?, ?)
+                ''', (
+                    item['product_name'],
+                    int(float(item['price'])),
+                    item['buyer_sku_code'],
+                    item.get('desc', item['product_name']),
+                    item['brand'],
+                    item.get('category', 'prepaid'),
+                    'digiflazz'
+                ))
+                products_added += 1
+        except Exception as e:
+            logger.warning(f"Error adding product {item.get('product_name', 'unknown')}: {e}")
+            continue
     
     conn.commit()
     conn.close()
     
     keyboard = [[InlineKeyboardButton("🔙 Kembali", callback_data='admin_menu')]]
     reply_markup = InlineKeyboardMarkup(keyboard)
-    safe_edit_message(query, f"✅ Berhasil mengupdate produk dari API!", reply_markup)
+    safe_edit_message(query, f"✅ Berhasil mengupdate {products_added} produk dari API Digiflazz!", reply_markup)
     return ADMIN_MENU
 
 def bot_stats(update: Update, context: CallbackContext) -> int:
@@ -640,20 +756,24 @@ def main():
             WAITING_TARGET_ID: [
                 MessageHandler(Filters.text & ~Filters.command, get_target_id),
                 CallbackQueryHandler(main_menu, pattern='^main_menu$'),
+                CallbackQueryHandler(buy_product_menu, pattern='^buy_product$'),
             ],
             CONFIRMING_PURCHASE: [
                 CallbackQueryHandler(confirm_purchase, pattern='^confirm_purchase$'),
                 CallbackQueryHandler(main_menu, pattern='^main_menu$'),
+                CallbackQueryHandler(buy_product_menu, pattern='^buy_product$'),
             ],
             WAITING_DEPOSIT_AMOUNT: [
                 MessageHandler(Filters.text & ~Filters.command, get_deposit_amount),
                 CallbackQueryHandler(main_menu, pattern='^main_menu$'),
+                CallbackQueryHandler(deposit_menu, pattern='^deposit$'),
             ],
             WAITING_DEPOSIT_PROOF: [
                 CallbackQueryHandler(upload_proof, pattern='^upload_proof$'),
                 MessageHandler(Filters.photo, get_deposit_proof),
                 MessageHandler(Filters.text & ~Filters.command, get_deposit_proof),
                 CallbackQueryHandler(main_menu, pattern='^main_menu$'),
+                CallbackQueryHandler(deposit_menu, pattern='^deposit$'),
             ],
             ADMIN_MENU: [
                 CallbackQueryHandler(update_products_from_api, pattern='^update_products_from_api$'),
@@ -666,18 +786,22 @@ def main():
                 CallbackQueryHandler(confirm_deposit_action, pattern='^confirm_deposit_'),
                 CallbackQueryHandler(confirm_deposit_list, pattern='^confirm_deposit_list$'),
                 CallbackQueryHandler(admin_menu, pattern='^admin_menu$'),
+                CallbackQueryHandler(main_menu, pattern='^main_menu$'),
             ],
             ADMIN_MANAGE_FLOW: [
                 CallbackQueryHandler(list_admin, pattern='^list_admin$'),
                 CallbackQueryHandler(manage_admin_start, pattern='^manage_admin_start$'),
                 CallbackQueryHandler(admin_menu, pattern='^admin_menu$'),
+                CallbackQueryHandler(main_menu, pattern='^main_menu$'),
             ],
         },
         fallbacks=[
             CommandHandler('cancel', cancel),
             CommandHandler('start', start),
+            CallbackQueryHandler(main_menu, pattern='^main_menu$'),
         ],
-        allow_reentry=True
+        allow_reentry=True,
+        per_message=False
     )
 
     # Add handlers
