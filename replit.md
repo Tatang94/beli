@@ -1,0 +1,72 @@
+# Overview
+
+This is a fully functional Telegram bot for selling digital products (mobile credits and PPOB services). The bot includes complete conversation flows for user registration, balance management, product purchases, deposit system, and admin management. All inline buttons are properly connected with working navigation flows.
+
+## Recent Changes (August 2025)
+- Fixed all conversation handler flows and inline button navigation
+- Consolidated codebase into single working bot.py file
+- Implemented complete purchase flow with target ID input and confirmation
+- Added working deposit system with photo upload support
+- Fixed admin menu with product updates, statistics, and deposit confirmation
+- All inline buttons now function correctly with proper state management
+- Bot is successfully running and ready for production use
+
+# User Preferences
+
+Preferred communication style: Simple, everyday language.
+
+# System Architecture
+
+## Bot Architecture
+- **Framework**: Python Telegram Bot library with conversation-based flow management
+- **Design Pattern**: State machine using ConversationHandler for managing user interactions
+- **Error Handling**: Comprehensive error handling with safe message editing and fallback mechanisms
+- **Logging**: Structured logging throughout the application for debugging and monitoring
+
+## Database Design
+- **Storage**: SQLite database for local data persistence
+- **Tables**: 
+  - Users table for user registration, balance tracking, and admin privileges
+  - Products table for caching Digiflazz product catalog
+  - Additional tables for transactions and deposits (implied by handlers)
+- **Admin System**: Role-based access control with predefined admin user IDs
+
+## API Integration
+- **External Service**: Digiflazz API for digital product transactions
+- **Authentication**: MD5 signature-based authentication for API requests
+- **Product Sync**: Automated product catalog synchronization from Digiflazz
+- **Transaction Processing**: Real-time transaction processing with reference ID generation
+
+## User Interface
+- **Interaction Model**: Inline keyboard-based menu system
+- **Navigation**: Hierarchical menu structure with back/cancel options
+- **User Flow**: Multi-step conversation flows for complex operations (purchases, deposits)
+- **Admin Interface**: Separate admin menu for product and user management
+
+## Key Features
+- **Balance Management**: User wallet system with deposit and spending tracking
+- **Product Categories**: Organized product browsing by categories
+- **Transaction History**: Complete transaction logging and status tracking
+- **Multi-language Support**: Indonesian language interface
+- **Security**: Input validation and admin verification
+
+# External Dependencies
+
+## Third-party Services
+- **Digiflazz API**: Primary service provider for digital products and transactions
+  - Price list endpoint for product catalog
+  - Transaction endpoint for processing purchases
+  - Signature-based authentication system
+
+## Python Libraries
+- **python-telegram-bot**: Core Telegram bot functionality and conversation handling
+- **requests**: HTTP client for external API communications
+- **sqlite3**: Built-in database connectivity
+- **logging**: Application logging and error tracking
+- **hashlib**: MD5 signature generation for API authentication
+- **datetime**: Timestamp management for transactions and user activity
+
+## Infrastructure Requirements
+- **Environment Variables**: Configuration management for sensitive credentials
+- **File System**: SQLite database file storage
+- **Network Access**: HTTPS connectivity for Telegram Bot API and Digiflazz API
