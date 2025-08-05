@@ -170,15 +170,15 @@ def register_user(user):
         conn.commit()
     conn.close()
 
-def safe_edit_message(query, text, reply_markup=None):
+async def safe_edit_message(query, text, reply_markup=None):
     """Safely edit message with fallback to new message"""
     try:
-        query.edit_message_text(text=text, reply_markup=reply_markup)
+        await query.edit_message_text(text=text, reply_markup=reply_markup)
         return True
     except Exception as e:
         logger.warning(f"Failed to edit message: {e}")
         try:
-            query.message.reply_text(text=text, reply_markup=reply_markup)
+            await query.message.reply_text(text=text, reply_markup=reply_markup)
             return True
         except Exception as e2:
             logger.error(f"Failed to send new message: {e2}")
@@ -219,7 +219,7 @@ async def main_menu(update: Update, context: ContextTypes.DEFAULT_TYPE) -> int:
         keyboard.append([InlineKeyboardButton("👑 Admin Menu", callback_data='admin_menu')])
 
     reply_markup = InlineKeyboardMarkup(keyboard)
-    safe_edit_message(query, "📱 Menu Utama\n\nSilakan pilih menu di bawah:", reply_markup)
+    await safe_edit_message(query, "📱 Menu Utama\n\nSilakan pilih menu di bawah:", reply_markup)
     return MENU_UTAMA
 
 async def admin_menu(update: Update, context: ContextTypes.DEFAULT_TYPE) -> int:
@@ -227,7 +227,7 @@ async def admin_menu(update: Update, context: ContextTypes.DEFAULT_TYPE) -> int:
     await query.answer()
 
     if not is_admin(update.effective_user.id):
-        safe_edit_message(query, "❌ Anda tidak memiliki akses admin.")
+        await safe_edit_message(query, "❌ Anda tidak memiliki akses admin.")
         return MENU_UTAMA
 
     keyboard = [[InlineKeyboardButton("➕ Update Produk", callback_data='update_products_from_api')],
@@ -238,7 +238,7 @@ async def admin_menu(update: Update, context: ContextTypes.DEFAULT_TYPE) -> int:
                 [InlineKeyboardButton("🏠 Menu Utama", callback_data='main_menu')]]
 
     reply_markup = InlineKeyboardMarkup(keyboard)
-    safe_edit_message(query, "👑 Menu Admin\n\nSilakan pilih menu admin:", reply_markup)
+    await safe_edit_message(query, "👑 Menu Admin\n\nSilakan pilih menu admin:", reply_markup)
     return ADMIN_MENU
 
 async def check_balance(update: Update, context: ContextTypes.DEFAULT_TYPE) -> int:
@@ -252,7 +252,7 @@ async def check_balance(update: Update, context: ContextTypes.DEFAULT_TYPE) -> i
                 [InlineKeyboardButton("🏠 Menu Utama", callback_data='main_menu')]]
 
     reply_markup = InlineKeyboardMarkup(keyboard)
-    safe_edit_message(query, f"💼 Saldo Anda\n\n💰 Saldo: Rp {balance:,}\n\nSilakan pilih menu di bawah:", reply_markup)
+    await safe_edit_message(query, f"💼 Saldo Anda\n\n💰 Saldo: Rp {balance:,}\n\nSilakan pilih menu di bawah:", reply_markup)
     return MENU_UTAMA
 
 # --- Handler Beli Produk (BUY_FLOW) ---
@@ -265,13 +265,13 @@ async def buy_product_menu(update: Update, context: ContextTypes.DEFAULT_TYPE) -
     conn.close()
 
     if not categories:
-        safe_edit_message(query, "❌ Maaf, saat ini tidak ada produk yang tersedia.")
+        await safe_edit_message(query, "❌ Maaf, saat ini tidak ada produk yang tersedia.")
         return MENU_UTAMA
 
     keyboard = [[InlineKeyboardButton(cat['type'].title(), callback_data=f"show_category_{cat['type']}")] for cat in categories]
     reply_markup = InlineKeyboardMarkup(keyboard)
     
-    safe_edit_message(query, "📱 Pilih Kategori Produk\n\nSilakan pilih kategori produk yang ingin Anda beli:\n\n💡 Gunakan /start untuk kembali ke menu utama", reply_markup)
+    await safe_edit_message(query, "📱 Pilih Kategori Produk\n\nSilakan pilih kategori produk yang ingin Anda beli:\n\n💡 Gunakan /start untuk kembali ke menu utama", reply_markup)
     return SHOW_CATEGORY
 
 async def show_brands_by_category(update: Update, context: ContextTypes.DEFAULT_TYPE) -> int:
@@ -285,13 +285,13 @@ async def show_brands_by_category(update: Update, context: ContextTypes.DEFAULT_
     conn.close()
 
     if not brands:
-        safe_edit_message(query, f"❌ Tidak ada brand tersedia dalam kategori {category}.")
+        await safe_edit_message(query, f"❌ Tidak ada brand tersedia dalam kategori {category}.")
         return SHOW_CATEGORY
 
     keyboard = [[InlineKeyboardButton(brand['brand'], callback_data=f"show_brand_{brand['brand']}")] for brand in brands]
     reply_markup = InlineKeyboardMarkup(keyboard)
 
-    safe_edit_message(query, f"🏪 Brand {category.title()}\n\nSilakan pilih brand yang ingin Anda beli:\n\n💡 Gunakan /start untuk kembali ke menu utama", reply_markup)
+    await safe_edit_message(query, f"🏪 Brand {category.title()}\n\nSilakan pilih brand yang ingin Anda beli:\n\n💡 Gunakan /start untuk kembali ke menu utama", reply_markup)
     return SHOW_BRAND
 
 async def show_products_by_brand(update: Update, context: ContextTypes.DEFAULT_TYPE) -> int:
@@ -306,7 +306,7 @@ async def show_products_by_brand(update: Update, context: ContextTypes.DEFAULT_T
     conn.close()
 
     if not products:
-        safe_edit_message(query, f"❌ Tidak ada produk tersedia untuk brand {brand}.")
+        await safe_edit_message(query, f"❌ Tidak ada produk tersedia untuk brand {brand}.")
         return SHOW_BRAND
 
     # Apply margin to prices
@@ -318,7 +318,7 @@ async def show_products_by_brand(update: Update, context: ContextTypes.DEFAULT_T
     
     reply_markup = InlineKeyboardMarkup(keyboard)
 
-    safe_edit_message(query, f"📋 Produk {brand} - {category.title()}\n\nSilakan pilih produk yang ingin Anda beli:\n\n💡 Gunakan /start untuk kembali ke menu utama", reply_markup)
+    await safe_edit_message(query, f"📋 Produk {brand} - {category.title()}\n\nSilakan pilih produk yang ingin Anda beli:\n\n💡 Gunakan /start untuk kembali ke menu utama", reply_markup)
     return SHOW_PRODUCT
 
 async def select_product(update: Update, context: ContextTypes.DEFAULT_TYPE) -> int:
@@ -331,7 +331,7 @@ async def select_product(update: Update, context: ContextTypes.DEFAULT_TYPE) -> 
     conn.close()
 
     if not product:
-        safe_edit_message(query, "❌ Produk tidak ditemukan.")
+        await safe_edit_message(query, "❌ Produk tidak ditemukan.")
         return SHOW_PRODUCT
 
     # Calculate final price with margin
@@ -341,7 +341,7 @@ async def select_product(update: Update, context: ContextTypes.DEFAULT_TYPE) -> 
     context.user_data['selected_product'] = product_id
     context.user_data['final_price'] = final_price
     
-    safe_edit_message(query, 
+    await safe_edit_message(query, 
         f"📋 Detail Produk\n\n🏷 Nama: {product['name']}\n💰 Harga: Rp {final_price:,}\n📝 Deskripsi: {product['description']}\n\nSilakan kirimkan ID tujuan (misal: nomor HP, nomor token PLN, dll):"
     )
     return WAITING_TARGET_ID
@@ -448,7 +448,7 @@ async def confirm_purchase(update: Update, context: ContextTypes.DEFAULT_TYPE) -
         keyboard = [[InlineKeyboardButton("🔙 Kembali ke Menu", callback_data='main_menu')]]
         reply_markup = InlineKeyboardMarkup(keyboard)
         
-        safe_edit_message(query, 
+        await safe_edit_message(query, 
             f"✅ Pembelian Berhasil!\n\n🏷 Produk: {product['name']}\n🎯 Target: {target_id}\n💰 Harga: Rp {final_price:,}\n📋 Ref ID: {ref_id}\n💼 Sisa Saldo: Rp {new_balance:,}\n\n✨ Terima kasih telah menggunakan layanan kami!",
             reply_markup
         )
@@ -465,7 +465,7 @@ async def confirm_purchase(update: Update, context: ContextTypes.DEFAULT_TYPE) -
                     [InlineKeyboardButton("🔙 Kembali", callback_data='main_menu')]]
         reply_markup = InlineKeyboardMarkup(keyboard)
         
-        safe_edit_message(query, 
+        await safe_edit_message(query, 
             f"❌ Pembelian Gagal!\n\n🏷 Produk: {product['name']}\n🎯 Target: {target_id}\n📋 Ref ID: {ref_id}\n⚠️ Error: {result}\n\n💰 Saldo Anda tidak dikurangi.",
             reply_markup
         )
@@ -479,7 +479,7 @@ async def deposit_menu(update: Update, context: ContextTypes.DEFAULT_TYPE) -> in
     query = update.callback_query
     await query.answer()
 
-    safe_edit_message(query, 
+    await safe_edit_message(query, 
         "💰 Deposit Saldo\n\nSilakan masukkan jumlah deposit yang ingin Anda lakukan:\n(Minimal Rp 10.000)"
     )
     return WAITING_DEPOSIT_AMOUNT
@@ -512,7 +512,7 @@ async def upload_proof(update: Update, context: ContextTypes.DEFAULT_TYPE) -> in
     query = update.callback_query
     await query.answer()
     
-    safe_edit_message(query, 
+    await safe_edit_message(query, 
         "📷 Upload Bukti Transfer\n\nSilakan kirimkan foto bukti transfer Anda.\nPastikan foto jelas dan dapat dibaca."
     )
     return WAITING_DEPOSIT_PROOF
@@ -619,7 +619,7 @@ async def update_products_from_api(update: Update, context: ContextTypes.DEFAULT
     await query.answer("Mengupdate produk dari API Digiflazz...")
 
     if not is_admin(update.effective_user.id):
-        safe_edit_message(query, "❌ Anda tidak memiliki akses admin.")
+        await safe_edit_message(query, "❌ Anda tidak memiliki akses admin.")
         return MENU_UTAMA
 
     # Get products from Digiflazz API
@@ -628,7 +628,7 @@ async def update_products_from_api(update: Update, context: ContextTypes.DEFAULT
     if not products_data:
         keyboard = [[InlineKeyboardButton("🔙 Kembali", callback_data='admin_menu')]]
         reply_markup = InlineKeyboardMarkup(keyboard)
-        safe_edit_message(query, "❌ Gagal mengambil data dari API Digiflazz. Silakan coba lagi nanti.", reply_markup)
+        await safe_edit_message(query, "❌ Gagal mengambil data dari API Digiflazz. Silakan coba lagi nanti.", reply_markup)
         return ADMIN_MENU
 
     conn = get_db_connection()
@@ -670,7 +670,7 @@ async def update_products_from_api(update: Update, context: ContextTypes.DEFAULT
     
     keyboard = [[InlineKeyboardButton("🔙 Kembali", callback_data='admin_menu')]]
     reply_markup = InlineKeyboardMarkup(keyboard)
-    safe_edit_message(query, f"✅ Berhasil mengupdate {products_added} produk dari API Digiflazz!", reply_markup)
+    await safe_edit_message(query, f"✅ Berhasil mengupdate {products_added} produk dari API Digiflazz!", reply_markup)
     return ADMIN_MENU
 
 async def bot_stats(update: Update, context: ContextTypes.DEFAULT_TYPE) -> int:
@@ -678,7 +678,7 @@ async def bot_stats(update: Update, context: ContextTypes.DEFAULT_TYPE) -> int:
     await query.answer()
 
     if not is_admin(update.effective_user.id):
-        safe_edit_message(query, "❌ Anda tidak memiliki akses admin.")
+        await safe_edit_message(query, "❌ Anda tidak memiliki akses admin.")
         return MENU_UTAMA
 
     conn = get_db_connection()
@@ -701,7 +701,7 @@ async def bot_stats(update: Update, context: ContextTypes.DEFAULT_TYPE) -> int:
         f"📦 Total Produk: {total_products}"
     )
     
-    safe_edit_message(query, stats_text, reply_markup)
+    await safe_edit_message(query, stats_text, reply_markup)
     return ADMIN_MENU
 
 async def confirm_deposit_list(update: Update, context: ContextTypes.DEFAULT_TYPE) -> int:
@@ -709,7 +709,7 @@ async def confirm_deposit_list(update: Update, context: ContextTypes.DEFAULT_TYP
     await query.answer()
 
     if not is_admin(update.effective_user.id):
-        safe_edit_message(query, "❌ Anda tidak memiliki akses admin.")
+        await safe_edit_message(query, "❌ Anda tidak memiliki akses admin.")
         return MENU_UTAMA
 
     conn = get_db_connection()
@@ -725,7 +725,7 @@ async def confirm_deposit_list(update: Update, context: ContextTypes.DEFAULT_TYP
     if not deposits:
         keyboard = [[InlineKeyboardButton("🔙 Kembali", callback_data='admin_menu')]]
         reply_markup = InlineKeyboardMarkup(keyboard)
-        safe_edit_message(query, "💰 Tidak ada deposit yang perlu dikonfirmasi.", reply_markup)
+        await safe_edit_message(query, "💰 Tidak ada deposit yang perlu dikonfirmasi.", reply_markup)
         return ADMIN_MENU
 
     keyboard = []
@@ -739,7 +739,7 @@ async def confirm_deposit_list(update: Update, context: ContextTypes.DEFAULT_TYP
     keyboard.append([InlineKeyboardButton("🔙 Kembali", callback_data='admin_menu')])
     reply_markup = InlineKeyboardMarkup(keyboard)
     
-    safe_edit_message(query, "💰 Deposit Pending Konfirmasi\n\nPilih deposit untuk dikonfirmasi:", reply_markup)
+    await safe_edit_message(query, "💰 Deposit Pending Konfirmasi\n\nPilih deposit untuk dikonfirmasi:", reply_markup)
     return ADMIN_CONFIRM_DEPOSIT
 
 async def confirm_deposit_action(update: Update, context: ContextTypes.DEFAULT_TYPE) -> int:
@@ -747,7 +747,7 @@ async def confirm_deposit_action(update: Update, context: ContextTypes.DEFAULT_T
     await query.answer()
 
     if not is_admin(update.effective_user.id):
-        safe_edit_message(query, "❌ Anda tidak memiliki akses admin.")
+        await safe_edit_message(query, "❌ Anda tidak memiliki akses admin.")
         return MENU_UTAMA
 
     deposit_id = int(query.data.split('_')[-1])
@@ -797,9 +797,9 @@ async def confirm_deposit_action(update: Update, context: ContextTypes.DEFAULT_T
     
     if deposit:
         user_name = deposit['first_name'] or deposit['username'] or f"User {deposit['user_id']}"
-        safe_edit_message(query, f"✅ Deposit berhasil dikonfirmasi!\n\n👤 User: {user_name}\n💰 Jumlah: Rp {deposit['amount']:,}\n\nSaldo user telah ditambahkan dan notifikasi terkirim.", reply_markup)
+        await safe_edit_message(query, f"✅ Deposit berhasil dikonfirmasi!\n\n👤 User: {user_name}\n💰 Jumlah: Rp {deposit['amount']:,}\n\nSaldo user telah ditambahkan dan notifikasi terkirim.", reply_markup)
     else:
-        safe_edit_message(query, f"❌ Deposit tidak ditemukan atau sudah diproses.", reply_markup)
+        await safe_edit_message(query, f"❌ Deposit tidak ditemukan atau sudah diproses.", reply_markup)
     
     return ADMIN_CONFIRM_DEPOSIT
 
@@ -808,14 +808,14 @@ async def manage_admin_start(update: Update, context: ContextTypes.DEFAULT_TYPE)
     await query.answer()
 
     if not is_admin(update.effective_user.id):
-        safe_edit_message(query, "❌ Anda tidak memiliki akses admin.")
+        await safe_edit_message(query, "❌ Anda tidak memiliki akses admin.")
         return MENU_UTAMA
 
     keyboard = [[InlineKeyboardButton("📋 Daftar Admin", callback_data='list_admin')],
                 [InlineKeyboardButton("🔙 Kembali", callback_data='admin_menu')]]
     reply_markup = InlineKeyboardMarkup(keyboard)
     
-    safe_edit_message(query, "👥 Kelola Admin\n\nSilakan pilih aksi:", reply_markup)
+    await safe_edit_message(query, "👥 Kelola Admin\n\nSilakan pilih aksi:", reply_markup)
     return ADMIN_MANAGE_FLOW
 
 # --- Margin Setting Handler ---
@@ -824,7 +824,7 @@ async def margin_setting(update: Update, context: ContextTypes.DEFAULT_TYPE) -> 
     await query.answer()
 
     if not is_admin(update.effective_user.id):
-        safe_edit_message(query, "❌ Anda tidak memiliki akses admin.")
+        await safe_edit_message(query, "❌ Anda tidak memiliki akses admin.")
         return MENU_UTAMA
 
     current_margin = get_margin_percentage()
@@ -840,7 +840,7 @@ async def margin_setting(update: Update, context: ContextTypes.DEFAULT_TYPE) -> 
     ]
     reply_markup = InlineKeyboardMarkup(keyboard)
     
-    safe_edit_message(query, f"⚙️ Setting Margin\n\nMargin saat ini: {current_margin}%\n\nPilih persentase margin yang ingin digunakan:", reply_markup)
+    await safe_edit_message(query, f"⚙️ Setting Margin\n\nMargin saat ini: {current_margin}%\n\nPilih persentase margin yang ingin digunakan:", reply_markup)
     return ADMIN_MARGIN_SETTING
 
 async def set_margin(update: Update, context: ContextTypes.DEFAULT_TYPE) -> int:
@@ -848,7 +848,7 @@ async def set_margin(update: Update, context: ContextTypes.DEFAULT_TYPE) -> int:
     await query.answer()
 
     if not is_admin(update.effective_user.id):
-        safe_edit_message(query, "❌ Anda tidak memiliki akses admin.")
+        await safe_edit_message(query, "❌ Anda tidak memiliki akses admin.")
         return MENU_UTAMA
 
     margin_value = int(query.data.split('_')[-1])
@@ -857,7 +857,7 @@ async def set_margin(update: Update, context: ContextTypes.DEFAULT_TYPE) -> int:
     keyboard = [[InlineKeyboardButton("🔙 Kembali", callback_data='admin_menu')]]
     reply_markup = InlineKeyboardMarkup(keyboard)
     
-    safe_edit_message(query, f"✅ Margin berhasil diubah menjadi {margin_value}%\n\nSemua harga produk akan otomatis menggunakan margin ini.", reply_markup)
+    await safe_edit_message(query, f"✅ Margin berhasil diubah menjadi {margin_value}%\n\nSemua harga produk akan otomatis menggunakan margin ini.", reply_markup)
     return ADMIN_MENU
 
 async def list_admin(update: Update, context: ContextTypes.DEFAULT_TYPE) -> int:
@@ -875,7 +875,7 @@ async def list_admin(update: Update, context: ContextTypes.DEFAULT_TYPE) -> int:
     keyboard = [[InlineKeyboardButton("🔙 Kembali", callback_data='manage_admin_start')]]
     reply_markup = InlineKeyboardMarkup(keyboard)
     
-    safe_edit_message(query, admin_list, reply_markup)
+    await safe_edit_message(query, admin_list, reply_markup)
     return ADMIN_MANAGE_FLOW
 
 async def cancel(update: Update, context: ContextTypes.DEFAULT_TYPE) -> int:
