@@ -4,25 +4,27 @@ import logging
 from datetime import datetime
 import requests
 import hashlib
-from telegram import (
-    Update,
-    InlineKeyboardButton,
-    InlineKeyboardMarkup,
-)
+# Import telegram components directly from their locations
+import sys
+sys.path.insert(0, '.pythonlibs/lib/python3.11/site-packages')
+
+from telegram._update import Update
+from telegram._inline.inlinekeyboardbutton import InlineKeyboardButton  
+from telegram._inline.inlinekeyboardmarkup import InlineKeyboardMarkup
 from telegram.ext import (
-    Updater,
-    CommandHandler,
+    Application,
+    CommandHandler, 
     MessageHandler,
-    Filters,
+    filters,
     CallbackContext,
     CallbackQueryHandler,
     ConversationHandler,
 )
 
 # Konfigurasi Bot dan API
-TOKEN = "8216106872:AAEQ_DxjYtZL0t6vD-y4Pfj90c94wHgXDcc"
-DIGIFLAZZ_USERNAME = "miwewogwOZ2g"
-DIGIFLAZZ_KEY = "8c2f1f52-6e36-56de-a1cd-3662bd5eb375"
+TOKEN = os.getenv("TELEGRAM_BOT_TOKEN", "8216106872:AAEQ_DxjYtZL0t6vD-y4Pfj90c94wHgXDcc")
+DIGIFLAZZ_USERNAME = os.getenv("DIGIFLAZZ_USERNAME", "miwewogwOZ2g")
+DIGIFLAZZ_KEY = os.getenv("DIGIFLAZZ_KEY", "8c2f1f52-6e36-56de-a1cd-3662bd5eb375")
 ADMIN_IDS = [7044289974]  # Ganti dengan ID admin Anda
 
 # Setup logging
@@ -786,7 +788,7 @@ def confirm_deposit_action(update: Update, context: CallbackContext) -> int:
                 f"✨ Deposit Anda telah berhasil dikonfirmasi dan saldo telah ditambahkan!"
             )
             
-            context.bot.send_message(
+            context.application.bot.send_message(
                 chat_id=deposit['user_id'],
                 text=user_message
             )
@@ -898,12 +900,9 @@ def main():
     
     # Create the Updater with conflict resolution
     try:
-        updater = Updater(TOKEN, use_context=True)
-        dispatcher = updater.dispatcher
+        application = Application.builder().token(TOKEN).build()
         
-        # Clear any pending updates to avoid conflicts
-        updater.bot.delete_webhook(drop_pending_updates=True)
-        logger.info("Cleared webhook and pending updates")
+        logger.info("Bot application created successfully")
         
     except Exception as e:
         logger.error(f"Failed to create updater: {e}")
@@ -938,7 +937,7 @@ def main():
                 CallbackQueryHandler(main_menu, pattern='^main_menu$'),
             ],
             WAITING_TARGET_ID: [
-                MessageHandler(Filters.text & ~Filters.command, get_target_id),
+                MessageHandler(filters.TEXT & ~filters.COMMAND, get_target_id),
                 CallbackQueryHandler(main_menu, pattern='^main_menu$'),
                 CallbackQueryHandler(buy_product_menu, pattern='^buy_product$'),
             ],
@@ -948,14 +947,14 @@ def main():
                 CallbackQueryHandler(buy_product_menu, pattern='^buy_product$'),
             ],
             WAITING_DEPOSIT_AMOUNT: [
-                MessageHandler(Filters.text & ~Filters.command, get_deposit_amount),
+                MessageHandler(filters.TEXT & ~filters.COMMAND, get_deposit_amount),
                 CallbackQueryHandler(main_menu, pattern='^main_menu$'),
                 CallbackQueryHandler(deposit_menu, pattern='^deposit$'),
             ],
             WAITING_DEPOSIT_PROOF: [
                 CallbackQueryHandler(upload_proof, pattern='^upload_proof$'),
-                MessageHandler(Filters.photo, get_deposit_proof),
-                MessageHandler(Filters.text & ~Filters.command, get_deposit_proof),
+                MessageHandler(filters.PHOTO, get_deposit_proof),
+                MessageHandler(filters.TEXT & ~filters.COMMAND, get_deposit_proof),
                 CallbackQueryHandler(main_menu, pattern='^main_menu$'),
                 CallbackQueryHandler(deposit_menu, pattern='^deposit$'),
             ],
@@ -995,25 +994,22 @@ def main():
     )
 
     # Add handlers
-    dispatcher.add_handler(conv_handler)
-    dispatcher.add_error_handler(error_handler)
+    application.add_handler(conv_handler)
+    application.add_error_handler(error_handler)
 
     # Start the bot
     logger.info("Starting bot...")
     try:
-        updater.start_polling(drop_pending_updates=True)
-        logger.info("Bot started with polling")
-        
-        # Run the bot until you press Ctrl-C
-        updater.idle()
+        application.run_polling(
+            poll_interval=2.0,
+            timeout=10,
+            close_loop=False,
+            stop_signals=None
+        )
+        logger.info("Bot started successfully")
     except Exception as e:
         logger.error(f"Error starting bot: {e}")
         logger.info("If you see 'Conflict' error, make sure no other bot instance is running")
-    finally:
-        try:
-            updater.stop()
-        except:
-            pass
 
 if __name__ == '__main__':
     main()
