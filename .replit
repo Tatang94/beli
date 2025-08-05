@@ -13,27 +13,15 @@ author = "agent"
 
 [[workflows.workflow.tasks]]
 task = "workflow.run"
-args = "Updated Bot"
-
-[[workflows.workflow.tasks]]
-task = "workflow.run"
-args = "Simple Bot Test"
+args = "Main Bot"
 
 [[workflows.workflow]]
-name = "Updated Bot"
+name = "Main Bot"
 author = "agent"
 
 [[workflows.workflow.tasks]]
 task = "shell.exec"
 args = "python bot.py"
-
-[[workflows.workflow]]
-name = "Simple Bot Test"
-author = "agent"
-
-[[workflows.workflow.tasks]]
-task = "shell.exec"
-args = "python simple_bot.py"
 
 [agent]
 expertMode = true

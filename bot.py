@@ -206,9 +206,9 @@ async def start(update: Update, context: ContextTypes.DEFAULT_TYPE) -> int:
     await update.message.reply_text(welcome_message, reply_markup=reply_markup)
     return MENU_UTAMA
 
-def main_menu(update: Update, context: CallbackContext) -> int:
+async def main_menu(update: Update, context: ContextTypes.DEFAULT_TYPE) -> int:
     query = update.callback_query
-    query.answer()
+    await query.answer()
 
     user = update.effective_user
     keyboard = [[InlineKeyboardButton("🛍 Beli Produk", callback_data='buy_product')],
@@ -222,9 +222,9 @@ def main_menu(update: Update, context: CallbackContext) -> int:
     safe_edit_message(query, "📱 Menu Utama\n\nSilakan pilih menu di bawah:", reply_markup)
     return MENU_UTAMA
 
-def admin_menu(update: Update, context: CallbackContext) -> int:
+async def admin_menu(update: Update, context: ContextTypes.DEFAULT_TYPE) -> int:
     query = update.callback_query
-    query.answer()
+    await query.answer()
 
     if not is_admin(update.effective_user.id):
         safe_edit_message(query, "❌ Anda tidak memiliki akses admin.")
@@ -241,9 +241,9 @@ def admin_menu(update: Update, context: CallbackContext) -> int:
     safe_edit_message(query, "👑 Menu Admin\n\nSilakan pilih menu admin:", reply_markup)
     return ADMIN_MENU
 
-def check_balance(update: Update, context: CallbackContext) -> int:
+async def check_balance(update: Update, context: ContextTypes.DEFAULT_TYPE) -> int:
     query = update.callback_query
-    query.answer()
+    await query.answer()
 
     user_id = update.effective_user.id
     balance = get_user_balance(user_id)
@@ -256,9 +256,9 @@ def check_balance(update: Update, context: CallbackContext) -> int:
     return MENU_UTAMA
 
 # --- Handler Beli Produk (BUY_FLOW) ---
-def buy_product_menu(update: Update, context: CallbackContext) -> int:
+async def buy_product_menu(update: Update, context: ContextTypes.DEFAULT_TYPE) -> int:
     query = update.callback_query
-    query.answer("Mengambil daftar kategori produk...")
+    await query.answer("Mengambil daftar kategori produk...")
 
     conn = get_db_connection()
     categories = conn.execute('SELECT DISTINCT type FROM products ORDER BY type').fetchall()
@@ -274,9 +274,9 @@ def buy_product_menu(update: Update, context: CallbackContext) -> int:
     safe_edit_message(query, "📱 Pilih Kategori Produk\n\nSilakan pilih kategori produk yang ingin Anda beli:\n\n💡 Gunakan /start untuk kembali ke menu utama", reply_markup)
     return SHOW_CATEGORY
 
-def show_brands_by_category(update: Update, context: CallbackContext) -> int:
+async def show_brands_by_category(update: Update, context: ContextTypes.DEFAULT_TYPE) -> int:
     query = update.callback_query
-    query.answer("Mengambil daftar brand...")
+    await query.answer("Mengambil daftar brand...")
     category = query.data.split('_', 2)[2]
     context.user_data['selected_category'] = category
 
@@ -294,9 +294,9 @@ def show_brands_by_category(update: Update, context: CallbackContext) -> int:
     safe_edit_message(query, f"🏪 Brand {category.title()}\n\nSilakan pilih brand yang ingin Anda beli:\n\n💡 Gunakan /start untuk kembali ke menu utama", reply_markup)
     return SHOW_BRAND
 
-def show_products_by_brand(update: Update, context: CallbackContext) -> int:
+async def show_products_by_brand(update: Update, context: ContextTypes.DEFAULT_TYPE) -> int:
     query = update.callback_query
-    query.answer("Mengambil daftar produk...")
+    await query.answer("Mengambil daftar produk...")
     brand = query.data.split('_', 2)[2]
     category = context.user_data.get('selected_category')
     context.user_data['selected_brand'] = brand
@@ -321,9 +321,9 @@ def show_products_by_brand(update: Update, context: CallbackContext) -> int:
     safe_edit_message(query, f"📋 Produk {brand} - {category.title()}\n\nSilakan pilih produk yang ingin Anda beli:\n\n💡 Gunakan /start untuk kembali ke menu utama", reply_markup)
     return SHOW_PRODUCT
 
-def select_product(update: Update, context: CallbackContext) -> int:
+async def select_product(update: Update, context: ContextTypes.DEFAULT_TYPE) -> int:
     query = update.callback_query
-    query.answer()
+    await query.answer()
     product_id = int(query.data.split('_')[-1])
 
     conn = get_db_connection()
@@ -346,7 +346,7 @@ def select_product(update: Update, context: CallbackContext) -> int:
     )
     return WAITING_TARGET_ID
 
-def get_target_id(update: Update, context: CallbackContext) -> int:
+async def get_target_id(update: Update, context: ContextTypes.DEFAULT_TYPE) -> int:
     target_id = update.message.text
     context.user_data['target_id'] = target_id
 
@@ -356,8 +356,8 @@ def get_target_id(update: Update, context: CallbackContext) -> int:
     conn.close()
 
     if not product:
-        update.message.reply_text("❌ Terjadi kesalahan. Silakan mulai pembelian dari awal.")
-        return start(update, context)
+        await update.message.reply_text("❌ Terjadi kesalahan. Silakan mulai pembelian dari awal.")
+        return await start(update, context)
 
     user_id = update.effective_user.id
     balance = get_user_balance(user_id)
@@ -367,7 +367,7 @@ def get_target_id(update: Update, context: CallbackContext) -> int:
         keyboard = [[InlineKeyboardButton("💰 Deposit Sekarang", callback_data='deposit')],
                     [InlineKeyboardButton("🔙 Kembali", callback_data='main_menu')]]
         reply_markup = InlineKeyboardMarkup(keyboard)
-        update.message.reply_text(
+        await update.message.reply_text(
             f"❌ Saldo tidak mencukupi!\n\n💰 Saldo Anda: Rp {balance:,}\n💳 Harga Produk: Rp {final_price:,}\n⚠️ Kurang: Rp {final_price - balance:,}",
             reply_markup=reply_markup
         )
@@ -377,7 +377,7 @@ def get_target_id(update: Update, context: CallbackContext) -> int:
                 [InlineKeyboardButton("❌ Batal", callback_data='main_menu')]]
     reply_markup = InlineKeyboardMarkup(keyboard)
     
-    update.message.reply_text(
+    await update.message.reply_text(
         f"📋 Konfirmasi Pembelian\n\n🏷 Produk: {product['name']}\n🎯 Target: {target_id}\n💰 Harga: Rp {final_price:,}\n💼 Saldo Anda: Rp {balance:,}\n💳 Sisa Saldo: Rp {balance - final_price:,}\n\nApakah Anda yakin ingin melakukan pembelian?",
         reply_markup=reply_markup
     )
@@ -413,9 +413,9 @@ def process_digiflazz_transaction(product_code, target_id, ref_id):
         logger.error(f"Error processing Digiflazz transaction: {e}")
         return False, str(e)
 
-def confirm_purchase(update: Update, context: CallbackContext) -> int:
+async def confirm_purchase(update: Update, context: ContextTypes.DEFAULT_TYPE) -> int:
     query = update.callback_query
-    query.answer("Memproses pembelian...")
+    await query.answer("Memproses pembelian...")
 
     user_id = update.effective_user.id
     product_id = context.user_data.get('selected_product')
@@ -475,21 +475,21 @@ def confirm_purchase(update: Update, context: CallbackContext) -> int:
     return MENU_UTAMA
 
 # --- Handler Deposit (DEPOSIT_FLOW) ---
-def deposit_menu(update: Update, context: CallbackContext) -> int:
+async def deposit_menu(update: Update, context: ContextTypes.DEFAULT_TYPE) -> int:
     query = update.callback_query
-    query.answer()
+    await query.answer()
 
     safe_edit_message(query, 
         "💰 Deposit Saldo\n\nSilakan masukkan jumlah deposit yang ingin Anda lakukan:\n(Minimal Rp 10.000)"
     )
     return WAITING_DEPOSIT_AMOUNT
 
-def get_deposit_amount(update: Update, context: CallbackContext) -> int:
+async def get_deposit_amount(update: Update, context: ContextTypes.DEFAULT_TYPE) -> int:
     try:
         amount = int(update.message.text.replace('.', '').replace(',', '').replace('Rp', '').strip())
         
         if amount < 10000:
-            update.message.reply_text("❌ Minimal deposit adalah Rp 10.000. Silakan masukkan jumlah yang valid.")
+            await update.message.reply_text("❌ Minimal deposit adalah Rp 10.000. Silakan masukkan jumlah yang valid.")
             return WAITING_DEPOSIT_AMOUNT
         
         context.user_data['deposit_amount'] = amount
@@ -498,26 +498,26 @@ def get_deposit_amount(update: Update, context: CallbackContext) -> int:
                     [InlineKeyboardButton("❌ Batal", callback_data='main_menu')]]
         reply_markup = InlineKeyboardMarkup(keyboard)
         
-        update.message.reply_text(
+        await update.message.reply_text(
             f"💰 Deposit: Rp {amount:,}\n\n📋 Instruksi Pembayaran:\n\n🏦 Bank BCA: 0542219716\n   a.n Tatang Taria Edi\n\n💳 E-Wallet DANA: 089663596711\n   a.n Tatang Taria Edi\n\n📝 Setelah transfer, klik tombol di bawah untuk upload bukti transfer\n\n⚠️ Pastikan jumlah transfer sesuai dengan yang tertera!",
             reply_markup=reply_markup
         )
         return WAITING_DEPOSIT_PROOF
         
     except ValueError:
-        update.message.reply_text("❌ Format tidak valid. Silakan masukkan angka saja (contoh: 50000)")
+        await update.message.reply_text("❌ Format tidak valid. Silakan masukkan angka saja (contoh: 50000)")
         return WAITING_DEPOSIT_AMOUNT
 
-def upload_proof(update: Update, context: CallbackContext) -> int:
+async def upload_proof(update: Update, context: ContextTypes.DEFAULT_TYPE) -> int:
     query = update.callback_query
-    query.answer()
+    await query.answer()
     
     safe_edit_message(query, 
         "📷 Upload Bukti Transfer\n\nSilakan kirimkan foto bukti transfer Anda.\nPastikan foto jelas dan dapat dibaca."
     )
     return WAITING_DEPOSIT_PROOF
 
-def get_deposit_proof(update: Update, context: CallbackContext) -> int:
+async def get_deposit_proof(update: Update, context: ContextTypes.DEFAULT_TYPE) -> int:
     if update.message.photo:
         photo = update.message.photo[-1]
         amount = context.user_data.get('deposit_amount')
@@ -614,9 +614,9 @@ def get_digiflazz_products():
         logger.error(f"Error fetching Digiflazz products: {e}")
         return None
 
-def update_products_from_api(update: Update, context: CallbackContext) -> int:
+async def update_products_from_api(update: Update, context: ContextTypes.DEFAULT_TYPE) -> int:
     query = update.callback_query
-    query.answer("Mengupdate produk dari API Digiflazz...")
+    await query.answer("Mengupdate produk dari API Digiflazz...")
 
     if not is_admin(update.effective_user.id):
         safe_edit_message(query, "❌ Anda tidak memiliki akses admin.")
@@ -673,9 +673,9 @@ def update_products_from_api(update: Update, context: CallbackContext) -> int:
     safe_edit_message(query, f"✅ Berhasil mengupdate {products_added} produk dari API Digiflazz!", reply_markup)
     return ADMIN_MENU
 
-def bot_stats(update: Update, context: CallbackContext) -> int:
+async def bot_stats(update: Update, context: ContextTypes.DEFAULT_TYPE) -> int:
     query = update.callback_query
-    query.answer()
+    await query.answer()
 
     if not is_admin(update.effective_user.id):
         safe_edit_message(query, "❌ Anda tidak memiliki akses admin.")
@@ -704,9 +704,9 @@ def bot_stats(update: Update, context: CallbackContext) -> int:
     safe_edit_message(query, stats_text, reply_markup)
     return ADMIN_MENU
 
-def confirm_deposit_list(update: Update, context: CallbackContext) -> int:
+async def confirm_deposit_list(update: Update, context: ContextTypes.DEFAULT_TYPE) -> int:
     query = update.callback_query
-    query.answer()
+    await query.answer()
 
     if not is_admin(update.effective_user.id):
         safe_edit_message(query, "❌ Anda tidak memiliki akses admin.")
@@ -742,9 +742,9 @@ def confirm_deposit_list(update: Update, context: CallbackContext) -> int:
     safe_edit_message(query, "💰 Deposit Pending Konfirmasi\n\nPilih deposit untuk dikonfirmasi:", reply_markup)
     return ADMIN_CONFIRM_DEPOSIT
 
-def confirm_deposit_action(update: Update, context: CallbackContext) -> int:
+async def confirm_deposit_action(update: Update, context: ContextTypes.DEFAULT_TYPE) -> int:
     query = update.callback_query
-    query.answer()
+    await query.answer()
 
     if not is_admin(update.effective_user.id):
         safe_edit_message(query, "❌ Anda tidak memiliki akses admin.")
@@ -803,9 +803,9 @@ def confirm_deposit_action(update: Update, context: CallbackContext) -> int:
     
     return ADMIN_CONFIRM_DEPOSIT
 
-def manage_admin_start(update: Update, context: CallbackContext) -> int:
+async def manage_admin_start(update: Update, context: ContextTypes.DEFAULT_TYPE) -> int:
     query = update.callback_query
-    query.answer()
+    await query.answer()
 
     if not is_admin(update.effective_user.id):
         safe_edit_message(query, "❌ Anda tidak memiliki akses admin.")
@@ -819,9 +819,9 @@ def manage_admin_start(update: Update, context: CallbackContext) -> int:
     return ADMIN_MANAGE_FLOW
 
 # --- Margin Setting Handler ---
-def margin_setting(update: Update, context: CallbackContext) -> int:
+async def margin_setting(update: Update, context: ContextTypes.DEFAULT_TYPE) -> int:
     query = update.callback_query
-    query.answer()
+    await query.answer()
 
     if not is_admin(update.effective_user.id):
         safe_edit_message(query, "❌ Anda tidak memiliki akses admin.")
@@ -843,9 +843,9 @@ def margin_setting(update: Update, context: CallbackContext) -> int:
     safe_edit_message(query, f"⚙️ Setting Margin\n\nMargin saat ini: {current_margin}%\n\nPilih persentase margin yang ingin digunakan:", reply_markup)
     return ADMIN_MARGIN_SETTING
 
-def set_margin(update: Update, context: CallbackContext) -> int:
+async def set_margin(update: Update, context: ContextTypes.DEFAULT_TYPE) -> int:
     query = update.callback_query
-    query.answer()
+    await query.answer()
 
     if not is_admin(update.effective_user.id):
         safe_edit_message(query, "❌ Anda tidak memiliki akses admin.")
@@ -860,9 +860,9 @@ def set_margin(update: Update, context: CallbackContext) -> int:
     safe_edit_message(query, f"✅ Margin berhasil diubah menjadi {margin_value}%\n\nSemua harga produk akan otomatis menggunakan margin ini.", reply_markup)
     return ADMIN_MENU
 
-def list_admin(update: Update, context: CallbackContext) -> int:
+async def list_admin(update: Update, context: ContextTypes.DEFAULT_TYPE) -> int:
     query = update.callback_query
-    query.answer()
+    await query.answer()
 
     conn = get_db_connection()
     admins = conn.execute('SELECT * FROM users WHERE is_admin = 1').fetchall()
@@ -878,12 +878,12 @@ def list_admin(update: Update, context: CallbackContext) -> int:
     safe_edit_message(query, admin_list, reply_markup)
     return ADMIN_MANAGE_FLOW
 
-def cancel(update: Update, context: CallbackContext) -> int:
-    update.message.reply_text("❌ Operasi dibatalkan. Kembali ke menu utama.")
+async def cancel(update: Update, context: ContextTypes.DEFAULT_TYPE) -> int:
+    await update.message.reply_text("❌ Operasi dibatalkan. Kembali ke menu utama.")
     context.user_data.clear()
     return ConversationHandler.END
 
-def error_handler(update: Update, context: CallbackContext):
+async def error_handler(update: Update, context: ContextTypes.DEFAULT_TYPE):
     """Handle errors"""
     logger.error(f"Update {update} caused error {context.error}")
 
