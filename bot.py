@@ -848,10 +848,15 @@ def main():
     # Initialize database
     init_db()
     
-    # Create the Updater
+    # Create the Updater with conflict resolution
     try:
         updater = Updater(TOKEN, use_context=True)
         dispatcher = updater.dispatcher
+        
+        # Clear any pending updates to avoid conflicts
+        updater.bot.delete_webhook(drop_pending_updates=True)
+        logger.info("Cleared webhook and pending updates")
+        
     except Exception as e:
         logger.error(f"Failed to create updater: {e}")
         return
