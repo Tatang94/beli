@@ -36,6 +36,7 @@ logger = logging.getLogger(__name__)
 MENU_UTAMA, ADMIN_MENU, DEPOSIT_FLOW, CONFIRM_DEPOSIT_FLOW, BUY_FLOW, TRANSACTION_ID_FLOW = range(6)
 ADMIN_DELETE_PRODUCT_FLOW, ADMIN_MANAGE_FLOW, WAITING_TARGET_ID, CONFIRMING_PURCHASE = range(6, 10)
 WAITING_DEPOSIT_AMOUNT, WAITING_DEPOSIT_PROOF, ADMIN_CONFIRM_DEPOSIT = range(10, 13)
+SHOW_CATEGORY, SHOW_BRAND, SHOW_PRODUCT, ADMIN_MARGIN_SETTING = range(13, 17)
 
 # Inisialisasi database
 def init_db():
@@ -108,6 +109,22 @@ def init_db():
     )
     ''')
 
+    # Tabel settings untuk margin
+    cursor.execute('''
+    CREATE TABLE IF NOT EXISTS settings (
+        setting_id INTEGER PRIMARY KEY AUTOINCREMENT,
+        setting_name TEXT UNIQUE,
+        setting_value TEXT,
+        updated_date TEXT
+    )
+    ''')
+    
+    # Set default margin jika belum ada
+    cursor.execute('''
+    INSERT OR IGNORE INTO settings (setting_name, setting_value, updated_date)
+    VALUES ('margin_percentage', '10', ?)
+    ''', (datetime.now().strftime('%Y-%m-%d %H:%M:%S'),))
+
     conn.commit()
     conn.close()
 
@@ -128,6 +145,23 @@ def get_user_balance(user_id):
     user = conn.execute('SELECT balance FROM users WHERE user_id = ?', (user_id,)).fetchone()
     conn.close()
     return user['balance'] if user else 0
+
+def get_margin_percentage():
+    """Get current margin percentage from settings"""
+    conn = get_db_connection()
+    setting = conn.execute('SELECT setting_value FROM settings WHERE setting_name = ?', ('margin_percentage',)).fetchone()
+    conn.close()
+    return float(setting['setting_value']) if setting else 10.0
+
+def set_margin_percentage(percentage):
+    """Set margin percentage in settings"""
+    conn = get_db_connection()
+    conn.execute('''
+    INSERT OR REPLACE INTO settings (setting_name, setting_value, updated_date)
+    VALUES ('margin_percentage', ?, ?)
+    ''', (str(percentage), datetime.now().strftime('%Y-%m-%d %H:%M:%S')))
+    conn.commit()
+    conn.close()
 
 def register_user(user):
     conn = get_db_connection()
@@ -201,6 +235,7 @@ def admin_menu(update: Update, context: CallbackContext) -> int:
         return MENU_UTAMA
 
     keyboard = [[InlineKeyboardButton("➕ Update Produk", callback_data='update_products_from_api')],
+                [InlineKeyboardButton("⚙️ Setting Margin", callback_data='margin_setting')],
                 [InlineKeyboardButton("👥 Kelola Admin", callback_data='manage_admin_start')],
                 [InlineKeyboardButton("📊 Statistik Bot", callback_data='bot_stats')],
                 [InlineKeyboardButton("💵 Konfirmasi Deposit", callback_data='confirm_deposit_list')],
@@ -230,7 +265,7 @@ def buy_product_menu(update: Update, context: CallbackContext) -> int:
     query.answer("Mengambil daftar kategori produk...")
 
     conn = get_db_connection()
-    categories = conn.execute('SELECT DISTINCT brand FROM products ORDER BY brand').fetchall()
+    categories = conn.execute('SELECT DISTINCT type FROM products ORDER BY type').fetchall()
     conn.close()
 
     if not categories:
@@ -239,35 +274,65 @@ def buy_product_menu(update: Update, context: CallbackContext) -> int:
         safe_edit_message(query, "❌ Maaf, saat ini tidak ada produk yang tersedia.", reply_markup)
         return MENU_UTAMA
 
-    keyboard = [[InlineKeyboardButton(cat['brand'], callback_data=f"category_{cat['brand']}")] for cat in categories]
+    keyboard = [[InlineKeyboardButton(cat['type'].title(), callback_data=f"show_category_{cat['type']}")] for cat in categories]
     keyboard.append([InlineKeyboardButton("🔙 Kembali", callback_data='main_menu')])
     reply_markup = InlineKeyboardMarkup(keyboard)
     
-    safe_edit_message(query, "🛍 Pilih Kategori Produk\n\nSilakan pilih kategori produk yang ingin Anda beli:", reply_markup)
-    return BUY_FLOW
+    safe_edit_message(query, "📱 Pilih Kategori Produk\n\nSilakan pilih kategori produk yang ingin Anda beli:", reply_markup)
+    return SHOW_CATEGORY
 
-def show_products(update: Update, context: CallbackContext) -> int:
+def show_brands_by_category(update: Update, context: CallbackContext) -> int:
     query = update.callback_query
-    query.answer("Mengambil daftar produk...")
-    category = query.data.split('_', 1)[1]
+    query.answer("Mengambil daftar brand...")
+    category = query.data.split('_', 2)[2]
     context.user_data['selected_category'] = category
 
     conn = get_db_connection()
-    products = conn.execute('SELECT * FROM products WHERE brand = ? ORDER BY price', (category,)).fetchall()
+    brands = conn.execute('SELECT DISTINCT brand FROM products WHERE type = ? ORDER BY brand', (category,)).fetchall()
     conn.close()
 
-    if not products:
+    if not brands:
         keyboard = [[InlineKeyboardButton("🔙 Kembali", callback_data='buy_product')]]
         reply_markup = InlineKeyboardMarkup(keyboard)
-        safe_edit_message(query, f"❌ Tidak ada produk tersedia dalam kategori {category}.", reply_markup)
-        return BUY_FLOW
+        safe_edit_message(query, f"❌ Tidak ada brand tersedia dalam kategori {category}.", reply_markup)
+        return SHOW_CATEGORY
 
-    keyboard = [[InlineKeyboardButton(f"{p['name']} - Rp {p['price']:,}", callback_data=f"select_product_{p['product_id']}")] for p in products]
+    keyboard = [[InlineKeyboardButton(brand['brand'], callback_data=f"show_brand_{brand['brand']}")] for brand in brands]
     keyboard.append([InlineKeyboardButton("🔙 Kembali", callback_data='buy_product')])
     reply_markup = InlineKeyboardMarkup(keyboard)
 
-    safe_edit_message(query, f"📋 Produk {category}\n\nSilakan pilih produk yang ingin Anda beli:", reply_markup)
-    return BUY_FLOW
+    safe_edit_message(query, f"🏪 Brand {category.title()}\n\nSilakan pilih brand yang ingin Anda beli:", reply_markup)
+    return SHOW_BRAND
+
+def show_products_by_brand(update: Update, context: CallbackContext) -> int:
+    query = update.callback_query
+    query.answer("Mengambil daftar produk...")
+    brand = query.data.split('_', 2)[2]
+    category = context.user_data.get('selected_category')
+    context.user_data['selected_brand'] = brand
+
+    conn = get_db_connection()
+    products = conn.execute('SELECT * FROM products WHERE brand = ? AND type = ? ORDER BY price', (brand, category)).fetchall()
+    conn.close()
+
+    if not products:
+        keyboard = [[InlineKeyboardButton("🔙 Kembali", callback_data=f'show_category_{category}')]]
+        reply_markup = InlineKeyboardMarkup(keyboard)
+        safe_edit_message(query, f"❌ Tidak ada produk tersedia untuk brand {brand}.", reply_markup)
+        return SHOW_BRAND
+
+    # Apply margin to prices
+    margin_percentage = get_margin_percentage()
+    keyboard = []
+    for p in products:
+        final_price = int(p['price'] * (1 + margin_percentage / 100))
+        keyboard.append([InlineKeyboardButton(f"{p['name']} - Rp {final_price:,}", callback_data=f"select_product_{p['product_id']}")])
+    
+    keyboard.append([InlineKeyboardButton("🔙 Kembali", callback_data=f'show_category_{category}')])
+    reply_markup = InlineKeyboardMarkup(keyboard)
+
+    safe_edit_message(query, f"📋 Produk {brand} - {category.title()}\n\nSilakan pilih produk yang ingin Anda beli:", reply_markup)
+    return SHOW_PRODUCT
 
 def select_product(update: Update, context: CallbackContext) -> int:
     query = update.callback_query
@@ -279,14 +344,21 @@ def select_product(update: Update, context: CallbackContext) -> int:
     conn.close()
 
     if not product:
-        keyboard = [[InlineKeyboardButton("🔙 Kembali", callback_data='buy_product')]]
+        brand = context.user_data.get('selected_brand', '')
+        keyboard = [[InlineKeyboardButton("🔙 Kembali", callback_data=f'show_brand_{brand}')]]
         reply_markup = InlineKeyboardMarkup(keyboard)
         safe_edit_message(query, "❌ Produk tidak ditemukan.", reply_markup)
-        return BUY_FLOW
+        return SHOW_PRODUCT
 
+    # Calculate final price with margin
+    margin_percentage = get_margin_percentage()
+    final_price = int(product['price'] * (1 + margin_percentage / 100))
+    
     context.user_data['selected_product'] = product_id
+    context.user_data['final_price'] = final_price
+    
     safe_edit_message(query, 
-        f"📋 Detail Produk\n\n🏷 Nama: {product['name']}\n💰 Harga: Rp {product['price']:,}\n📝 Deskripsi: {product['description']}\n\nSilakan kirimkan ID tujuan (misal: nomor HP, nomor token PLN, dll):"
+        f"📋 Detail Produk\n\n🏷 Nama: {product['name']}\n💰 Harga: Rp {final_price:,}\n📝 Deskripsi: {product['description']}\n\nSilakan kirimkan ID tujuan (misal: nomor HP, nomor token PLN, dll):"
     )
     return WAITING_TARGET_ID
 
@@ -305,13 +377,14 @@ def get_target_id(update: Update, context: CallbackContext) -> int:
 
     user_id = update.effective_user.id
     balance = get_user_balance(user_id)
+    final_price = context.user_data.get('final_price', product['price'])
 
-    if balance < product['price']:
+    if balance < final_price:
         keyboard = [[InlineKeyboardButton("💰 Deposit Sekarang", callback_data='deposit')],
                     [InlineKeyboardButton("🔙 Kembali", callback_data='main_menu')]]
         reply_markup = InlineKeyboardMarkup(keyboard)
         update.message.reply_text(
-            f"❌ Saldo tidak mencukupi!\n\n💰 Saldo Anda: Rp {balance:,}\n💳 Harga Produk: Rp {product['price']:,}\n⚠️ Kurang: Rp {product['price'] - balance:,}",
+            f"❌ Saldo tidak mencukupi!\n\n💰 Saldo Anda: Rp {balance:,}\n💳 Harga Produk: Rp {final_price:,}\n⚠️ Kurang: Rp {final_price - balance:,}",
             reply_markup=reply_markup
         )
         return MENU_UTAMA
@@ -321,7 +394,7 @@ def get_target_id(update: Update, context: CallbackContext) -> int:
     reply_markup = InlineKeyboardMarkup(keyboard)
     
     update.message.reply_text(
-        f"📋 Konfirmasi Pembelian\n\n🏷 Produk: {product['name']}\n🎯 Target: {target_id}\n💰 Harga: Rp {product['price']:,}\n💼 Saldo Anda: Rp {balance:,}\n💳 Sisa Saldo: Rp {balance - product['price']:,}\n\nApakah Anda yakin ingin melakukan pembelian?",
+        f"📋 Konfirmasi Pembelian\n\n🏷 Produk: {product['name']}\n🎯 Target: {target_id}\n💰 Harga: Rp {final_price:,}\n💼 Saldo Anda: Rp {balance:,}\n💳 Sisa Saldo: Rp {balance - final_price:,}\n\nApakah Anda yakin ingin melakukan pembelian?",
         reply_markup=reply_markup
     )
     return CONFIRMING_PURCHASE
@@ -363,6 +436,7 @@ def confirm_purchase(update: Update, context: CallbackContext) -> int:
     user_id = update.effective_user.id
     product_id = context.user_data.get('selected_product')
     target_id = context.user_data.get('target_id')
+    final_price = context.user_data.get('final_price')
 
     conn = get_db_connection()
     product = conn.execute('SELECT * FROM products WHERE product_id = ?', (product_id,)).fetchone()
@@ -375,15 +449,15 @@ def confirm_purchase(update: Update, context: CallbackContext) -> int:
     success, result = process_digiflazz_transaction(product['digiflazz_code'], target_id, ref_id)
     
     if success:
-        # Deduct balance
-        new_balance = balance - product['price']
+        # Deduct balance using final price with margin
+        new_balance = balance - final_price
         conn.execute('UPDATE users SET balance = ? WHERE user_id = ?', (new_balance, user_id))
 
         # Create transaction record
         conn.execute('''
         INSERT INTO transactions (user_id, product_id, amount, digiflazz_refid, status, date, target_id)
         VALUES (?, ?, ?, ?, ?, ?, ?)
-        ''', (user_id, product_id, product['price'], ref_id, 'success', datetime.now().strftime('%Y-%m-%d %H:%M:%S'), target_id))
+        ''', (user_id, product_id, final_price, ref_id, 'success', datetime.now().strftime('%Y-%m-%d %H:%M:%S'), target_id))
         
         conn.commit()
         
@@ -391,7 +465,7 @@ def confirm_purchase(update: Update, context: CallbackContext) -> int:
         reply_markup = InlineKeyboardMarkup(keyboard)
         
         safe_edit_message(query, 
-            f"✅ Pembelian Berhasil!\n\n🏷 Produk: {product['name']}\n🎯 Target: {target_id}\n💰 Harga: Rp {product['price']:,}\n📋 Ref ID: {ref_id}\n💼 Sisa Saldo: Rp {new_balance:,}\n\n✨ Terima kasih telah menggunakan layanan kami!",
+            f"✅ Pembelian Berhasil!\n\n🏷 Produk: {product['name']}\n🎯 Target: {target_id}\n💰 Harga: Rp {final_price:,}\n📋 Ref ID: {ref_id}\n💼 Sisa Saldo: Rp {new_balance:,}\n\n✨ Terima kasih telah menggunakan layanan kami!",
             reply_markup
         )
     else:
@@ -399,7 +473,7 @@ def confirm_purchase(update: Update, context: CallbackContext) -> int:
         conn.execute('''
         INSERT INTO transactions (user_id, product_id, amount, digiflazz_refid, status, date, target_id)
         VALUES (?, ?, ?, ?, ?, ?, ?)
-        ''', (user_id, product_id, product['price'], ref_id, 'failed', datetime.now().strftime('%Y-%m-%d %H:%M:%S'), target_id))
+        ''', (user_id, product_id, final_price, ref_id, 'failed', datetime.now().strftime('%Y-%m-%d %H:%M:%S'), target_id))
         
         conn.commit()
         
@@ -700,6 +774,48 @@ def manage_admin_start(update: Update, context: CallbackContext) -> int:
     safe_edit_message(query, "👥 Kelola Admin\n\nSilakan pilih aksi:", reply_markup)
     return ADMIN_MANAGE_FLOW
 
+# --- Margin Setting Handler ---
+def margin_setting(update: Update, context: CallbackContext) -> int:
+    query = update.callback_query
+    query.answer()
+
+    if not is_admin(update.effective_user.id):
+        safe_edit_message(query, "❌ Anda tidak memiliki akses admin.")
+        return MENU_UTAMA
+
+    current_margin = get_margin_percentage()
+    
+    keyboard = [
+        [InlineKeyboardButton("5%", callback_data='set_margin_5'),
+         InlineKeyboardButton("10%", callback_data='set_margin_10'),
+         InlineKeyboardButton("15%", callback_data='set_margin_15')],
+        [InlineKeyboardButton("20%", callback_data='set_margin_20'),
+         InlineKeyboardButton("25%", callback_data='set_margin_25'),
+         InlineKeyboardButton("30%", callback_data='set_margin_30')],
+        [InlineKeyboardButton("🔙 Kembali", callback_data='admin_menu')]
+    ]
+    reply_markup = InlineKeyboardMarkup(keyboard)
+    
+    safe_edit_message(query, f"⚙️ Setting Margin\n\nMargin saat ini: {current_margin}%\n\nPilih persentase margin yang ingin digunakan:", reply_markup)
+    return ADMIN_MARGIN_SETTING
+
+def set_margin(update: Update, context: CallbackContext) -> int:
+    query = update.callback_query
+    query.answer()
+
+    if not is_admin(update.effective_user.id):
+        safe_edit_message(query, "❌ Anda tidak memiliki akses admin.")
+        return MENU_UTAMA
+
+    margin_value = int(query.data.split('_')[-1])
+    set_margin_percentage(margin_value)
+    
+    keyboard = [[InlineKeyboardButton("🔙 Kembali", callback_data='admin_menu')]]
+    reply_markup = InlineKeyboardMarkup(keyboard)
+    
+    safe_edit_message(query, f"✅ Margin berhasil diubah menjadi {margin_value}%\n\nSemua harga produk akan otomatis menggunakan margin ini.", reply_markup)
+    return ADMIN_MENU
+
 def list_admin(update: Update, context: CallbackContext) -> int:
     query = update.callback_query
     query.answer()
@@ -751,10 +867,21 @@ def main():
                 CallbackQueryHandler(deposit_menu, pattern='^deposit$'),
                 CallbackQueryHandler(admin_menu, pattern='^admin_menu$'),
             ],
-            BUY_FLOW: [
+            SHOW_CATEGORY: [
+                CallbackQueryHandler(show_brands_by_category, pattern='^show_category_'),
                 CallbackQueryHandler(buy_product_menu, pattern='^buy_product$'),
-                CallbackQueryHandler(show_products, pattern='^category_'),
+                CallbackQueryHandler(main_menu, pattern='^main_menu$'),
+            ],
+            SHOW_BRAND: [
+                CallbackQueryHandler(show_products_by_brand, pattern='^show_brand_'),
+                CallbackQueryHandler(show_brands_by_category, pattern='^show_category_'),
+                CallbackQueryHandler(buy_product_menu, pattern='^buy_product$'),
+                CallbackQueryHandler(main_menu, pattern='^main_menu$'),
+            ],
+            SHOW_PRODUCT: [
                 CallbackQueryHandler(select_product, pattern='^select_product_'),
+                CallbackQueryHandler(show_products_by_brand, pattern='^show_brand_'),
+                CallbackQueryHandler(show_brands_by_category, pattern='^show_category_'),
                 CallbackQueryHandler(main_menu, pattern='^main_menu$'),
             ],
             WAITING_TARGET_ID: [
@@ -781,9 +908,15 @@ def main():
             ],
             ADMIN_MENU: [
                 CallbackQueryHandler(update_products_from_api, pattern='^update_products_from_api$'),
+                CallbackQueryHandler(margin_setting, pattern='^margin_setting$'),
                 CallbackQueryHandler(bot_stats, pattern='^bot_stats$'),
                 CallbackQueryHandler(confirm_deposit_list, pattern='^confirm_deposit_list$'),
                 CallbackQueryHandler(manage_admin_start, pattern='^manage_admin_start$'),
+                CallbackQueryHandler(main_menu, pattern='^main_menu$'),
+            ],
+            ADMIN_MARGIN_SETTING: [
+                CallbackQueryHandler(set_margin, pattern='^set_margin_'),
+                CallbackQueryHandler(admin_menu, pattern='^admin_menu$'),
                 CallbackQueryHandler(main_menu, pattern='^main_menu$'),
             ],
             ADMIN_CONFIRM_DEPOSIT: [
