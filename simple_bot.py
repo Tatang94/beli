@@ -3,7 +3,7 @@
 import os
 import logging
 from telegram import Update, InlineKeyboardButton, InlineKeyboardMarkup
-from telegram.ext import Application, CommandHandler, CallbackQueryHandler, CallbackContext
+from telegram.ext import Application, CommandHandler, CallbackQueryHandler, ContextTypes
 
 # Bot configuration
 TOKEN = os.getenv("TELEGRAM_BOT_TOKEN", "8216106872:AAEQ_DxjYtZL0t6vD-y4Pfj90c94wHgXDcc")
@@ -15,7 +15,7 @@ logging.basicConfig(
 )
 logger = logging.getLogger(__name__)
 
-async def start(update: Update, context: CallbackContext):
+async def start(update: Update, context: ContextTypes.DEFAULT_TYPE):
     """Send welcome message with inline keyboard"""
     keyboard = [
         [InlineKeyboardButton("🛍 Beli Produk", callback_data='buy_product')],
@@ -29,7 +29,7 @@ async def start(update: Update, context: CallbackContext):
         reply_markup=reply_markup
     )
 
-async def button_handler(update: Update, context: CallbackContext):
+async def button_handler(update: Update, context: ContextTypes.DEFAULT_TYPE):
     """Handle button presses"""
     query = update.callback_query
     await query.answer()

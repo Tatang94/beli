@@ -4,19 +4,13 @@ import logging
 from datetime import datetime
 import requests
 import hashlib
-# Import telegram components directly from their locations
-import sys
-sys.path.insert(0, '.pythonlibs/lib/python3.11/site-packages')
-
-from telegram._update import Update
-from telegram._inline.inlinekeyboardbutton import InlineKeyboardButton  
-from telegram._inline.inlinekeyboardmarkup import InlineKeyboardMarkup
+from telegram import Update, InlineKeyboardButton, InlineKeyboardMarkup
 from telegram.ext import (
     Application,
-    CommandHandler, 
+    CommandHandler,
     MessageHandler,
     filters,
-    CallbackContext,
+    ContextTypes,
     CallbackQueryHandler,
     ConversationHandler,
 )
@@ -191,7 +185,7 @@ def safe_edit_message(query, text, reply_markup=None):
             return False
 
 # --- Handlers Umum (Main Menu & Admin Menu) ---
-def start(update: Update, context: CallbackContext) -> int:
+async def start(update: Update, context: ContextTypes.DEFAULT_TYPE) -> int:
     user = update.effective_user
     register_user(user)
 
@@ -209,7 +203,7 @@ def start(update: Update, context: CallbackContext) -> int:
         keyboard.append([InlineKeyboardButton("👑 Admin Menu", callback_data='admin_menu')])
 
     reply_markup = InlineKeyboardMarkup(keyboard)
-    update.message.reply_text(welcome_message, reply_markup=reply_markup)
+    await update.message.reply_text(welcome_message, reply_markup=reply_markup)
     return MENU_UTAMA
 
 def main_menu(update: Update, context: CallbackContext) -> int:
