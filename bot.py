@@ -733,8 +733,12 @@ def main():
     init_db()
     
     # Create the Updater
-    updater = Updater(TOKEN, use_context=True)
-    dispatcher = updater.dispatcher
+    try:
+        updater = Updater(TOKEN, use_context=True)
+        dispatcher = updater.dispatcher
+    except Exception as e:
+        logger.error(f"Failed to create updater: {e}")
+        return
 
     # Add conversation handler
     conv_handler = ConversationHandler(
@@ -810,11 +814,20 @@ def main():
 
     # Start the bot
     logger.info("Starting bot...")
-    updater.start_polling()
-    logger.info("Bot started with polling")
-
-    # Run the bot until you press Ctrl-C
-    updater.idle()
+    try:
+        updater.start_polling(drop_pending_updates=True)
+        logger.info("Bot started with polling")
+        
+        # Run the bot until you press Ctrl-C
+        updater.idle()
+    except Exception as e:
+        logger.error(f"Error starting bot: {e}")
+        logger.info("If you see 'Conflict' error, make sure no other bot instance is running")
+    finally:
+        try:
+            updater.stop()
+        except:
+            pass
 
 if __name__ == '__main__':
     main()
