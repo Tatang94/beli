@@ -9,6 +9,10 @@ This is a fully functional Telegram bot for selling digital products (mobile cre
 - Added working deposit system with photo upload support
 - Fixed admin menu with product updates, statistics, and deposit confirmation
 - All inline buttons now function correctly with proper state management
+- Implemented structured product navigation: Category → Brand → Product → Price
+- Added admin margin setting feature (5%-30%) with database persistence
+- Added automatic admin notifications when users upload deposit proof
+- Added automatic user notifications when deposits are confirmed
 - Bot is successfully running and ready for production use
 
 # User Preferences

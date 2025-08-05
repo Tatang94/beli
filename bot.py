@@ -537,17 +537,51 @@ def get_deposit_proof(update: Update, context: CallbackContext) -> int:
     if update.message.photo:
         photo = update.message.photo[-1]
         amount = context.user_data.get('deposit_amount')
+        user_id = update.effective_user.id
+        user_name = update.effective_user.first_name or update.effective_user.username or f"User {user_id}"
         
         # Create deposit record
         conn = get_db_connection()
-        cursor = conn.execute('''
+        cursor = conn.cursor()
+        cursor.execute('''
         INSERT INTO deposits (user_id, amount, method, proof, date)
         VALUES (?, ?, ?, ?, ?)
-        ''', (update.effective_user.id, amount, 'manual', photo.file_id, datetime.now().strftime('%Y-%m-%d %H:%M:%S')))
+        ''', (user_id, amount, 'manual', photo.file_id, datetime.now().strftime('%Y-%m-%d %H:%M:%S')))
         
         deposit_id = cursor.lastrowid
+        
+        # Get all admin user IDs
+        admins = conn.execute('SELECT user_id FROM users WHERE is_admin = 1').fetchall()
         conn.commit()
         conn.close()
+
+        # Send notification to all admins
+        for admin in admins:
+            try:
+                admin_message = (
+                    f"🔔 DEPOSIT BARU!\n\n"
+                    f"👤 User: {user_name}\n"
+                    f"💰 Jumlah: Rp {amount:,}\n"
+                    f"📋 ID Deposit: {deposit_id}\n"
+                    f"📅 Waktu: {datetime.now().strftime('%Y-%m-%d %H:%M:%S')}\n\n"
+                    f"⚠️ Silakan konfirmasi deposit melalui menu admin."
+                )
+                
+                # Send text notification to admin
+                context.bot.send_message(
+                    chat_id=admin['user_id'],
+                    text=admin_message
+                )
+                
+                # Forward photo to admin
+                context.bot.send_photo(
+                    chat_id=admin['user_id'],
+                    photo=photo.file_id,
+                    caption=f"📷 Bukti transfer dari {user_name}\nID Deposit: {deposit_id}"
+                )
+                    
+            except Exception as e:
+                logger.error(f"Failed to send notification to admin {admin['user_id']}: {e}")
         
         keyboard = [[InlineKeyboardButton("🔙 Kembali ke Menu", callback_data='main_menu')]]
         reply_markup = InlineKeyboardMarkup(keyboard)
@@ -735,7 +769,12 @@ def confirm_deposit_action(update: Update, context: CallbackContext) -> int:
     deposit_id = int(query.data.split('_')[-1])
     
     conn = get_db_connection()
-    deposit = conn.execute('SELECT * FROM deposits WHERE deposit_id = ? AND status = "pending"', (deposit_id,)).fetchone()
+    deposit = conn.execute('''
+    SELECT d.*, u.first_name, u.username 
+    FROM deposits d 
+    JOIN users u ON d.user_id = u.user_id 
+    WHERE d.deposit_id = ? AND d.status = "pending"
+    ''', (deposit_id,)).fetchone()
     
     if deposit:
         # Update deposit status
@@ -747,13 +786,34 @@ def confirm_deposit_action(update: Update, context: CallbackContext) -> int:
         conn.execute('UPDATE users SET balance = ? WHERE user_id = ?', (new_balance, deposit['user_id']))
         
         conn.commit()
+        
+        # Send confirmation notification to user
+        try:
+            user_name = deposit['first_name'] or deposit['username'] or f"User {deposit['user_id']}"
+            user_message = (
+                f"✅ DEPOSIT DIKONFIRMASI!\n\n"
+                f"💰 Jumlah: Rp {deposit['amount']:,}\n"
+                f"📋 ID Deposit: {deposit_id}\n"
+                f"💼 Saldo baru: Rp {new_balance:,}\n\n"
+                f"✨ Deposit Anda telah berhasil dikonfirmasi dan saldo telah ditambahkan!"
+            )
+            
+            context.bot.send_message(
+                chat_id=deposit['user_id'],
+                text=user_message
+            )
+            
+        except Exception as e:
+            logger.error(f"Failed to send confirmation to user {deposit['user_id']}: {e}")
+            
     conn.close()
     
     keyboard = [[InlineKeyboardButton("🔙 Kembali", callback_data='confirm_deposit_list')]]
     reply_markup = InlineKeyboardMarkup(keyboard)
     
     if deposit:
-        safe_edit_message(query, f"✅ Deposit berhasil dikonfirmasi!\n\nSaldo user telah ditambahkan: Rp {deposit['amount']:,}", reply_markup)
+        user_name = deposit['first_name'] or deposit['username'] or f"User {deposit['user_id']}"
+        safe_edit_message(query, f"✅ Deposit berhasil dikonfirmasi!\n\n👤 User: {user_name}\n💰 Jumlah: Rp {deposit['amount']:,}\n\nSaldo user telah ditambahkan dan notifikasi terkirim.", reply_markup)
     else:
         safe_edit_message(query, f"❌ Deposit tidak ditemukan atau sudah diproses.", reply_markup)
     
