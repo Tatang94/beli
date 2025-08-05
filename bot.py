@@ -239,7 +239,7 @@ def admin_menu(update: Update, context: CallbackContext) -> int:
                 [InlineKeyboardButton("👥 Kelola Admin", callback_data='manage_admin_start')],
                 [InlineKeyboardButton("📊 Statistik Bot", callback_data='bot_stats')],
                 [InlineKeyboardButton("💵 Konfirmasi Deposit", callback_data='confirm_deposit_list')],
-                [InlineKeyboardButton("🔙 Kembali", callback_data='main_menu')]]
+                [InlineKeyboardButton("🏠 Menu Utama", callback_data='main_menu')]]
 
     reply_markup = InlineKeyboardMarkup(keyboard)
     safe_edit_message(query, "👑 Menu Admin\n\nSilakan pilih menu admin:", reply_markup)
@@ -253,7 +253,7 @@ def check_balance(update: Update, context: CallbackContext) -> int:
     balance = get_user_balance(user_id)
 
     keyboard = [[InlineKeyboardButton("💰 Deposit", callback_data='deposit')],
-                [InlineKeyboardButton("🔙 Kembali", callback_data='main_menu')]]
+                [InlineKeyboardButton("🏠 Menu Utama", callback_data='main_menu')]]
 
     reply_markup = InlineKeyboardMarkup(keyboard)
     safe_edit_message(query, f"💼 Saldo Anda\n\n💰 Saldo: Rp {balance:,}\n\nSilakan pilih menu di bawah:", reply_markup)
@@ -269,16 +269,13 @@ def buy_product_menu(update: Update, context: CallbackContext) -> int:
     conn.close()
 
     if not categories:
-        keyboard = [[InlineKeyboardButton("🔙 Kembali", callback_data='main_menu')]]
-        reply_markup = InlineKeyboardMarkup(keyboard)
-        safe_edit_message(query, "❌ Maaf, saat ini tidak ada produk yang tersedia.", reply_markup)
+        safe_edit_message(query, "❌ Maaf, saat ini tidak ada produk yang tersedia.")
         return MENU_UTAMA
 
     keyboard = [[InlineKeyboardButton(cat['type'].title(), callback_data=f"show_category_{cat['type']}")] for cat in categories]
-    keyboard.append([InlineKeyboardButton("🔙 Kembali", callback_data='main_menu')])
     reply_markup = InlineKeyboardMarkup(keyboard)
     
-    safe_edit_message(query, "📱 Pilih Kategori Produk\n\nSilakan pilih kategori produk yang ingin Anda beli:", reply_markup)
+    safe_edit_message(query, "📱 Pilih Kategori Produk\n\nSilakan pilih kategori produk yang ingin Anda beli:\n\n💡 Gunakan /start untuk kembali ke menu utama", reply_markup)
     return SHOW_CATEGORY
 
 def show_brands_by_category(update: Update, context: CallbackContext) -> int:
@@ -292,16 +289,13 @@ def show_brands_by_category(update: Update, context: CallbackContext) -> int:
     conn.close()
 
     if not brands:
-        keyboard = [[InlineKeyboardButton("🔙 Kembali", callback_data='buy_product')]]
-        reply_markup = InlineKeyboardMarkup(keyboard)
-        safe_edit_message(query, f"❌ Tidak ada brand tersedia dalam kategori {category}.", reply_markup)
+        safe_edit_message(query, f"❌ Tidak ada brand tersedia dalam kategori {category}.")
         return SHOW_CATEGORY
 
     keyboard = [[InlineKeyboardButton(brand['brand'], callback_data=f"show_brand_{brand['brand']}")] for brand in brands]
-    keyboard.append([InlineKeyboardButton("🔙 Kembali", callback_data='buy_product')])
     reply_markup = InlineKeyboardMarkup(keyboard)
 
-    safe_edit_message(query, f"🏪 Brand {category.title()}\n\nSilakan pilih brand yang ingin Anda beli:", reply_markup)
+    safe_edit_message(query, f"🏪 Brand {category.title()}\n\nSilakan pilih brand yang ingin Anda beli:\n\n💡 Gunakan /start untuk kembali ke menu utama", reply_markup)
     return SHOW_BRAND
 
 def show_products_by_brand(update: Update, context: CallbackContext) -> int:
@@ -316,9 +310,7 @@ def show_products_by_brand(update: Update, context: CallbackContext) -> int:
     conn.close()
 
     if not products:
-        keyboard = [[InlineKeyboardButton("🔙 Kembali", callback_data=f'show_category_{category}')]]
-        reply_markup = InlineKeyboardMarkup(keyboard)
-        safe_edit_message(query, f"❌ Tidak ada produk tersedia untuk brand {brand}.", reply_markup)
+        safe_edit_message(query, f"❌ Tidak ada produk tersedia untuk brand {brand}.")
         return SHOW_BRAND
 
     # Apply margin to prices
@@ -328,10 +320,9 @@ def show_products_by_brand(update: Update, context: CallbackContext) -> int:
         final_price = int(p['price'] * (1 + margin_percentage / 100))
         keyboard.append([InlineKeyboardButton(f"{p['name']} - Rp {final_price:,}", callback_data=f"select_product_{p['product_id']}")])
     
-    keyboard.append([InlineKeyboardButton("🔙 Kembali", callback_data=f'show_category_{category}')])
     reply_markup = InlineKeyboardMarkup(keyboard)
 
-    safe_edit_message(query, f"📋 Produk {brand} - {category.title()}\n\nSilakan pilih produk yang ingin Anda beli:", reply_markup)
+    safe_edit_message(query, f"📋 Produk {brand} - {category.title()}\n\nSilakan pilih produk yang ingin Anda beli:\n\n💡 Gunakan /start untuk kembali ke menu utama", reply_markup)
     return SHOW_PRODUCT
 
 def select_product(update: Update, context: CallbackContext) -> int:
@@ -344,10 +335,7 @@ def select_product(update: Update, context: CallbackContext) -> int:
     conn.close()
 
     if not product:
-        brand = context.user_data.get('selected_brand', '')
-        keyboard = [[InlineKeyboardButton("🔙 Kembali", callback_data=f'show_brand_{brand}')]]
-        reply_markup = InlineKeyboardMarkup(keyboard)
-        safe_edit_message(query, "❌ Produk tidak ditemukan.", reply_markup)
+        safe_edit_message(query, "❌ Produk tidak ditemukan.")
         return SHOW_PRODUCT
 
     # Calculate final price with margin
