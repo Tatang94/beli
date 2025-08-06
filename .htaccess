@@ -1,0 +1,37 @@
+# .htaccess untuk Telegram Bot PHP di cPanel
+
+# Set error reporting
+php_value error_reporting "E_ALL & ~E_DEPRECATED & ~E_STRICT"
+php_value display_errors "Off"
+php_value log_errors "On"
+
+# Set timezone
+php_value date.timezone "Asia/Jakarta"
+
+# Increase memory limit if needed
+php_value memory_limit "128M"
+
+# Set max execution time
+php_value max_execution_time "30"
+
+# Enable URL rewriting
+RewriteEngine On
+
+# Redirect all requests to bot.php (for webhook)
+RewriteCond %{REQUEST_FILENAME} !-f
+RewriteCond %{REQUEST_FILENAME} !-d
+RewriteRule ^webhook$ bot.php [L]
+
+# Security: Deny access to sensitive files
+<Files "config.php">
+    Order allow,deny
+    Deny from all
+</Files>
+
+<Files "*.sql">
+    Order allow,deny
+    Deny from all
+</Files>
+
+# Hide PHP version
+Header unset X-Powered-By
