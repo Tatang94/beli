@@ -1,33 +1,39 @@
 #!/usr/bin/env python3
+"""Test script to debug telegram package import issues"""
 
-print("Testing telegram imports...")
 import sys
+import os
+
+print("Python path:")
+for path in sys.path:
+    print(f"  {path}")
+
+print("\nTrying imports:")
 
 try:
-    sys.path.insert(0, '.pythonlibs/lib/python3.11/site-packages')
-    
-    print("1. Importing telegram module...")
     import telegram
-    print(f"telegram module loaded: {telegram}")
+    print(f"✓ telegram module imported from: {telegram.__file__}")
+    print(f"  telegram module contents: {dir(telegram)}")
     
-    print("2. Testing telegram contents...")
-    print(f"Contents: {dir(telegram)}")
+    try:
+        from telegram import Update
+        print("✓ telegram.Update imported successfully")
+    except ImportError as e:
+        print(f"✗ Failed to import Update: {e}")
     
-    print("3. Importing Update...")
-    from telegram import Update
-    print("Update imported successfully!")
-    
-    print("4. Importing bot components...")
-    from telegram import InlineKeyboardButton, InlineKeyboardMarkup
-    print("Keyboard components imported successfully!")
-    
-    print("5. Importing ext components...")
-    from telegram.ext import Application, CommandHandler
-    print("Ext components imported successfully!")
-    
-    print("All imports successful!")
-    
+    try:
+        from telegram.ext import Application
+        print("✓ telegram.ext.Application imported successfully")
+    except ImportError as e:
+        print(f"✗ Failed to import Application: {e}")
+        
+except ImportError as e:
+    print(f"✗ Failed to import telegram module: {e}")
+
+print("\nChecking installed packages:")
+import subprocess
+try:
+    result = subprocess.run(['python3', '-m', 'pip', 'list'], capture_output=True, text=True)
+    print(result.stdout)
 except Exception as e:
-    print(f"Import error: {e}")
-    import traceback
-    traceback.print_exc()
+    print(f"Error checking packages: {e}")

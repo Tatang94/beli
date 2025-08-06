@@ -1,10 +1,10 @@
 [project]
-name = "repl-nix-workspace"
+name = "telegram-bot-project"
 version = "0.1.0"
-description = "Add your description here"
+description = "Telegram Bot for Digital Products"
 requires-python = ">=3.11"
 dependencies = [
-    "python-telegram-bot==22.3",
+    "python-telegram-bot[all]==20.7",
     "requests>=2.32.4",
     "telegram>=0.0.1",
 ]
