@@ -11,7 +11,7 @@ if (!isset($_COOKIE['admin_session']) || $_COOKIE['admin_session'] !== 'authenti
 $message = '';
 if ($_POST) {
     try {
-        $pdo = new PDO("sqlite:bot_database.db");
+        $pdo = new PDO("sqlite:../bot_database.db");
         $pdo->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
         
         $category = $_POST['category'];
@@ -37,7 +37,7 @@ if ($_POST) {
 // Get current margins
 $margins = [];
 try {
-    $pdo = new PDO("sqlite:bot_database.db");
+    $pdo = new PDO("sqlite:../bot_database.db");
     $pdo->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
     
     $stmt = $pdo->query("SELECT * FROM margins ORDER BY category");

@@ -1050,6 +1050,137 @@ if ($pdo) {
             messagesContainer.appendChild(welcomeMessage);
             messagesContainer.scrollTop = messagesContainer.scrollHeight;
         });
+        
+        // Implementasi fitur bantuan/info yang lengkap
+        function showFAQ() {
+            const messagesContainer = document.querySelector('.chat-messages');
+            const currentTime = new Date().toLocaleTimeString('id-ID', {hour: '2-digit', minute:'2-digit'});
+            
+            const botMessage = document.createElement('div');
+            botMessage.className = 'message message-bot';
+            botMessage.innerHTML = `
+                <div>❓ <strong>FAQ & Tutorial</strong></div>
+                <div style="margin-top: 15px;">
+                    <div style="background: #f8f9fa; padding: 12px; border-radius: 8px; margin-bottom: 10px;">
+                        <div style="font-weight: bold; font-size: 13px; margin-bottom: 5px;">🔍 Cara Membeli Pulsa?</div>
+                        <div style="font-size: 12px; color: #666; line-height: 1.4;">
+                            1. Pilih "🛒 Beli Produk Digital"<br>
+                            2. Pilih kategori "📱 Pulsa Reguler"<br>
+                            3. Pilih operator (Telkomsel, Indosat, dll)<br>
+                            4. Pilih nominal yang diinginkan<br>
+                            5. Masukkan nomor tujuan<br>
+                            6. Konfirmasi pembayaran
+                        </div>
+                    </div>
+                    
+                    <div style="background: #f8f9fa; padding: 12px; border-radius: 8px; margin-bottom: 10px;">
+                        <div style="font-weight: bold; font-size: 13px; margin-bottom: 5px;">💰 Cara Top Up Saldo?</div>
+                        <div style="font-size: 12px; color: #666; line-height: 1.4;">
+                            1. Pilih "📥 Deposit / Top Up Saldo"<br>
+                            2. Pilih metode payment (Bank Transfer/E-Wallet)<br>
+                            3. Transfer sesuai nominal + kode unik<br>
+                            4. Upload bukti transfer<br>
+                            5. Tunggu konfirmasi (5-15 menit)
+                        </div>
+                    </div>
+                    
+                    <div style="background: #fff3cd; padding: 10px; border-radius: 8px; margin-top: 15px;">
+                        <div style="font-size: 12px; color: #856404;">
+                            💡 <strong>Tips:</strong> Pastikan saldo mencukupi sebelum membeli produk. Transaksi gagal akan dikembalikan otomatis.
+                        </div>
+                    </div>
+                </div>
+                <div class="message-time">${currentTime}</div>
+            `;
+            messagesContainer.appendChild(botMessage);
+            messagesContainer.scrollTop = messagesContainer.scrollHeight;
+        }
+        
+        function showPriceList() {
+            window.location.href = 'products.php';
+        }
+        
+        function showTerms() {
+            const messagesContainer = document.querySelector('.chat-messages');
+            const currentTime = new Date().toLocaleTimeString('id-ID', {hour: '2-digit', minute:'2-digit'});
+            
+            const botMessage = document.createElement('div');
+            botMessage.className = 'message message-bot';
+            botMessage.innerHTML = `
+                <div>📄 <strong>Syarat & Ketentuan</strong></div>
+                <div style="margin-top: 15px; font-size: 12px; line-height: 1.5; color: #555;">
+                    <div style="background: #f8f9fa; padding: 12px; border-radius: 8px; margin-bottom: 10px;">
+                        <div style="font-weight: bold; margin-bottom: 8px;">🛡️ Kebijakan Layanan</div>
+                        <div>• Transaksi berlaku 24/7 dengan proses otomatis</div>
+                        <div>• Harga dapat berubah sewaktu-waktu tanpa pemberitahuan</div>
+                        <div>• Nomor tujuan harus valid dan aktif</div>
+                        <div>• Komplain maksimal 3x24 jam setelah transaksi</div>
+                    </div>
+                    
+                    <div style="background: #e8f5e8; padding: 12px; border-radius: 8px; margin-bottom: 10px;">
+                        <div style="font-weight: bold; margin-bottom: 8px;">💳 Kebijakan Pembayaran</div>
+                        <div>• Saldo tidak dapat ditarik kembali</div>
+                        <div>• Deposit minimum Rp 10.000</div>
+                        <div>• Konfirmasi pembayaran maksimal 1x24 jam</div>
+                        <div>• Transaksi gagal akan dikembalikan otomatis</div>
+                    </div>
+                    
+                    <div style="background: #fff3cd; padding: 10px; border-radius: 8px;">
+                        <div style="font-size: 11px; color: #856404;">
+                            ⚖️ Dengan menggunakan layanan ini, Anda menyetujui semua syarat dan ketentuan yang berlaku.
+                        </div>
+                    </div>
+                </div>
+                <div class="message-time">${currentTime}</div>
+            `;
+            messagesContainer.appendChild(botMessage);
+            messagesContainer.scrollTop = messagesContainer.scrollHeight;
+        }
+        
+        function contactSupport() {
+            const messagesContainer = document.querySelector('.chat-messages');
+            const currentTime = new Date().toLocaleTimeString('id-ID', {hour: '2-digit', minute:'2-digit'});
+            
+            const botMessage = document.createElement('div');
+            botMessage.className = 'message message-bot';
+            botMessage.innerHTML = `
+                <div>💬 <strong>Hubungi Customer Service</strong></div>
+                <div style="margin-top: 15px;">
+                    <div style="background: #e3f2fd; padding: 15px; border-radius: 8px; margin-bottom: 15px;">
+                        <div style="font-weight: bold; color: #1976d2; margin-bottom: 10px;">📞 Kontak Langsung</div>
+                        <div style="font-size: 13px; margin-bottom: 8px;">
+                            📱 WhatsApp: <a href="https://wa.me/6281234567890" target="_blank" style="color: #25d366; text-decoration: none; font-weight: bold;">+62 812-3456-7890</a>
+                        </div>
+                        <div style="font-size: 13px; margin-bottom: 8px;">
+                            📧 Email: <a href="mailto:support@botpulsa.com" style="color: #1976d2; text-decoration: none;">support@botpulsa.com</a>
+                        </div>
+                        <div style="font-size: 12px; color: #666;">⏰ Online: 24 Jam / 7 Hari</div>
+                    </div>
+                    
+                    <div style="background: #f8f9fa; padding: 12px; border-radius: 8px;">
+                        <div style="font-weight: bold; font-size: 13px; margin-bottom: 8px;">📋 Siapkan Info Berikut:</div>
+                        <div style="font-size: 12px; color: #666; line-height: 1.4;">
+                            • Nomor HP yang terdaftar<br>
+                            • Detail transaksi atau keluhan<br>
+                            • Screenshot bukti jika ada<br>
+                            • Nomor referensi transaksi
+                        </div>
+                    </div>
+                    
+                    <div class="menu-buttons" style="margin-top: 15px;">
+                        <button class="menu-btn" onclick="window.open('https://wa.me/6281234567890', '_blank')">
+                            💬 Chat WhatsApp
+                        </button>
+                        <button class="menu-btn secondary" onclick="window.location.href='mailto:support@botpulsa.com'">
+                            📧 Kirim Email
+                        </button>
+                    </div>
+                </div>
+                <div class="message-time">${currentTime}</div>
+            `;
+            messagesContainer.appendChild(botMessage);
+            messagesContainer.scrollTop = messagesContainer.scrollHeight;
+        }
     </script>
 </body>
 </html>
