@@ -53,6 +53,9 @@ This is a fully functional Telegram bot for selling digital products (mobile cre
 - Simplified chat to show only welcome message initially
 - Admin can now manage products through existing system (categories, brands, types, prices)
 - Chat interactions now purely dynamic based on user input and admin-managed product data
+- **ADMIN ACCESS SEPARATION**: Completely removed all admin panel buttons from main chat
+- Admin access exclusively through direct URL: /admincenter
+- Clean user interface without any admin references or buttons
 
 # User Preferences
 
