@@ -13,7 +13,7 @@ if (isset($_POST['admin_key']) && $_POST['admin_key'] === 'admin123') {
 // Handle logout
 if (isset($_GET['logout'])) {
     setcookie('admin_session', '', time() - 3600);
-    header('Location: admincenter');
+    header('Location: admincenter.php');
     exit;
 }
 
