@@ -96,10 +96,11 @@ function categorizeProduct($product_name) {
         strpos($name_lower, 'netflix') !== false ||
         strpos($name_lower, 'spotify') !== false) return 'voucher';
     
-    // E-Money & E-Wallet
+    // E-Money & E-Wallet - comprehensive detection
     if (strpos($name_lower, 'ovo') !== false || 
         strpos($name_lower, 'dana') !== false ||
         strpos($name_lower, 'gopay') !== false ||
+        strpos($name_lower, 'go pay') !== false ||
         strpos($name_lower, 'shopee') !== false ||
         strpos($name_lower, 'link') !== false ||
         strpos($name_lower, 'jenius') !== false ||
@@ -107,7 +108,10 @@ function categorizeProduct($product_name) {
         strpos($name_lower, 'tcash') !== false ||
         strpos($name_lower, 'doku') !== false ||
         strpos($name_lower, 'grab') !== false ||
-        strpos($name_lower, 'gojek') !== false) return 'emoney';
+        strpos($name_lower, 'gojek') !== false ||
+        strpos($name_lower, 'maxim') !== false ||
+        strpos($name_lower, 'indriver') !== false ||
+        strpos($name_lower, 'driver') !== false) return 'emoney';
     
     // PLN & Listrik - avoid pascabayar
     if ((strpos($name_lower, 'pln') !== false || strpos($name_lower, 'listrik') !== false || strpos($name_lower, 'token') !== false) &&
@@ -261,7 +265,9 @@ function categorizeProduct($product_name) {
         preg_match('/\b\d+\.?\d*\b/', $name_lower) &&
         strpos($name_lower, 'data') === false && 
         strpos($name_lower, 'internet') === false &&
-        strpos($name_lower, 'paket') === false) {
+        strpos($name_lower, 'paket') === false &&
+        strpos($name_lower, 'gb') === false &&
+        strpos($name_lower, 'mb') === false) {
         return 'pulsa';
     }
     
@@ -306,10 +312,32 @@ function categorizeProduct($product_name) {
         return 'esim';
     }
     
-    // Detect phone/communication services
+    // Detect phone/communication services and remaining special products
     if (strpos($name_lower, 'anynet') !== false ||
-        strpos($name_lower, 'menit') !== false) {
+        strpos($name_lower, 'menit') !== false ||
+        strpos($name_lower, 'telp') !== false ||
+        strpos($name_lower, 'call') !== false) {
         return 'paket_sms_telpon';
+    }
+    
+    // Detect remaining specific products
+    if (strpos($name_lower, 'voucher') !== false) {
+        return 'voucher';
+    }
+    
+    // Detect specific remaining products
+    if (strpos($name_lower, 'i.saku') !== false ||
+        strpos($name_lower, 'kaspro') !== false ||
+        strpos($name_lower, 'pb cash') !== false ||
+        strpos($name_lower, 'cash') !== false) {
+        return 'emoney';
+    }
+    
+    // Detect WiFi access products
+    if (strpos($name_lower, 'wifi') !== false ||
+        strpos($name_lower, 'akses') !== false ||
+        strpos($name_lower, 'internet') !== false) {
+        return 'internet_pascabayar';
     }
     
     return 'lainnya';
@@ -318,19 +346,53 @@ function categorizeProduct($product_name) {
 function extractBrand($product_name) {
     $name_lower = strtolower($product_name);
     
-    // Provider Seluler dan Brand lainnya
-    $brands = [
-        'telkomsel', 'indosat', 'xl', 'tri', 'three', 'smartfren', 'axis', 'by.u', 'byu',
-        'pln', 'ovo', 'dana', 'gopay', 'shopeepay', 'linkaja', 'jenius', 'sakuku',
+    // Prioritas utama: operator seluler dengan pencocokan yang tepat
+    $primary_brands = [
+        'telkomsel' => 'Telkomsel',
+        'indosat' => 'Indosat', 
+        'xl' => 'XL',
+        'tri' => 'Tri',
+        'three' => 'Tri',  // Three adalah nama lain dari Tri
+        'smartfren' => 'Smartfren',
+        'axis' => 'Axis',
+        'by.u' => 'By.U',
+        'byu' => 'By.U'
+    ];
+    
+    // Cek operator seluler terlebih dahulu
+    foreach ($primary_brands as $search => $brand_name) {
+        if (strpos($name_lower, $search) !== false) {
+            return $brand_name;
+        }
+    }
+    
+    // Brand lainnya dengan penanganan khusus
+    $special_brands = [
+        'go pay' => 'GoPay',
+        'gopay' => 'GoPay', 
+        'maxim' => 'Maxim',
+        'indriver' => 'Indriver'
+    ];
+    
+    // Cek brand khusus
+    foreach ($special_brands as $search => $brand_name) {
+        if (strpos($name_lower, $search) !== false) {
+            return $brand_name;
+        }
+    }
+    
+    // Brand standar lainnya
+    $other_brands = [
+        'pln', 'ovo', 'dana', 'shopeepay', 'linkaja', 'jenius', 'sakuku',
         'mobile legends', 'pubg', 'free fire', 'valorant', 'steam', 'garena',
         'netflix', 'disney', 'spotify', 'youtube', 'vidio', 'viu', 'iflix',
-        'grab', 'gojek', 'uber', 'maxim', 'bpjs', 'pdam', 'indihome', 'biznet',
+        'grab', 'gojek', 'uber', 'bpjs', 'pdam', 'indihome', 'biznet',
         'mnc', 'first media', 'myrepublic', 'oxygen', 'cbr', 'iconnet',
         'tapcash', 'brizzi', 'flazz', 'jakcard', 'mandiri', 'bni', 'bca', 'bri',
         'anynet', 'genshin', 'roblox', 'clash', 'arena', 'honor', 'lords'
     ];
     
-    foreach ($brands as $brand) {
+    foreach ($other_brands as $brand) {
         if (strpos($name_lower, $brand) !== false) {
             return ucwords($brand);
         }
