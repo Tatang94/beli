@@ -8,33 +8,93 @@ require_once 'config.php';
 function categorizeProduct($product_name) {
     $name_lower = strtolower($product_name);
     
-    // Pulsa & Kredit
+    // Pulsa & Kredit - Most comprehensive pattern matching
     if (strpos($name_lower, 'pulsa') !== false || 
         strpos($name_lower, 'kredit') !== false ||
-        strpos($name_lower, 'regular') !== false) return 'pulsa';
+        strpos($name_lower, 'regular') !== false ||
+        strpos($name_lower, 'credit') !== false ||
+        // Simple Telkomsel pulsa detection - just numbers with operator name
+        (strpos($name_lower, 'telkomsel') !== false && 
+         preg_match('/\b\d+\.?\d*\b/', $name_lower) &&
+         strpos($name_lower, 'data') === false && 
+         strpos($name_lower, 'internet') === false &&
+         strpos($name_lower, 'freedom') === false &&
+         strpos($name_lower, 'sakti') === false) ||
+        // Other operators - simple detection
+        (strpos($name_lower, 'indosat') !== false && 
+         preg_match('/\b\d+\.?\d*\b/', $name_lower) &&
+         strpos($name_lower, 'data') === false && 
+         strpos($name_lower, 'internet') === false) ||
+        (strpos($name_lower, 'xl') !== false && 
+         preg_match('/\b\d+\.?\d*\b/', $name_lower) &&
+         strpos($name_lower, 'data') === false && 
+         strpos($name_lower, 'internet') === false) ||
+        (strpos($name_lower, 'tri') !== false && 
+         preg_match('/\b\d+\.?\d*\b/', $name_lower) &&
+         strpos($name_lower, 'data') === false && 
+         strpos($name_lower, 'internet') === false) ||
+        (strpos($name_lower, 'smartfren') !== false && 
+         preg_match('/\b\d+\.?\d*\b/', $name_lower) &&
+         strpos($name_lower, 'data') === false && 
+         strpos($name_lower, 'internet') === false) ||
+        (strpos($name_lower, 'axis') !== false && 
+         preg_match('/\b\d+\.?\d*\b/', $name_lower) &&
+         strpos($name_lower, 'data') === false && 
+         strpos($name_lower, 'internet') === false)) return 'pulsa';
     
-    // Paket Data & Internet  
+    // Paket Data & Internet - more comprehensive
     if (strpos($name_lower, 'data') !== false || 
         strpos($name_lower, 'internet') !== false ||
         strpos($name_lower, 'kuota') !== false ||
-        strpos($name_lower, 'unlimited') !== false) return 'data';
+        strpos($name_lower, 'unlimited') !== false ||
+        strpos($name_lower, 'bulk') !== false ||
+        strpos($name_lower, 'paket') !== false ||
+        strpos($name_lower, 'gb') !== false ||
+        strpos($name_lower, 'mb') !== false ||
+        strpos($name_lower, '4g') !== false ||
+        strpos($name_lower, '5g') !== false ||
+        strpos($name_lower, 'hotrod') !== false ||
+        strpos($name_lower, 'bronet') !== false ||
+        strpos($name_lower, 'freedom') !== false) return 'data';
     
-    // Games & Gaming
+    // Games & Gaming - comprehensive
     if (strpos($name_lower, 'game') !== false || 
         strpos($name_lower, 'mobile legends') !== false ||
         strpos($name_lower, 'ml') !== false ||
         strpos($name_lower, 'pubg') !== false ||
         strpos($name_lower, 'free fire') !== false ||
+        strpos($name_lower, 'ff') !== false ||
         strpos($name_lower, 'valorant') !== false ||
         strpos($name_lower, 'steam') !== false ||
         strpos($name_lower, 'garena') !== false ||
         strpos($name_lower, 'diamond') !== false ||
-        strpos($name_lower, 'uc') !== false) return 'games';
+        strpos($name_lower, 'uc') !== false ||
+        strpos($name_lower, 'cp') !== false ||
+        strpos($name_lower, 'genshin') !== false ||
+        strpos($name_lower, 'roblox') !== false ||
+        strpos($name_lower, 'lords') !== false ||
+        strpos($name_lower, 'clash') !== false ||
+        strpos($name_lower, 'arena') !== false ||
+        strpos($name_lower, 'honor') !== false ||
+        strpos($name_lower, 'codm') !== false ||
+        strpos($name_lower, 'higgs') !== false ||
+        strpos($name_lower, 'domino') !== false ||
+        strpos($name_lower, 'coin') !== false ||
+        strpos($name_lower, 'gold') !== false ||
+        strpos($name_lower, 'point') !== false) return 'games';
     
-    // Voucher (selain game)
-    if (strpos($name_lower, 'voucher') !== false && 
-        strpos($name_lower, 'game') === false &&
-        strpos($name_lower, 'aktivasi') === false) return 'voucher';
+    // Voucher (selain game) - more comprehensive
+    if ((strpos($name_lower, 'voucher') !== false && 
+         strpos($name_lower, 'game') === false &&
+         strpos($name_lower, 'aktivasi') === false &&
+         strpos($name_lower, 'diamond') === false &&
+         strpos($name_lower, 'uc') === false &&
+         strpos($name_lower, 'cp') === false) ||
+        strpos($name_lower, 'google play') !== false ||
+        strpos($name_lower, 'apple') !== false ||
+        strpos($name_lower, 'itunes') !== false ||
+        strpos($name_lower, 'netflix') !== false ||
+        strpos($name_lower, 'spotify') !== false) return 'voucher';
     
     // E-Money & E-Wallet
     if (strpos($name_lower, 'ovo') !== false || 
@@ -49,10 +109,9 @@ function categorizeProduct($product_name) {
         strpos($name_lower, 'grab') !== false ||
         strpos($name_lower, 'gojek') !== false) return 'emoney';
     
-    // PLN & Listrik
-    if (strpos($name_lower, 'pln') !== false || 
-        strpos($name_lower, 'listrik') !== false ||
-        strpos($name_lower, 'token') !== false) return 'pln';
+    // PLN & Listrik - avoid pascabayar
+    if ((strpos($name_lower, 'pln') !== false || strpos($name_lower, 'listrik') !== false || strpos($name_lower, 'token') !== false) &&
+        strpos($name_lower, 'pascabayar') === false && strpos($name_lower, 'tagihan') === false && strpos($name_lower, 'postpaid') === false) return 'pln';
     
     // International Top-ups
     if (strpos($name_lower, 'china') !== false) return 'china_topup';
