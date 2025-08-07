@@ -207,8 +207,9 @@ function updateProductsFromAPI() {
             VALUES (?, ?, ?, ?, ?, ?, ?)");
         
         foreach ($result['data'] as $product) {
-            if ($product['buyer_product_status'] === false || 
-                $product['seller_product_status'] === false) {
+            // Hanya ambil produk yang aktif dan tersedia untuk dijual
+            if ($product['buyer_product_status'] !== true || 
+                $product['seller_product_status'] !== true) {
                 continue;
             }
             
