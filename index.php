@@ -447,11 +447,7 @@ if ($pdo) {
                     </div>
                 </div>
                 
-                <div style="margin-top: 15px; text-align: center;">
-                    <button onclick="openAdminCenter()" style="background: linear-gradient(135deg, #ff6b6b 0%, #ee5a24 100%); color: white; border: none; padding: 8px 16px; border-radius: 12px; font-size: 11px; font-weight: 600; cursor: pointer; transition: all 0.3s ease;">
-                        ⚡ Admin Center
-                    </button>
-                </div>
+
                 
                 <div class="message-time">20:46</div>
             </div>
@@ -703,9 +699,7 @@ if ($pdo) {
             }
         }
         
-        function openAdminCenter() {
-            window.location.href = 'admincenter.php';
-        }
+
         
         function backToMenu() {
             location.reload();
