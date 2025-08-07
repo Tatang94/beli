@@ -17,8 +17,8 @@ php_value max_execution_time "30"
 # Enable URL rewriting
 RewriteEngine On
 
-# Redirect /admincenter to admin.php (highest priority)
-RewriteRule ^admincenter/?$ admin.php [L]
+# Admin center direct file access (no .php extension needed)
+# This rule is not needed since we're using a file named 'admincenter' directly
 
 # Redirect webhook to bot.php 
 RewriteRule ^webhook/?$ bot.php [L]
