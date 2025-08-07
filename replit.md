@@ -89,6 +89,11 @@ This is a fully functional Telegram bot for selling digital products (mobile cre
 - SMS & Telpon packages, Streaming, TV, Aktivasi Voucher, Masa Aktif, Bundling, Aktivasi Perdana, Gas, eSIM, Media Sosial
 - Product categorization engine recognizes all types with proper brand detection
 - Filter system updated with complete dropdown options for all categories
+- **POSTPAID CATEGORY EXPANSION (August 7, 2025)**: Added comprehensive postpaid/pascabayar categories
+- Added 17 postpaid categories: PLN Pascabayar, PDAM, HP Pascabayar, Internet Pascabayar, BPJS Kesehatan/Ketenagakerjaan
+- Multifinance, PBB, Gas Negara, TV Pascabayar, SAMSAT, PLN Nontaglis
+- Special provider categories: Telkomsel Omni, Indosat Only4u, Tri CuanMax, XL Axis Cuanku, by.U
+- Complete categorization system now covers both prepaid and postpaid services with 39+ total categories
 
 # User Preferences
 

@@ -116,6 +116,74 @@ function categorizeProduct($product_name) {
         strpos($name_lower, 'tiktok') !== false ||
         strpos($name_lower, 'whatsapp') !== false) return 'media_sosial';
     
+    // === KATEGORI PASCABAYAR ===
+    
+    // PLN Pascabayar
+    if ((strpos($name_lower, 'pln') !== false && strpos($name_lower, 'pascabayar') !== false) ||
+        (strpos($name_lower, 'pln') !== false && strpos($name_lower, 'postpaid') !== false) ||
+        (strpos($name_lower, 'pln') !== false && strpos($name_lower, 'tagihan') !== false)) return 'pln_pascabayar';
+    
+    // PDAM
+    if (strpos($name_lower, 'pdam') !== false || 
+        (strpos($name_lower, 'air') !== false && strpos($name_lower, 'tagihan') !== false)) return 'pdam';
+    
+    // HP Pascabayar
+    if ((strpos($name_lower, 'pascabayar') !== false || strpos($name_lower, 'postpaid') !== false) &&
+        (strpos($name_lower, 'telkomsel') !== false || strpos($name_lower, 'indosat') !== false ||
+         strpos($name_lower, 'xl') !== false || strpos($name_lower, 'tri') !== false ||
+         strpos($name_lower, 'smartfren') !== false)) return 'hp_pascabayar';
+    
+    // Internet Pascabayar
+    if ((strpos($name_lower, 'internet') !== false && strpos($name_lower, 'pascabayar') !== false) ||
+        strpos($name_lower, 'indihome') !== false || strpos($name_lower, 'speedy') !== false ||
+        strpos($name_lower, 'biznet') !== false || strpos($name_lower, 'first media') !== false ||
+        strpos($name_lower, 'mnc play') !== false) return 'internet_pascabayar';
+    
+    // BPJS Kesehatan
+    if (strpos($name_lower, 'bpjs') !== false && strpos($name_lower, 'kesehatan') !== false) return 'bpjs_kesehatan';
+    
+    // Multifinance
+    if (strpos($name_lower, 'multifinance') !== false ||
+        strpos($name_lower, 'finance') !== false ||
+        strpos($name_lower, 'fif') !== false ||
+        strpos($name_lower, 'adira') !== false ||
+        strpos($name_lower, 'baf') !== false ||
+        strpos($name_lower, 'oto') !== false ||
+        strpos($name_lower, 'wom') !== false) return 'multifinance';
+    
+    // PBB
+    if (strpos($name_lower, 'pbb') !== false ||
+        (strpos($name_lower, 'pajak') !== false && strpos($name_lower, 'bumi') !== false)) return 'pbb';
+    
+    // Gas Negara
+    if (strpos($name_lower, 'gas negara') !== false ||
+        strpos($name_lower, 'pgn') !== false ||
+        (strpos($name_lower, 'gas') !== false && strpos($name_lower, 'negara') !== false)) return 'gas_negara';
+    
+    // TV Pascabayar
+    if ((strpos($name_lower, 'tv') !== false && strpos($name_lower, 'pascabayar') !== false) ||
+        strpos($name_lower, 'indovision') !== false ||
+        strpos($name_lower, 'big tv') !== false ||
+        strpos($name_lower, 'nex parabola') !== false ||
+        strpos($name_lower, 'transvision') !== false) return 'tv_pascabayar';
+    
+    // SAMSAT
+    if (strpos($name_lower, 'samsat') !== false ||
+        (strpos($name_lower, 'pajak') !== false && strpos($name_lower, 'kendaraan') !== false)) return 'samsat';
+    
+    // BPJS Ketenagakerjaan
+    if (strpos($name_lower, 'bpjs') !== false && strpos($name_lower, 'ketenagakerjaan') !== false) return 'bpjs_ketenagakerjaan';
+    
+    // PLN Nontaglis
+    if (strpos($name_lower, 'pln') !== false && strpos($name_lower, 'nontaglis') !== false) return 'pln_nontaglis';
+    
+    // Provider Khusus
+    if (strpos($name_lower, 'telkomsel omni') !== false) return 'telkomsel_omni';
+    if (strpos($name_lower, 'indosat only4u') !== false) return 'indosat_only4u';
+    if (strpos($name_lower, 'tri cuanmax') !== false) return 'tri_cuanmax';
+    if (strpos($name_lower, 'xl axis cuanku') !== false || strpos($name_lower, 'axis cuanku') !== false) return 'xl_axis_cuanku';
+    if (strpos($name_lower, 'by.u') !== false) return 'by_u';
+    
     return 'lainnya';
 }
 

@@ -374,6 +374,26 @@ $category_names = [
                     <option value="gas" <?= $category == 'gas' ? 'selected' : '' ?>>Gas</option>
                     <option value="esim" <?= $category == 'esim' ? 'selected' : '' ?>>eSIM</option>
                     <option value="media_sosial" <?= $category == 'media_sosial' ? 'selected' : '' ?>>Media Sosial</option>
+                    <!-- Kategori Pascabayar -->
+                    <optgroup label="─── PASCABAYAR ───">
+                        <option value="pln_pascabayar" <?= $category == 'pln_pascabayar' ? 'selected' : '' ?>>PLN Pascabayar</option>
+                        <option value="pdam" <?= $category == 'pdam' ? 'selected' : '' ?>>PDAM</option>
+                        <option value="hp_pascabayar" <?= $category == 'hp_pascabayar' ? 'selected' : '' ?>>HP Pascabayar</option>
+                        <option value="internet_pascabayar" <?= $category == 'internet_pascabayar' ? 'selected' : '' ?>>Internet Pascabayar</option>
+                        <option value="bpjs_kesehatan" <?= $category == 'bpjs_kesehatan' ? 'selected' : '' ?>>BPJS Kesehatan</option>
+                        <option value="multifinance" <?= $category == 'multifinance' ? 'selected' : '' ?>>Multifinance</option>
+                        <option value="pbb" <?= $category == 'pbb' ? 'selected' : '' ?>>PBB</option>
+                        <option value="gas_negara" <?= $category == 'gas_negara' ? 'selected' : '' ?>>Gas Negara</option>
+                        <option value="tv_pascabayar" <?= $category == 'tv_pascabayar' ? 'selected' : '' ?>>TV Pascabayar</option>
+                        <option value="samsat" <?= $category == 'samsat' ? 'selected' : '' ?>>SAMSAT</option>
+                        <option value="bpjs_ketenagakerjaan" <?= $category == 'bpjs_ketenagakerjaan' ? 'selected' : '' ?>>BPJS Ketenagakerjaan</option>
+                        <option value="pln_nontaglis" <?= $category == 'pln_nontaglis' ? 'selected' : '' ?>>PLN Nontaglis</option>
+                        <option value="telkomsel_omni" <?= $category == 'telkomsel_omni' ? 'selected' : '' ?>>Telkomsel Omni</option>
+                        <option value="indosat_only4u" <?= $category == 'indosat_only4u' ? 'selected' : '' ?>>Indosat Only4u</option>
+                        <option value="tri_cuanmax" <?= $category == 'tri_cuanmax' ? 'selected' : '' ?>>Tri CuanMax</option>
+                        <option value="xl_axis_cuanku" <?= $category == 'xl_axis_cuanku' ? 'selected' : '' ?>>XL Axis Cuanku</option>
+                        <option value="by_u" <?= $category == 'by_u' ? 'selected' : '' ?>>by.U</option>
+                    </optgroup>
                     <option value="lainnya" <?= $category == 'lainnya' ? 'selected' : '' ?>>Lainnya</option>
                 </select>
                 <input type="text" name="search" class="search-input" placeholder="Cari produk..." value="<?= htmlspecialchars($search) ?>">
