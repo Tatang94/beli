@@ -18,6 +18,7 @@ Preferred communication style: Simple, everyday language.
 - **Design**: Chat-like interface mimicking Telegram bot appearance, mobile-first responsive.
 - **Modularity**: PHP files are organized into modular structures (e.g., `includes/`, `setup/`, `admin/`).
 - **Admin Panel**: Dedicated, authenticated admin panel at `/admincenter` with a modern gradient design, offering comprehensive management tools and broadcasting features. Features include product listing, margin adjustment, statistics, and buyer analysis.
+- **Auto Update Dashboard**: Complete monitoring system for product synchronization with real-time statistics, log viewing, manual triggers, and automated 30-minute update cycles.
 - **Dynamic Content**: Removal of mock data; chat interactions are purely dynamic based on user input and admin-managed product data.
 - **Help System**: Integrated FAQ, terms and conditions, and customer support contact systems (WhatsApp, email).
 
@@ -28,7 +29,8 @@ Preferred communication style: Simple, everyday language.
 
 ## API Integration
 - **Core Service**: Digiflazz API for digital product transactions, utilizing MD5 signature-based authentication.
-- **Product Sync**: Automated synchronization of over 1,000 real products, including both prepaid and postpaid categories, with comprehensive categorization engine ensuring high accuracy.
+- **Product Sync**: Automated synchronization of over 1,000 real products (1178 products as of latest update), including both prepaid and postpaid categories, with comprehensive categorization engine ensuring high accuracy.
+- **Auto Update System**: Implemented automatic product update every 30 minutes with complete monitoring dashboard, logging system, and manual trigger capabilities.
 - **Transaction Processing**: Real-time transaction processing with reference ID generation.
 
 ## User Interface (General)

@@ -20,6 +20,10 @@ args = "Working Bot"
 task = "workflow.run"
 args = "Web Server"
 
+[[workflows.workflow.tasks]]
+task = "workflow.run"
+args = "Product Auto Update"
+
 [[workflows.workflow]]
 name = "Working Bot"
 author = "agent"
@@ -36,6 +40,17 @@ author = "agent"
 task = "shell.exec"
 args = "php -S 0.0.0.0:5000 -t web_interface"
 waitForPort = 5000
+
+[[workflows.workflow]]
+name = "Product Auto Update"
+author = "agent"
+
+[[workflows.workflow.tasks]]
+task = "shell.exec"
+args = "cd web_interface && php cron_scheduler.php"
+
+[workflows.workflow.metadata]
+outputType = "console"
 
 [agent]
 expertMode = true
