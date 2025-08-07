@@ -15,6 +15,10 @@ author = "agent"
 task = "workflow.run"
 args = "Working Bot"
 
+[[workflows.workflow.tasks]]
+task = "workflow.run"
+args = "Web Server"
+
 [[workflows.workflow]]
 name = "Working Bot"
 author = "agent"
@@ -26,5 +30,21 @@ args = "python bot_working.py"
 [workflows.workflow.metadata]
 outputType = "webview"
 
+[[workflows.workflow]]
+name = "Web Server"
+author = "agent"
+
+[[workflows.workflow.tasks]]
+task = "shell.exec"
+args = "php -S 0.0.0.0:5000"
+waitForPort = 5000
+
+[workflows.workflow.metadata]
+outputType = "webview"
+
 [agent]
 expertMode = true
+
+[[ports]]
+localPort = 5000
+externalPort = 80
