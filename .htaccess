@@ -17,6 +17,9 @@ php_value max_execution_time "30"
 # Enable URL rewriting
 RewriteEngine On
 
+# Redirect /admincenter to admincenter.php
+RewriteRule ^admincenter/?$ admincenter.php [L]
+
 # Redirect all requests to bot.php (for webhook)
 RewriteCond %{REQUEST_FILENAME} !-f
 RewriteCond %{REQUEST_FILENAME} !-d
