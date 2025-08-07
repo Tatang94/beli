@@ -1,9 +1,9 @@
 import os
 
 # Bot Configuration
-TOKEN = os.getenv("TELEGRAM_TOKEN", "8216106872:AAEQ_DxjYtZL0t6vD-y4Pfj90c94wHgXDcc")
-DIGIFLAZZ_USERNAME = os.getenv("DIGIFLAZZ_USERNAME", "miwewogwOZ2g")
-DIGIFLAZZ_KEY = os.getenv("DIGIFLAZZ_KEY", "8c2f1f52-6e36-56de-a1cd-3662bd5eb375")
+TOKEN = os.getenv("TELEGRAM_BOT_TOKEN")
+DIGIFLAZZ_USERNAME = os.getenv("DIGIFLAZZ_USERNAME")
+DIGIFLAZZ_KEY = os.getenv("DIGIFLAZZ_KEY")
 ADMIN_IDS = [int(x) for x in os.getenv("ADMIN_IDS", "7044289974").split(",")]
 
 # Digiflazz API URLs

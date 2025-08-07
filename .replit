@@ -1,4 +1,4 @@
-modules = ["python-3.11"]
+modules = ["python-3.11", "php-8.2", "web"]
 
 [nix]
 channel = "stable-25_05"
@@ -13,15 +13,18 @@ author = "agent"
 
 [[workflows.workflow.tasks]]
 task = "workflow.run"
-args = "Main Bot"
+args = "Working Bot"
 
 [[workflows.workflow]]
-name = "Main Bot"
+name = "Working Bot"
 author = "agent"
 
 [[workflows.workflow.tasks]]
 task = "shell.exec"
-args = "python bot.py"
+args = "python bot_working.py"
+
+[workflows.workflow.metadata]
+outputType = "webview"
 
 [agent]
 expertMode = true

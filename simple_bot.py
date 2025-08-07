@@ -6,7 +6,7 @@ from telegram import Update, InlineKeyboardButton, InlineKeyboardMarkup
 from telegram.ext import Application, CommandHandler, CallbackQueryHandler, ContextTypes
 
 # Bot configuration
-TOKEN = os.getenv("TELEGRAM_BOT_TOKEN", "8216106872:AAEQ_DxjYtZL0t6vD-y4Pfj90c94wHgXDcc")
+TOKEN = os.getenv("TELEGRAM_BOT_TOKEN") or "8216106872:AAEQ_DxjYtZL0t6vD-y4Pfj90c94wHgXDcc"
 
 # Setup logging
 logging.basicConfig(

@@ -4,7 +4,14 @@ import logging
 from datetime import datetime
 import requests
 import hashlib
-from telegram import Update, InlineKeyboardButton, InlineKeyboardMarkup
+# Import classes directly to avoid circular import issues  
+import sys
+import os
+sys.path.insert(0, os.path.join(os.path.dirname(__file__), '.pythonlibs/lib/python3.11/site-packages'))
+
+from telegram.update import Update
+from telegram.inline.inlinekeyboardbutton import InlineKeyboardButton
+from telegram.inline.inlinekeyboardmarkup import InlineKeyboardMarkup
 from telegram.ext import (
     Application,
     CommandHandler,
@@ -16,10 +23,10 @@ from telegram.ext import (
 )
 
 # Konfigurasi Bot dan API
-TOKEN = os.getenv("TELEGRAM_BOT_TOKEN", "8216106872:AAEQ_DxjYtZL0t6vD-y4Pfj90c94wHgXDcc")
-DIGIFLAZZ_USERNAME = os.getenv("DIGIFLAZZ_USERNAME", "miwewogwOZ2g")
-DIGIFLAZZ_KEY = os.getenv("DIGIFLAZZ_KEY", "8c2f1f52-6e36-56de-a1cd-3662bd5eb375")
-ADMIN_IDS = [7044289974]  # Ganti dengan ID admin Anda
+TOKEN = os.getenv("TELEGRAM_BOT_TOKEN") or "8216106872:AAEQ_DxjYtZL0t6vD-y4Pfj90c94wHgXDcc"
+DIGIFLAZZ_USERNAME = os.getenv("DIGIFLAZZ_USERNAME") or "miwewogwOZ2g"
+DIGIFLAZZ_KEY = os.getenv("DIGIFLAZZ_KEY") or "8c2f1f52-6e36-56de-a1cd-3662bd5eb375"
+ADMIN_IDS = [int(x) for x in os.getenv("ADMIN_IDS", "7044289974").split(",")]
 
 # Setup logging
 logging.basicConfig(
