@@ -61,15 +61,15 @@ function updateProductsFromAPI() {
     }
     
     try {
-        $pdo = new PDO("sqlite:bot_database.db");
+        $pdo = new PDO("sqlite:../bot_database.db");
         $pdo->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
         
-        // Gunakan struktur tabel yang sudah ada
+        // Buat tabel products dengan struktur yang benar
         $pdo->exec("CREATE TABLE IF NOT EXISTS products (
             product_id INTEGER PRIMARY KEY AUTOINCREMENT,
-            name TEXT,
-            price INTEGER,
-            digiflazz_code TEXT,
+            name TEXT NOT NULL,
+            price INTEGER NOT NULL,
+            digiflazz_code TEXT NOT NULL UNIQUE,
             description TEXT,
             brand TEXT,
             type TEXT,

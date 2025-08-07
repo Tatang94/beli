@@ -24,7 +24,7 @@ $search = $_GET['search'] ?? '';
 
 // Database connection SQLite
 try {
-    $pdo = new PDO("sqlite:bot_database.db");
+    $pdo = new PDO("sqlite:../bot_database.db");
     $pdo->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
     
     // Tabel products sudah ada, tidak perlu dibuat ulang
