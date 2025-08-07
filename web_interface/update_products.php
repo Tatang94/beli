@@ -79,8 +79,8 @@ function updateProductsFromAPI() {
         $pdo->exec("DELETE FROM products");
         
         $insert_count = 0;
-        $stmt = $pdo->prepare("INSERT OR REPLACE INTO products 
-            (digiflazz_code, name, price, brand, type, seller, description) 
+        $stmt = $pdo->prepare("INSERT OR IGNORE INTO products 
+            (name, price, digiflazz_code, brand, type, seller, description) 
             VALUES (?, ?, ?, ?, ?, ?, ?)");
         
         foreach ($result['data'] as $product) {
@@ -93,9 +93,9 @@ function updateProductsFromAPI() {
             $brand = extractBrand($product['product_name']);
             
             $stmt->execute([
-                $product['buyer_sku_code'],
                 $product['product_name'],
                 (int)$product['price'],
+                $product['buyer_sku_code'],
                 $brand,
                 $category,
                 $product['seller_name'] ?? 'Digiflazz',

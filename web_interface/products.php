@@ -27,17 +27,7 @@ try {
     $pdo = new PDO("sqlite:bot_database.db");
     $pdo->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
     
-    // Pastikan tabel products ada sesuai struktur yang sudah ada
-    $pdo->exec("CREATE TABLE IF NOT EXISTS products (
-        product_id INTEGER PRIMARY KEY AUTOINCREMENT,
-        name TEXT,
-        price INTEGER,
-        digiflazz_code TEXT,
-        description TEXT,
-        brand TEXT,
-        type TEXT,
-        seller TEXT
-    )");
+    // Tabel products sudah ada, tidak perlu dibuat ulang
     
 } catch (PDOException $e) {
     $pdo = null;
