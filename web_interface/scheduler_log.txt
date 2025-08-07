@@ -8,3 +8,7 @@
 [2025-08-07 23:27:57] Database error: SQLSTATE[HY000]: General error: 1 no such table: settings
 [2025-08-07 23:27:57] Starting scheduled product update...
 [2025-08-07 23:28:18] Scheduled product update completed
+[2025-08-07 23:32:06] Product Update Scheduler started
+[2025-08-07 23:32:06] Update interval: 30 minutes
+[2025-08-07 23:34:57] Product Update Scheduler started
+[2025-08-07 23:34:57] Update interval: 30 minutes
