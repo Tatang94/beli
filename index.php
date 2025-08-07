@@ -428,9 +428,7 @@ if ($pdo) {
                 case 'bantuan':
                     menuText = '🆘 Bantuan & Info';
                     break;
-                case 'admin':
-                    menuText = '👑 Admin Panel';
-                    break;
+
             }
             
             userMessage.innerHTML = `
@@ -550,32 +548,7 @@ if ($pdo) {
                             </div>
                         `;
                         break;
-                    case 'admin':
-                        responseContent = `
-                            <div>👑 <strong>Admin Panel</strong></div>
-                            <div style="margin-top: 12px; color: #555; font-size: 13px; line-height: 1.4;">
-                                Panel kontrol administrasi sistem:
-                            </div>
-                            
-                            <div style="margin-top: 15px; background: #fff3cd; padding: 12px; border-radius: 8px; font-size: 12px; color: #856404; text-align: center;">
-                                🔐 <strong>Area Terbatas</strong><br>
-                                Hanya admin yang dapat mengakses panel ini
-                            </div>
-                            
-                            <div class="menu-buttons" style="margin-top: 15px;">
-                                <button class="menu-btn admin" onclick="adminAction('update_products')">🔄 Update Database Produk</button>
-                                <button class="menu-btn admin" onclick="adminAction('statistics')">📊 Statistik & Laporan</button>
-                                <button class="menu-btn admin" onclick="adminAction('users')">👥 Kelola User & Saldo</button>
-                                <button class="menu-btn admin" onclick="adminAction('deposits')">💰 Konfirmasi Deposit</button>
-                                <button class="menu-btn admin" onclick="adminAction('settings')">⚙️ Pengaturan Sistem</button>
-                                <button class="menu-btn admin" onclick="adminAction('broadcast')">📢 Broadcast Message</button>
-                            </div>
-                            
-                            <div style="margin-top: 15px; background: #d4edda; padding: 10px; border-radius: 8px; font-size: 11px; color: #155724;">
-                                ✅ Sistem operasional normal • Server aktif • Database terhubung
-                            </div>
-                        `;
-                        break;
+
                 }
                 
                 botMessage.innerHTML = responseContent + `<div class="message-time">${currentTime}</div>`;
@@ -812,9 +785,7 @@ if ($pdo) {
                                 <button class="menu-btn secondary" onclick="selectMenu('bantuan')">
                                     🆘 Bantuan & Info
                                 </button>
-                                <button class="menu-btn admin" onclick="selectMenu('admin')" style="margin-top: 10px;">
-                                    👑 Admin Panel
-                                </button>
+
                             </div>
                             
                             <div style="margin-top: 15px; background: #f8f9fa; padding: 10px; border-radius: 8px; font-size: 11px; color: #666;">
