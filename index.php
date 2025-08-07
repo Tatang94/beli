@@ -391,109 +391,8 @@ if ($pdo) {
             </div>
         </div>
         
-        <div class="chat-messages">
-            <!-- Bot Introduction -->
-            <div class="message message-bot">
-                <div style="font-size: 16px; font-weight: bold; color: #667eea;">🚀 Halo! Saya PulsaBot AI</div>
-                <div style="margin-top: 12px; color: #555; font-size: 13px; line-height: 1.6;">
-                    Asisten digital terpercaya untuk semua kebutuhan pulsa, paket data, dan pembayaran online Anda!
-                </div>
-                <div style="margin-top: 15px; background: linear-gradient(135deg, #e3f2fd 0%, #f3e5f5 100%); padding: 12px; border-radius: 15px; border-left: 4px solid #667eea;">
-                    <div style="font-size: 12px; font-weight: bold; color: #667eea; margin-bottom: 8px;">✨ Yang bisa saya bantu:</div>
-                    <div style="font-size: 11px; color: #666; line-height: 1.4;">
-                        🎯 Pulsa All Operator • 🌐 Paket Internet • ⚡ Token PLN<br>
-                        💳 Top Up E-Money • 🎮 Voucher Gaming • 📺 Streaming
-                    </div>
-                </div>
-                <div style="margin-top: 12px; text-align: center; font-size: 11px; color: #999;">
-                    💬 Cukup ketik <span style="background: rgba(102, 126, 234, 0.1); padding: 2px 6px; border-radius: 4px; color: #667eea; font-weight: bold;">"beli pulsa mas"</span>
-                </div>
-                <div class="message-time">20:45</div>
-            </div>
-            
-            <!-- User Interaction -->
-            <div class="message message-user">
-                <div>beli pulsa mas</div>
-                <div class="message-time">20:46 ✓✓</div>
-            </div>
-            
-            <!-- AI Response -->
-            <div class="message message-bot">
-                <div style="font-size: 15px; font-weight: bold;">🎪 <span style="background: linear-gradient(135deg, #667eea, #764ba2); -webkit-background-clip: text; -webkit-text-fill-color: transparent;">Wonderful! Mari kita mulai</span></div>
-                <div style="margin-top: 12px; color: #555; font-size: 13px; line-height: 1.5;">
-                    Saya siap membantu Anda! Pilih layanan yang ingin digunakan dari menu interaktif di bawah ini:
-                </div>
-                
-                <div class="menu-buttons">
-                    <button class="menu-btn" onclick="selectMenu('beli_produk')" style="background: linear-gradient(135deg, #ff6b6b 0%, #ee5a24 100%); animation: pulse 2s infinite;">
-                        🎯 Belanja Digital Store
-                    </button>
-                    <button class="menu-btn secondary" onclick="selectMenu('cek_saldo')" style="background: linear-gradient(135deg, #00c9ff 0%, #92fe9d 100%);">
-                        💎 Wallet & History
-                    </button>
-                    <button class="menu-btn secondary" onclick="selectMenu('deposit')" style="background: linear-gradient(135deg, #a8edea 0%, #fed6e3 100%);">
-                        🔋 Power Up Balance
-                    </button>
-                    <button class="menu-btn secondary" onclick="selectMenu('bantuan')" style="background: linear-gradient(135deg, #ffecd2 0%, #fcb69f 100%);">
-                        🛟 Help Center
-                    </button>
-
-                </div>
-                
-                <div style="margin-top: 20px; background: linear-gradient(135deg, rgba(102, 126, 234, 0.1) 0%, rgba(118, 75, 162, 0.1) 100%); padding: 12px; border-radius: 15px; text-align: center;">
-                    <div style="font-size: 11px; color: #667eea; font-weight: bold; margin-bottom: 5px;">🌟 PREMIUM FEATURES</div>
-                    <div style="font-size: 10px; color: #888; line-height: 1.3;">
-                        ⚡ Lightning Fast • 🛡️ 100% Secure • 🎯 Auto-Process • 💫 24/7 Support
-                    </div>
-                </div>
-                
-
-                
-                <div class="message-time">20:46</div>
-            </div>
-            
-            <!-- User Tries Again -->
-            <div class="message message-user">
-                <div>gimana cara belinya?</div>
-                <div class="message-time">20:50 ✓✓</div>
-            </div>
-            
-            <!-- Enhanced Bot Response -->
-            <div class="message message-bot">
-                <div style="font-size: 14px;">🎪 <strong>Super Easy! Ikuti langkah magic ini:</strong></div>
-                <div style="margin-top: 15px;">
-                    <div style="background: linear-gradient(135deg, #ff9a9e 0%, #fecfef 100%); padding: 12px; border-radius: 12px; margin-bottom: 10px; border-left: 4px solid #ff6b6b;">
-                        <div style="font-weight: bold; font-size: 12px; color: #e74c3c; margin-bottom: 5px;">🎯 STEP 1: Pilih Produk</div>
-                        <div style="font-size: 11px; color: #666;">Klik "Belanja Digital Store" → Pilih kategori → Pilih operator</div>
-                    </div>
-                    <div style="background: linear-gradient(135deg, #a8edea 0%, #fed6e3 100%); padding: 12px; border-radius: 12px; margin-bottom: 10px; border-left: 4px solid #00c9ff;">
-                        <div style="font-weight: bold; font-size: 12px; color: #0088cc; margin-bottom: 5px;">💰 STEP 2: Input Nomor</div>
-                        <div style="font-size: 11px; color: #666;">Masukkan nomor HP/ID tujuan dengan benar</div>
-                    </div>
-                    <div style="background: linear-gradient(135deg, #ffecd2 0%, #fcb69f 100%); padding: 12px; border-radius: 12px; border-left: 4px solid #ff9800;">
-                        <div style="font-weight: bold; font-size: 12px; color: #f57c00; margin-bottom: 5px;">⚡ STEP 3: Instant Process</div>
-                        <div style="font-size: 11px; color: #666;">Konfirmasi → Bayar → Selesai dalam detik!</div>
-                    </div>
-                </div>
-                
-                <div style="margin-top: 15px; text-align: center;">
-                    <button class="menu-btn" onclick="selectMenu('beli_produk')" style="background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); animation: bounce 1s infinite;">
-                        🚀 Mulai Belanja Sekarang!
-                    </button>
-                </div>
-                
-                <div class="message-time">20:50</div>
-            </div>
-            
-            <!-- System Update Notification -->
-            <div style="background: linear-gradient(135deg, #d4edda 0%, #c3e6cb 100%); color: #155724; padding: 15px; border-radius: 20px; margin: 10px 0; border: 1px solid rgba(21, 87, 36, 0.2); text-align: center;">
-                <div style="font-size: 13px; font-weight: bold; margin-bottom: 8px;">🎉 System Update Complete!</div>
-                <div style="font-size: 11px; line-height: 1.4;">
-                    ✨ Database refreshed dengan <?= number_format($products_count) ?> produk terbaru<br>
-                    🚀 Performance boost 300% • 🛡️ Security enhanced
-                </div>
-                <div style="font-size: 10px; margin-top: 8px; opacity: 0.8;">Updated: Just now</div>
-            </div>
+        <div class="chat-messages" id="chatMessages">
+            <!-- Messages will be dynamically added here -->
         </div>
         
         <div class="input-area">
@@ -958,9 +857,32 @@ if ($pdo) {
             }
         });
         
-        // Auto scroll to bottom on load
+        // Initialize chat with welcome message
         window.addEventListener('load', function() {
             const messagesContainer = document.querySelector('.chat-messages');
+            const currentTime = new Date().toLocaleTimeString('id-ID', {hour: '2-digit', minute:'2-digit'});
+            
+            // Welcome message
+            const welcomeMessage = document.createElement('div');
+            welcomeMessage.className = 'message message-bot';
+            welcomeMessage.innerHTML = `
+                <div style="font-size: 16px; font-weight: bold; color: #667eea;">🚀 Halo! Saya PulsaBot AI</div>
+                <div style="margin-top: 12px; color: #555; font-size: 13px; line-height: 1.6;">
+                    Asisten digital terpercaya untuk semua kebutuhan pulsa, paket data, dan pembayaran online Anda!
+                </div>
+                <div style="margin-top: 15px; background: linear-gradient(135deg, #e3f2fd 0%, #f3e5f5 100%); padding: 12px; border-radius: 15px; border-left: 4px solid #667eea;">
+                    <div style="font-size: 12px; font-weight: bold; color: #667eea; margin-bottom: 8px;">✨ Yang bisa saya bantu:</div>
+                    <div style="font-size: 11px; color: #666; line-height: 1.4;">
+                        🎯 Pulsa All Operator • 🌐 Paket Internet • ⚡ Token PLN<br>
+                        💳 Top Up E-Money • 🎮 Voucher Gaming • 📺 Streaming
+                    </div>
+                </div>
+                <div style="margin-top: 12px; text-align: center; font-size: 11px; color: #999;">
+                    💬 Cukup ketik <span style="background: rgba(102, 126, 234, 0.1); padding: 2px 6px; border-radius: 4px; color: #667eea; font-weight: bold;">"beli pulsa mas"</span>
+                </div>
+                <div class="message-time">${currentTime}</div>
+            `;
+            messagesContainer.appendChild(welcomeMessage);
             messagesContainer.scrollTop = messagesContainer.scrollHeight;
         });
     </script>
