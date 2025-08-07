@@ -254,20 +254,80 @@ function categorizeProduct($product_name) {
     if (strpos($name_lower, 'xl axis cuanku') !== false || strpos($name_lower, 'axis cuanku') !== false) return 'xl_axis_cuanku';
     if (strpos($name_lower, 'by.u') !== false) return 'by_u';
     
+    // Additional comprehensive detection for remaining products
+    
+    // Detect remaining operator products as pulsa if they have numeric values
+    if (preg_match('/\b(telkomsel|indosat|xl|tri|three|smartfren|axis|by\.u|byu)\b/i', $name_lower) && 
+        preg_match('/\b\d+\.?\d*\b/', $name_lower) &&
+        strpos($name_lower, 'data') === false && 
+        strpos($name_lower, 'internet') === false &&
+        strpos($name_lower, 'paket') === false) {
+        return 'pulsa';
+    }
+    
+    // Detect E-Toll and transport cards
+    if (strpos($name_lower, 'e-toll') !== false ||
+        strpos($name_lower, 'tapcash') !== false ||
+        strpos($name_lower, 'brizzi') !== false ||
+        strpos($name_lower, 'flazz') !== false ||
+        strpos($name_lower, 'jakcard') !== false) {
+        return 'emoney';
+    }
+    
+    // Detect streaming services
+    if (strpos($name_lower, 'netflix') !== false ||
+        strpos($name_lower, 'spotify') !== false ||
+        strpos($name_lower, 'youtube') !== false ||
+        strpos($name_lower, 'disney') !== false ||
+        strpos($name_lower, 'hbo') !== false ||
+        strpos($name_lower, 'prime') !== false ||
+        strpos($name_lower, 'vidio') !== false ||
+        strpos($name_lower, 'viu') !== false) {
+        return 'streaming';
+    }
+    
+    // Detect TV services
+    if (strpos($name_lower, 'tv') !== false ||
+        strpos($name_lower, 'transvision') !== false ||
+        strpos($name_lower, 'indovision') !== false ||
+        strpos($name_lower, 'orange') !== false) {
+        return 'tv';
+    }
+    
+    // Detect aktivasi products
+    if (strpos($name_lower, 'aktivasi') !== false ||
+        strpos($name_lower, 'perdana') !== false) {
+        return 'aktivasi_perdana';
+    }
+    
+    // Detect eSIM products
+    if (strpos($name_lower, 'esim') !== false ||
+        strpos($name_lower, 'e-sim') !== false) {
+        return 'esim';
+    }
+    
+    // Detect phone/communication services
+    if (strpos($name_lower, 'anynet') !== false ||
+        strpos($name_lower, 'menit') !== false) {
+        return 'paket_sms_telpon';
+    }
+    
     return 'lainnya';
 }
 
 function extractBrand($product_name) {
     $name_lower = strtolower($product_name);
     
-    // Provider Seluler
+    // Provider Seluler dan Brand lainnya
     $brands = [
-        'telkomsel', 'indosat', 'xl', 'tri', 'three', 'smartfren', 'axis', 'by.u',
+        'telkomsel', 'indosat', 'xl', 'tri', 'three', 'smartfren', 'axis', 'by.u', 'byu',
         'pln', 'ovo', 'dana', 'gopay', 'shopeepay', 'linkaja', 'jenius', 'sakuku',
         'mobile legends', 'pubg', 'free fire', 'valorant', 'steam', 'garena',
         'netflix', 'disney', 'spotify', 'youtube', 'vidio', 'viu', 'iflix',
         'grab', 'gojek', 'uber', 'maxim', 'bpjs', 'pdam', 'indihome', 'biznet',
-        'mnc', 'first media', 'myrepublic', 'oxygen', 'cbr', 'iconnet'
+        'mnc', 'first media', 'myrepublic', 'oxygen', 'cbr', 'iconnet',
+        'tapcash', 'brizzi', 'flazz', 'jakcard', 'mandiri', 'bni', 'bca', 'bri',
+        'anynet', 'genshin', 'roblox', 'clash', 'arena', 'honor', 'lords'
     ];
     
     foreach ($brands as $brand) {
