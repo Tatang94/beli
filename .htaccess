@@ -17,17 +17,11 @@ php_value max_execution_time "30"
 # Enable URL rewriting
 RewriteEngine On
 
-# Redirect /admincenter to admin.php
+# Redirect /admincenter to admin.php (highest priority)
 RewriteRule ^admincenter/?$ admin.php [L]
 
 # Redirect webhook to bot.php 
 RewriteRule ^webhook/?$ bot.php [L]
-
-# Default fallback (but exclude existing files and directories)
-RewriteCond %{REQUEST_FILENAME} !-f
-RewriteCond %{REQUEST_FILENAME} !-d
-RewriteCond %{REQUEST_URI} !^/admincenter
-RewriteRule ^(.*)$ index.php [L]
 
 # Security: Deny access to sensitive files
 <Files "config.php">
