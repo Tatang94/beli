@@ -1,52 +1,29 @@
 <?php
-/**
- * Admin Panel - Halaman administrasi bot
- */
-
 require_once 'config.php';
-session_start();
 
-// Simple admin authentication (untuk demo)
-$is_admin = true; // Dalam implementasi sesungguhnya, tambahkan sistem login
-
-$action = $_GET['action'] ?? 'dashboard';
-
-// Database connection dengan fallback
-try {
-    $pdo = new PDO("mysql:host=" . DB_HOST . ";dbname=" . DB_NAME . ";charset=utf8mb4", DB_USER, DB_PASS);
-    $pdo->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
-} catch (PDOException $e) {
-    $pdo = null;
+// Simple admin authentication
+$admin_logged_in = false;
+if (isset($_POST['admin_key']) && $_POST['admin_key'] === 'admin123') {
+    $admin_logged_in = true;
+    setcookie('admin_session', 'authenticated', time() + 3600);
+} elseif (isset($_COOKIE['admin_session']) && $_COOKIE['admin_session'] === 'authenticated') {
+    $admin_logged_in = true;
 }
 
-// Simulasi data statistik
-$stats = [
-    'total_users' => 150,
-    'total_transactions' => 1250,
-    'total_revenue' => 15750000,
-    'pending_deposits' => 5,
-    'products_count' => 1165
-];
-
-if ($pdo) {
-    try {
-        // Ambil statistik real dari database jika tersedia
-        $stmt = $pdo->query("SELECT COUNT(*) FROM users");
-        $stats['total_users'] = $stmt->fetchColumn() ?: $stats['total_users'];
-        
-        $stmt = $pdo->query("SELECT COUNT(*) FROM products WHERE status = 'active'");
-        $stats['products_count'] = $stmt->fetchColumn() ?: $stats['products_count'];
-    } catch (PDOException $e) {
-        // Gunakan data fallback
-    }
+// Handle logout
+if (isset($_GET['logout'])) {
+    setcookie('admin_session', '', time() - 3600);
+    header('Location: admin.php');
+    exit;
 }
 ?>
+
 <!DOCTYPE html>
 <html lang="id">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Admin Panel - Bot Digital</title>
+    <title>Admin Panel - Digital Pulsa Bot</title>
     <style>
         * {
             margin: 0;
@@ -55,271 +32,143 @@ if ($pdo) {
         }
         
         body {
-            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
-            background: #f8f9fa;
-            color: #333;
-        }
-        
-        .container {
-            max-width: 1200px;
-            margin: 0 auto;
-            padding: 20px;
-        }
-        
-        .header {
-            background: #075e54;
-            color: white;
-            padding: 20px;
-            border-radius: 12px;
-            margin-bottom: 30px;
-            text-align: center;
-        }
-        
-        .nav-menu {
-            background: white;
-            padding: 20px;
-            border-radius: 12px;
-            margin-bottom: 30px;
-            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
-        }
-        
-        .nav-buttons {
-            display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
-            gap: 15px;
-        }
-        
-        .nav-btn {
-            background: #25d366;
-            color: white;
-            border: none;
-            padding: 15px 20px;
-            border-radius: 8px;
-            font-size: 14px;
-            font-weight: 600;
-            cursor: pointer;
-            transition: all 0.2s;
-            text-decoration: none;
-            text-align: center;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
             display: flex;
             align-items: center;
             justify-content: center;
-            gap: 8px;
+            padding: 20px;
         }
         
-        .nav-btn:hover {
-            background: #128c7e;
-            transform: translateY(-2px);
+        .admin-container {
+            background: rgba(255, 255, 255, 0.95);
+            backdrop-filter: blur(20px);
+            border-radius: 20px;
+            box-shadow: 0 20px 40px rgba(0,0,0,0.1);
+            overflow: hidden;
+            width: 100%;
+            max-width: 500px;
+            border: 1px solid rgba(255, 255, 255, 0.3);
         }
         
-        .nav-btn.secondary {
-            background: #34b7f1;
-        }
-        
-        .nav-btn.secondary:hover {
-            background: #0088cc;
-        }
-        
-        .nav-btn.warning {
-            background: #ff9800;
-        }
-        
-        .nav-btn.warning:hover {
-            background: #f57c00;
-        }
-        
-        .stats-grid {
-            display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
-            gap: 20px;
-            margin-bottom: 30px;
-        }
-        
-        .stat-card {
-            background: white;
-            padding: 25px;
-            border-radius: 12px;
-            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        .admin-header {
+            background: linear-gradient(135deg, #ff6b6b 0%, #ee5a24 100%);
+            color: white;
+            padding: 30px;
             text-align: center;
         }
         
-        .stat-number {
-            font-size: 36px;
-            font-weight: bold;
-            color: #28a745;
-            margin-bottom: 10px;
+        .admin-content {
+            padding: 40px 30px;
         }
         
-        .stat-label {
-            color: #666;
-            font-size: 14px;
+        .login-form {
+            text-align: center;
         }
         
-        .content-section {
-            background: white;
-            padding: 30px;
-            border-radius: 12px;
-            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        .form-input {
+            width: 100%;
+            padding: 15px 20px;
+            border: 2px solid rgba(102, 126, 234, 0.3);
+            border-radius: 15px;
+            font-size: 16px;
+            background: rgba(255, 255, 255, 0.9);
+            margin-bottom: 20px;
+            outline: none;
         }
         
-        .back-btn {
-            background: #6c757d;
+        .btn {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
             color: white;
             border: none;
-            padding: 10px 20px;
-            border-radius: 20px;
-            margin-bottom: 20px;
+            padding: 15px 30px;
+            border-radius: 15px;
+            font-size: 16px;
+            font-weight: 600;
             cursor: pointer;
-            font-size: 14px;
+            width: 100%;
+        }
+        
+        .btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 10px 25px rgba(102, 126, 234, 0.3);
+        }
+        
+        .menu-item {
+            display: block;
+            background: white;
+            padding: 20px;
+            margin: 10px 0;
+            border-radius: 15px;
+            text-decoration: none;
+            color: #333;
+            box-shadow: 0 5px 15px rgba(0,0,0,0.1);
+            transition: all 0.3s ease;
+        }
+        
+        .menu-item:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 10px 25px rgba(0,0,0,0.15);
+        }
+        
+        .menu-title {
+            font-size: 16px;
+            font-weight: bold;
+            margin-bottom: 5px;
+        }
+        
+        .menu-desc {
+            font-size: 12px;
+            color: #666;
+        }
+        
+        .logout-btn {
+            background: linear-gradient(135deg, #ff6b6b 0%, #ee5a24 100%);
+            color: white;
+            padding: 10px 20px;
+            border-radius: 10px;
             text-decoration: none;
             display: inline-block;
-        }
-        
-        .back-btn:hover {
-            background: #5a6268;
-        }
-        
-        @media (max-width: 768px) {
-            .container {
-                padding: 10px;
-            }
-            
-            .nav-buttons {
-                grid-template-columns: 1fr;
-            }
-            
-            .stats-grid {
-                grid-template-columns: repeat(2, 1fr);
-            }
+            margin-top: 20px;
         }
     </style>
 </head>
 <body>
-    <div class="container">
-        <div class="header">
-            <h1>⚠️ Admin Panel</h1>
-            <p>Panel administrasi Bot Digital Products</p>
+    <div class="admin-container">
+        <div class="admin-header">
+            <h1>⚡ Admin Panel</h1>
+            <p>Digital Pulsa Bot Management</p>
         </div>
         
-        <a href="index.php" class="back-btn">⬅️ Kembali ke Bot Interface</a>
-        
-        <?php if ($action === 'dashboard'): ?>
-            
-            <div class="nav-menu">
-                <div class="nav-buttons">
-                    <a href="admin.php?action=update_products" class="nav-btn">
-                        🔄 Update Produk
-                    </a>
-                    <a href="admin.php?action=statistics" class="nav-btn secondary">
-                        📊 Statistik Detail
-                    </a>
-                    <a href="admin.php?action=users" class="nav-btn secondary">
-                        👥 Kelola User
-                    </a>
-                    <a href="admin.php?action=deposits" class="nav-btn warning">
-                        💰 Konfirmasi Deposit
-                    </a>
-                </div>
-            </div>
-            
-            <div class="stats-grid">
-                <div class="stat-card">
-                    <div class="stat-number"><?= number_format($stats['total_users']) ?></div>
-                    <div class="stat-label">Total User</div>
-                </div>
-                <div class="stat-card">
-                    <div class="stat-number"><?= number_format($stats['total_transactions']) ?></div>
-                    <div class="stat-label">Total Transaksi</div>
-                </div>
-                <div class="stat-card">
-                    <div class="stat-number"><?= number_format($stats['products_count']) ?></div>
-                    <div class="stat-label">Produk Aktif</div>
-                </div>
-                <div class="stat-card">
-                    <div class="stat-number">Rp <?= number_format($stats['total_revenue']) ?></div>
-                    <div class="stat-label">Total Revenue</div>
-                </div>
-            </div>
-            
-        <?php elseif ($action === 'update_products'): ?>
-            
-            <div class="content-section">
-                <h2>🔄 Update Produk dari Digiflazz</h2>
-                <p style="margin-bottom: 20px; color: #666;">
-                    Sinkronisasi produk terbaru dari API Digiflazz
-                </p>
+        <div class="admin-content">
+            <?php if (!$admin_logged_in): ?>
+                <!-- Login Form -->
+                <form method="post" class="login-form">
+                    <h3 style="margin-bottom: 25px; color: #333;">🔐 Login Admin</h3>
+                    <input type="password" name="admin_key" class="form-input" placeholder="Masukkan password admin..." required>
+                    <button type="submit" class="btn">🚀 Masuk ke Panel</button>
+                </form>
+            <?php else: ?>
+                <!-- Admin Dashboard -->
+                <h3 style="text-align: center; margin-bottom: 30px; color: #333;">🎛️ Control Panel</h3>
                 
-                <button onclick="updateProducts()" class="nav-btn" style="width: auto;">
-                    🔄 Mulai Update Produk
-                </button>
+                <a href="update_products.php" class="menu-item">
+                    <div class="menu-title">🔄 Update Database Produk</div>
+                    <div class="menu-desc">Sinkronisasi produk dari Digiflazz API</div>
+                </a>
                 
-                <div id="updateStatus" style="margin-top: 20px;"></div>
-            </div>
-            
-        <?php elseif ($action === 'statistics'): ?>
-            
-            <div class="content-section">
-                <h2>📊 Statistik Detail</h2>
+                <a href="products.php" class="menu-item">
+                    <div class="menu-title">📦 Kelola Produk</div>
+                    <div class="menu-desc">Lihat dan atur produk yang tersedia</div>
+                </a>
                 
-                <div class="stats-grid" style="margin-top: 20px;">
-                    <div class="stat-card">
-                        <div class="stat-number"><?= $stats['pending_deposits'] ?></div>
-                        <div class="stat-label">Deposit Pending</div>
-                    </div>
-                    <div class="stat-card">
-                        <div class="stat-number">98.5%</div>
-                        <div class="stat-label">Success Rate</div>
-                    </div>
-                    <div class="stat-card">
-                        <div class="stat-number">24</div>
-                        <div class="stat-label">Transaksi Hari Ini</div>
-                    </div>
-                    <div class="stat-card">
-                        <div class="stat-number">2.5 menit</div>
-                        <div class="stat-label">Rata-rata Proses</div>
-                    </div>
+                <div style="text-align: center;">
+                    <a href="index.php" style="color: #667eea; text-decoration: none; margin-right: 20px;">🏠 Kembali ke Home</a>
+                    <a href="?logout=1" class="logout-btn">🚪 Logout</a>
                 </div>
-            </div>
-            
-        <?php elseif ($action === 'users'): ?>
-            
-            <div class="content-section">
-                <h2>👥 Kelola User</h2>
-                <p style="margin-bottom: 20px; color: #666;">
-                    Manajemen user dan saldo
-                </p>
-                
-                <div style="color: #666; text-align: center; padding: 40px;">
-                    Fitur manajemen user akan tersedia dalam versi lengkap
-                </div>
-            </div>
-            
-        <?php elseif ($action === 'deposits'): ?>
-            
-            <div class="content-section">
-                <h2>💰 Konfirmasi Deposit</h2>
-                <p style="margin-bottom: 20px; color: #666;">
-                    Review dan konfirmasi deposit user
-                </p>
-                
-                <div style="color: #666; text-align: center; padding: 40px;">
-                    Tidak ada deposit pending saat ini
-                </div>
-            </div>
-            
-        <?php endif; ?>
+            <?php endif; ?>
+        </div>
     </div>
-    
-    <script>
-        function updateProducts() {
-            const statusDiv = document.getElementById('updateStatus');
-            statusDiv.innerHTML = '<div style="color: #007bff;">🔄 Mengupdate produk dari Digiflazz...</div>';
-            
-            // Simulasi update (dalam implementasi real, panggil update_products.php via AJAX)
-            setTimeout(() => {
-                statusDiv.innerHTML = '<div style="color: #28a745; padding: 15px; background: #d4edda; border-radius: 8px;">✅ Berhasil mengupdate <?= $stats["products_count"] ?> produk dari API Digiflazz!</div>';
-            }, 3000);
-        }
-    </script>
 </body>
 </html>
