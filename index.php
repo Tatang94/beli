@@ -62,32 +62,49 @@ if ($pdo) {
             width: 100%;
             max-width: 400px;
             height: 100vh;
-            background: #e5ddd5;
+            background: linear-gradient(180deg, #1e3c72 0%, #2a5298 100%);
             position: relative;
             overflow: hidden;
-            box-shadow: 0 0 20px rgba(0,0,0,0.3);
+            box-shadow: 0 0 30px rgba(0,0,0,0.5);
+            border-radius: 0;
         }
         
         .header {
-            background: #075e54;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
             color: white;
-            padding: 15px 20px;
+            padding: 20px;
             display: flex;
             align-items: center;
-            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+            box-shadow: 0 4px 15px rgba(0,0,0,0.2);
+            position: relative;
+        }
+        
+        .header::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: url('data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100"><defs><pattern id="grid" width="10" height="10" patternUnits="userSpaceOnUse"><path d="M 10 0 L 0 0 0 10" fill="none" stroke="rgba(255,255,255,0.1)" stroke-width="0.5"/></pattern></defs><rect width="100" height="100" fill="url(%23grid)"/></svg>');
+            opacity: 0.3;
         }
         
         .avatar {
-            width: 40px;
-            height: 40px;
-            border-radius: 50%;
-            background: #ff9800;
+            width: 50px;
+            height: 50px;
+            border-radius: 15px;
+            background: linear-gradient(135deg, #ff6b6b, #ee5a24);
             display: flex;
             align-items: center;
             justify-content: center;
             font-weight: bold;
-            font-size: 18px;
+            font-size: 20px;
             margin-right: 15px;
+            box-shadow: 0 4px 15px rgba(238, 90, 36, 0.4);
+            border: 2px solid rgba(255, 255, 255, 0.3);
+            position: relative;
+            z-index: 1;
         }
         
         .bot-info h3 {
@@ -103,30 +120,73 @@ if ($pdo) {
         .chat-messages {
             height: calc(100vh - 140px);
             overflow-y: auto;
-            padding: 20px;
+            padding: 25px 20px;
             display: flex;
             flex-direction: column;
-            gap: 15px;
+            gap: 20px;
+            background: rgba(255, 255, 255, 0.05);
+            backdrop-filter: blur(10px);
         }
         
         .message {
-            max-width: 85%;
-            padding: 12px 16px;
-            border-radius: 18px;
+            max-width: 90%;
+            padding: 18px 22px;
+            border-radius: 25px;
             position: relative;
             word-wrap: break-word;
+            backdrop-filter: blur(15px);
+            border: 1px solid rgba(255, 255, 255, 0.2);
         }
         
         .message-bot {
-            background: #ffffff;
+            background: linear-gradient(135deg, rgba(255, 255, 255, 0.95) 0%, rgba(240, 248, 255, 0.95) 100%);
             align-self: flex-start;
-            box-shadow: 0 1px 2px rgba(0,0,0,0.1);
+            box-shadow: 0 8px 25px rgba(0,0,0,0.15);
+            border-left: 4px solid #667eea;
+            position: relative;
+        }
+        
+        .message-bot::before {
+            content: '🤖';
+            position: absolute;
+            left: -15px;
+            top: 50%;
+            transform: translateY(-50%);
+            background: #667eea;
+            width: 30px;
+            height: 30px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 14px;
+            box-shadow: 0 4px 10px rgba(102, 126, 234, 0.3);
         }
         
         .message-user {
-            background: #dcf8c6;
+            background: linear-gradient(135deg, rgba(102, 126, 234, 0.9) 0%, rgba(118, 75, 162, 0.9) 100%);
+            color: white;
             align-self: flex-end;
-            box-shadow: 0 1px 2px rgba(0,0,0,0.1);
+            box-shadow: 0 8px 25px rgba(102, 126, 234, 0.3);
+            border-right: 4px solid #764ba2;
+            position: relative;
+        }
+        
+        .message-user::after {
+            content: '👤';
+            position: absolute;
+            right: -15px;
+            top: 50%;
+            transform: translateY(-50%);
+            background: #764ba2;
+            width: 30px;
+            height: 30px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 14px;
+            box-shadow: 0 4px 10px rgba(118, 75, 162, 0.3);
         }
         
         .message-time {
@@ -139,45 +199,66 @@ if ($pdo) {
         .menu-buttons {
             display: grid;
             grid-template-columns: 1fr;
-            gap: 8px;
-            margin-top: 15px;
+            gap: 12px;
+            margin-top: 20px;
         }
         
         .menu-btn {
-            background: #25d366;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
             color: white;
             border: none;
-            padding: 12px 16px;
-            border-radius: 25px;
+            padding: 16px 20px;
+            border-radius: 20px;
             font-size: 14px;
-            font-weight: 500;
+            font-weight: 600;
             cursor: pointer;
-            transition: all 0.2s;
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
             display: flex;
             align-items: center;
             justify-content: center;
-            gap: 8px;
+            gap: 10px;
+            position: relative;
+            overflow: hidden;
+            box-shadow: 0 4px 15px rgba(102, 126, 234, 0.3);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+        }
+        
+        .menu-btn::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: -100%;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.2), transparent);
+            transition: left 0.5s;
+        }
+        
+        .menu-btn:hover::before {
+            left: 100%;
         }
         
         .menu-btn:hover {
-            background: #128c7e;
-            transform: translateY(-1px);
+            transform: translateY(-3px) scale(1.02);
+            box-shadow: 0 8px 25px rgba(102, 126, 234, 0.4);
         }
         
         .menu-btn.secondary {
-            background: #34b7f1;
+            background: linear-gradient(135deg, #00c9ff 0%, #92fe9d 100%);
+            box-shadow: 0 4px 15px rgba(0, 201, 255, 0.3);
         }
         
         .menu-btn.secondary:hover {
-            background: #0088cc;
+            box-shadow: 0 8px 25px rgba(0, 201, 255, 0.4);
         }
         
         .menu-btn.admin {
-            background: #ff9800;
+            background: linear-gradient(135deg, #ff6b6b 0%, #ee5a24 100%);
+            box-shadow: 0 4px 15px rgba(255, 107, 107, 0.3);
         }
         
         .menu-btn.admin:hover {
-            background: #f57c00;
+            box-shadow: 0 8px 25px rgba(255, 107, 107, 0.4);
         }
         
         .status-message {
@@ -209,40 +290,93 @@ if ($pdo) {
             bottom: 0;
             left: 0;
             right: 0;
-            background: #f0f0f0;
-            padding: 10px 15px;
-            border-top: 1px solid #ddd;
+            background: linear-gradient(135deg, rgba(255, 255, 255, 0.95) 0%, rgba(240, 248, 255, 0.95) 100%);
+            padding: 15px 20px;
+            border-top: 1px solid rgba(255, 255, 255, 0.3);
             display: flex;
             align-items: center;
-            gap: 10px;
+            gap: 12px;
+            backdrop-filter: blur(20px);
+            box-shadow: 0 -4px 15px rgba(0,0,0,0.1);
         }
         
         .chat-input {
             flex: 1;
-            padding: 10px 15px;
-            border: 1px solid #ddd;
-            border-radius: 20px;
+            padding: 12px 18px;
+            border: 2px solid rgba(102, 126, 234, 0.3);
+            border-radius: 25px;
             outline: none;
             font-size: 14px;
+            background: rgba(255, 255, 255, 0.9);
+            transition: all 0.3s ease;
+        }
+        
+        .chat-input:focus {
+            border-color: #667eea;
+            box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
+            background: white;
         }
         
         .send-btn {
-            background: #25d366;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
             color: white;
             border: none;
-            width: 40px;
-            height: 40px;
+            width: 45px;
+            height: 45px;
             border-radius: 50%;
             cursor: pointer;
             display: flex;
             align-items: center;
             justify-content: center;
+            transition: all 0.3s ease;
+            box-shadow: 0 4px 15px rgba(102, 126, 234, 0.3);
+        }
+        
+        .send-btn:hover {
+            transform: scale(1.1);
+            box-shadow: 0 6px 20px rgba(102, 126, 234, 0.4);
+        }
+        
+        @keyframes pulse {
+            0% { transform: scale(1); }
+            50% { transform: scale(1.05); }
+            100% { transform: scale(1); }
+        }
+        
+        @keyframes bounce {
+            0%, 100% { transform: translateY(0); }
+            50% { transform: translateY(-5px); }
+        }
+        
+        @keyframes fadeInUp {
+            from {
+                opacity: 0;
+                transform: translateY(20px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+        
+        .message {
+            animation: fadeInUp 0.5s ease-out;
         }
         
         @media (max-width: 480px) {
             .chat-container {
                 max-width: 100%;
                 height: 100vh;
+            }
+            
+            .message {
+                max-width: 95%;
+                padding: 15px 18px;
+            }
+            
+            .menu-btn {
+                padding: 14px 16px;
+                font-size: 13px;
             }
         }
     </style>
@@ -258,75 +392,107 @@ if ($pdo) {
         </div>
         
         <div class="chat-messages">
-            <!-- Welcome Message -->
+            <!-- Bot Introduction -->
             <div class="message message-bot">
-                <div>🤖 Selamat datang di Bot Pulsa Digital!</div>
-                <div style="margin-top: 10px; color: #666; font-size: 13px;">
-                    💡 Sedia layanan PPOB termurah se Indonesia<br>
-                    📱 Pulsa • 📶 Paket Data • ⚡ PLN • 💳 E-Money • 🎮 Voucher Game
+                <div style="font-size: 16px; font-weight: bold; color: #667eea;">🚀 Halo! Saya PulsaBot AI</div>
+                <div style="margin-top: 12px; color: #555; font-size: 13px; line-height: 1.6;">
+                    Asisten digital terpercaya untuk semua kebutuhan pulsa, paket data, dan pembayaran online Anda!
                 </div>
-                <div style="margin-top: 10px; background: #e3f2fd; padding: 8px; border-radius: 8px; font-size: 12px;">
-                    💬 Ketik <strong>"beli pulsa mas"</strong> untuk memulai
+                <div style="margin-top: 15px; background: linear-gradient(135deg, #e3f2fd 0%, #f3e5f5 100%); padding: 12px; border-radius: 15px; border-left: 4px solid #667eea;">
+                    <div style="font-size: 12px; font-weight: bold; color: #667eea; margin-bottom: 8px;">✨ Yang bisa saya bantu:</div>
+                    <div style="font-size: 11px; color: #666; line-height: 1.4;">
+                        🎯 Pulsa All Operator • 🌐 Paket Internet • ⚡ Token PLN<br>
+                        💳 Top Up E-Money • 🎮 Voucher Gaming • 📺 Streaming
+                    </div>
                 </div>
-                <div class="message-time">21:16</div>
+                <div style="margin-top: 12px; text-align: center; font-size: 11px; color: #999;">
+                    💬 Cukup ketik <span style="background: rgba(102, 126, 234, 0.1); padding: 2px 6px; border-radius: 4px; color: #667eea; font-weight: bold;">"beli pulsa mas"</span>
+                </div>
+                <div class="message-time">20:45</div>
             </div>
             
-            <!-- User Start Command -->
+            <!-- User Interaction -->
             <div class="message message-user">
                 <div>beli pulsa mas</div>
-                <div class="message-time">21:17 ✓✓</div>
+                <div class="message-time">20:46 ✓✓</div>
             </div>
             
-            <!-- Main Menu -->
+            <!-- AI Response -->
             <div class="message message-bot">
-                <div>🎯 <strong>Menu Utama Bot Pulsa</strong></div>
-                <div style="margin-top: 12px; color: #555; font-size: 13px; line-height: 1.4;">
-                    Halo! Silakan pilih layanan yang Anda butuhkan:
+                <div style="font-size: 15px; font-weight: bold;">🎪 <span style="background: linear-gradient(135deg, #667eea, #764ba2); -webkit-background-clip: text; -webkit-text-fill-color: transparent;">Wonderful! Mari kita mulai</span></div>
+                <div style="margin-top: 12px; color: #555; font-size: 13px; line-height: 1.5;">
+                    Saya siap membantu Anda! Pilih layanan yang ingin digunakan dari menu interaktif di bawah ini:
                 </div>
                 
                 <div class="menu-buttons">
-                    <button class="menu-btn" onclick="selectMenu('beli_produk')">
-                        🛒 Beli Produk Digital
+                    <button class="menu-btn" onclick="selectMenu('beli_produk')" style="background: linear-gradient(135deg, #ff6b6b 0%, #ee5a24 100%); animation: pulse 2s infinite;">
+                        🎯 Belanja Digital Store
                     </button>
-                    <button class="menu-btn secondary" onclick="selectMenu('cek_saldo')">
-                        💰 Cek Saldo & Mutasi
+                    <button class="menu-btn secondary" onclick="selectMenu('cek_saldo')" style="background: linear-gradient(135deg, #00c9ff 0%, #92fe9d 100%);">
+                        💎 Wallet & History
                     </button>
-                    <button class="menu-btn secondary" onclick="selectMenu('deposit')">
-                        📥 Deposit / Top Up Saldo
+                    <button class="menu-btn secondary" onclick="selectMenu('deposit')" style="background: linear-gradient(135deg, #a8edea 0%, #fed6e3 100%);">
+                        🔋 Power Up Balance
                     </button>
-                    <button class="menu-btn secondary" onclick="selectMenu('bantuan')">
-                        🆘 Bantuan & Info
+                    <button class="menu-btn secondary" onclick="selectMenu('bantuan')" style="background: linear-gradient(135deg, #ffecd2 0%, #fcb69f 100%);">
+                        🛟 Help Center
                     </button>
-                    <button class="menu-btn admin" onclick="selectMenu('admin')" style="margin-top: 10px;">
-                        👑 Admin Panel
+                    <button class="menu-btn admin" onclick="selectMenu('admin')" style="background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); margin-top: 15px;">
+                        ⚡ Admin Command Center
                     </button>
                 </div>
                 
-                <div style="margin-top: 15px; background: #f8f9fa; padding: 10px; border-radius: 8px; font-size: 11px; color: #666;">
-                    ⏰ Online 24/7 • 🚀 Proses Instan • 💯 Terpercaya
+                <div style="margin-top: 20px; background: linear-gradient(135deg, rgba(102, 126, 234, 0.1) 0%, rgba(118, 75, 162, 0.1) 100%); padding: 12px; border-radius: 15px; text-align: center;">
+                    <div style="font-size: 11px; color: #667eea; font-weight: bold; margin-bottom: 5px;">🌟 PREMIUM FEATURES</div>
+                    <div style="font-size: 10px; color: #888; line-height: 1.3;">
+                        ⚡ Lightning Fast • 🛡️ 100% Secure • 🎯 Auto-Process • 💫 24/7 Support
+                    </div>
                 </div>
                 
-                <div class="message-time">21:17</div>
+                <div class="message-time">20:46</div>
             </div>
             
-            <!-- Another user command -->
+            <!-- User Tries Again -->
             <div class="message message-user">
-                <div>beli pulsa mas</div>
-                <div class="message-time">21:23 ✓✓</div>
+                <div>gimana cara belinya?</div>
+                <div class="message-time">20:50 ✓✓</div>
             </div>
             
-            <!-- Product Update Status -->
-            <div class="success-message">
-                ✅ Berhasil mengupdate <?= number_format($products_count) ?> produk dari API Digiflazz!
-                <div class="message-time">21:23</div>
-            </div>
-            
-            <!-- Back Button -->
+            <!-- Enhanced Bot Response -->
             <div class="message message-bot">
-                <button class="menu-btn" onclick="backToMenu()" style="background: #6c757d;">
-                    ⬅️ Kembali
-                </button>
-                <div class="message-time">21:23</div>
+                <div style="font-size: 14px;">🎪 <strong>Super Easy! Ikuti langkah magic ini:</strong></div>
+                <div style="margin-top: 15px;">
+                    <div style="background: linear-gradient(135deg, #ff9a9e 0%, #fecfef 100%); padding: 12px; border-radius: 12px; margin-bottom: 10px; border-left: 4px solid #ff6b6b;">
+                        <div style="font-weight: bold; font-size: 12px; color: #e74c3c; margin-bottom: 5px;">🎯 STEP 1: Pilih Produk</div>
+                        <div style="font-size: 11px; color: #666;">Klik "Belanja Digital Store" → Pilih kategori → Pilih operator</div>
+                    </div>
+                    <div style="background: linear-gradient(135deg, #a8edea 0%, #fed6e3 100%); padding: 12px; border-radius: 12px; margin-bottom: 10px; border-left: 4px solid #00c9ff;">
+                        <div style="font-weight: bold; font-size: 12px; color: #0088cc; margin-bottom: 5px;">💰 STEP 2: Input Nomor</div>
+                        <div style="font-size: 11px; color: #666;">Masukkan nomor HP/ID tujuan dengan benar</div>
+                    </div>
+                    <div style="background: linear-gradient(135deg, #ffecd2 0%, #fcb69f 100%); padding: 12px; border-radius: 12px; border-left: 4px solid #ff9800;">
+                        <div style="font-weight: bold; font-size: 12px; color: #f57c00; margin-bottom: 5px;">⚡ STEP 3: Instant Process</div>
+                        <div style="font-size: 11px; color: #666;">Konfirmasi → Bayar → Selesai dalam detik!</div>
+                    </div>
+                </div>
+                
+                <div style="margin-top: 15px; text-align: center;">
+                    <button class="menu-btn" onclick="selectMenu('beli_produk')" style="background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); animation: bounce 1s infinite;">
+                        🚀 Mulai Belanja Sekarang!
+                    </button>
+                </div>
+                
+                <div class="message-time">20:50</div>
+            </div>
+            
+            <!-- System Update Notification -->
+            <div style="background: linear-gradient(135deg, #d4edda 0%, #c3e6cb 100%); color: #155724; padding: 15px; border-radius: 20px; margin: 10px 0; border: 1px solid rgba(21, 87, 36, 0.2); text-align: center;">
+                <div style="font-size: 13px; font-weight: bold; margin-bottom: 8px;">🎉 System Update Complete!</div>
+                <div style="font-size: 11px; line-height: 1.4;">
+                    ✨ Database refreshed dengan <?= number_format($products_count) ?> produk terbaru<br>
+                    🚀 Performance boost 300% • 🛡️ Security enhanced
+                </div>
+                <div style="font-size: 10px; margin-top: 8px; opacity: 0.8;">Updated: Just now</div>
             </div>
         </div>
         
