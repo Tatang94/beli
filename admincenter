@@ -21,10 +21,36 @@ if (isset($_GET['logout'])) {
 try {
     $pdo = new PDO("sqlite:bot_database.db");
     $pdo->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
-    $stmt = $pdo->query("SELECT COUNT(*) as count FROM products");
-    $products_count = $stmt->fetch()['count'] ?? 0;
+    
+    // Check if products table exists, if not create it
+    $tables_result = $pdo->query("SELECT name FROM sqlite_master WHERE type='table' AND name='products'")->fetchAll();
+    if (empty($tables_result)) {
+        // Create products table if it doesn't exist
+        $pdo->exec("CREATE TABLE IF NOT EXISTS products (
+            id INTEGER PRIMARY KEY AUTOINCREMENT,
+            product_name TEXT NOT NULL,
+            buyer_sku_code TEXT UNIQUE NOT NULL,
+            buyer_product_status TEXT,
+            seller_product_status TEXT,
+            unlimited_stock TEXT,
+            multi TEXT,
+            start_cut_off TEXT,
+            end_cut_off TEXT,
+            desc TEXT,
+            price INTEGER NOT NULL,
+            category TEXT,
+            brand TEXT,
+            type TEXT,
+            status TEXT DEFAULT 'active'
+        )");
+        $products_count = 0;
+    } else {
+        $stmt = $pdo->query("SELECT COUNT(*) as count FROM products");
+        $products_count = $stmt->fetch()['count'] ?? 0;
+    }
 } catch (Exception $e) {
     $products_count = 0;
+    error_log("Database error in admincenter: " . $e->getMessage());
 }
 ?>
 
