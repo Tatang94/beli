@@ -437,9 +437,7 @@ if ($pdo) {
                     <button class="menu-btn secondary" onclick="selectMenu('bantuan')" style="background: linear-gradient(135deg, #ffecd2 0%, #fcb69f 100%);">
                         🛟 Help Center
                     </button>
-                    <button class="menu-btn admin" onclick="selectMenu('admin')" style="background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); margin-top: 15px;">
-                        ⚡ Admin Command Center
-                    </button>
+
                 </div>
                 
                 <div style="margin-top: 20px; background: linear-gradient(135deg, rgba(102, 126, 234, 0.1) 0%, rgba(118, 75, 162, 0.1) 100%); padding: 12px; border-radius: 15px; text-align: center;">
@@ -447,6 +445,12 @@ if ($pdo) {
                     <div style="font-size: 10px; color: #888; line-height: 1.3;">
                         ⚡ Lightning Fast • 🛡️ 100% Secure • 🎯 Auto-Process • 💫 24/7 Support
                     </div>
+                </div>
+                
+                <div style="margin-top: 15px; text-align: center;">
+                    <button onclick="openAdminCenter()" style="background: linear-gradient(135deg, #ff6b6b 0%, #ee5a24 100%); color: white; border: none; padding: 8px 16px; border-radius: 12px; font-size: 11px; font-weight: 600; cursor: pointer; transition: all 0.3s ease;">
+                        ⚡ Admin Center
+                    </button>
                 </div>
                 
                 <div class="message-time">20:46</div>
@@ -697,6 +701,10 @@ if ($pdo) {
             } else {
                 window.location.href = `admin.php?action=${action}`;
             }
+        }
+        
+        function openAdminCenter() {
+            window.location.href = 'admincenter.php';
         }
         
         function backToMenu() {

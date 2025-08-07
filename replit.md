@@ -44,6 +44,11 @@ This is a fully functional Telegram bot for selling digital products (mobile cre
 - Implemented full product browsing, purchase flow, and admin panel
 - All API keys preserved and configured for production deployment
 - Interface designed for mobile-first responsive experience
+- **ADMIN CENTER SEPARATION (August 7, 2025)**: Created dedicated admin panel at /admincenter
+- Separated admin functions from main chat interface for better security
+- Added authentication system with admin access key protection
+- Built comprehensive admin dashboard with statistics and management tools
+- Modern gradient design with secure login and session management
 
 # User Preferences
 
