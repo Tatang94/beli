@@ -72,6 +72,12 @@ This is a fully functional Telegram bot for selling digital products (mobile cre
 - Created statistics.php for comprehensive analytics and reporting
 - Created buyers.php for customer data and transaction analysis
 - Admin panel now focused on core business management functions
+- **FILE ORGANIZATION (August 7, 2025)**: Cleaned up project structure for better organization
+- Moved all PHP files to web_interface/ directory for better separation
+- Removed duplicate and unused files (test_bot.py, simple_bot.py, php_bot folder)
+- Consolidated update_products scripts into single functional version
+- Updated web server to serve from web_interface directory
+- Created clean separation between Python bot and PHP web interface
 
 # User Preferences
 

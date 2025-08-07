@@ -8,7 +8,7 @@ session_start();
 
 // Handle update products request
 if (isset($_POST['update_products'])) {
-    include 'update_products_clean.php';
+    include 'update_products.php';
     $result = updateProductsFromAPI();
     if ($result['success']) {
         $_SESSION['success_message'] = $result['message'];
