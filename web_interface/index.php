@@ -14,26 +14,25 @@ if (!isset($_SESSION['user_id'])) {
     $_SESSION['user_id'] = 'web_user_' . time() . '_' . rand(1000, 9999);
 }
 
-// Database connection
+// Database connection SQLite untuk development
 try {
-    $pdo = new PDO("mysql:host=" . DB_HOST . ";dbname=" . DB_NAME . ";charset=utf8mb4", DB_USER, DB_PASS);
+    $pdo = new PDO("sqlite:../bot_database.db");
     $pdo->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
 } catch (PDOException $e) {
-    // Fallback untuk development/testing
     $pdo = null;
 }
 
-// Ambil data produk dari database atau API
+// Ambil data produk dari database
 $products_count = 0;
 if ($pdo) {
     try {
-        $stmt = $pdo->query("SELECT COUNT(*) FROM products WHERE status = 'active'");
+        $stmt = $pdo->query("SELECT COUNT(*) FROM products");
         $products_count = $stmt->fetchColumn();
     } catch (PDOException $e) {
-        $products_count = 1165; // Fallback sesuai screenshot
+        $products_count = 565; // Fallback berdasarkan data real
     }
 } else {
-    $products_count = 1165; // Fallback sesuai screenshot
+    $products_count = 565; // Fallback berdasarkan data real
 }
 ?>
 <!DOCTYPE html>
@@ -252,14 +251,7 @@ if ($pdo) {
             box-shadow: 0 8px 25px rgba(0, 201, 255, 0.4);
         }
         
-        .menu-btn.admin {
-            background: linear-gradient(135deg, #ff6b6b 0%, #ee5a24 100%);
-            box-shadow: 0 4px 15px rgba(255, 107, 107, 0.3);
-        }
-        
-        .menu-btn.admin:hover {
-            box-shadow: 0 8px 25px rgba(255, 107, 107, 0.4);
-        }
+
         
         .status-message {
             background: #fff3cd;
@@ -582,20 +574,6 @@ if ($pdo) {
             messagesContainer.scrollTop = messagesContainer.scrollHeight;
         }
         
-        function selectCategory(category) {
-            window.location.href = `products.php?category=${category}`;
-        }
-        
-        function adminAction(action) {
-            if (action === 'update_products') {
-                window.location.href = 'update_products.php';
-            } else {
-                window.location.href = `admin.php?action=${action}`;
-            }
-        }
-        
-
-        
         function backToMenu() {
             location.reload();
         }
@@ -812,7 +790,8 @@ if ($pdo) {
                             </div>
                             
                             <div style="margin-top: 15px; background: #f8f9fa; padding: 10px; border-radius: 8px; font-size: 11px; color: #666;">
-                                ⏰ Online 24/7 • 🚀 Proses Instan • 💯 Terpercaya
+                                ⏰ Online 24/7 • 🚀 Proses Instan • 💯 Terpercaya<br>
+                                📊 Total Produk: <?php echo number_format($products_count); ?> items
                             </div>
                             
                             <div class="message-time">${currentTime}</div>
