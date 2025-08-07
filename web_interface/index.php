@@ -454,12 +454,12 @@ if ($pdo) {
                                 Silakan pilih kategori produk yang ingin Anda beli:
                             </div>
                             <div class="menu-buttons" style="margin-top: 15px;">
-                                <button class="menu-btn" onclick="selectCategory('pulsa')">📱 Pulsa Reguler</button>
-                                <button class="menu-btn" onclick="selectCategory('paket_data')">📶 Paket Internet</button>
-                                <button class="menu-btn" onclick="selectCategory('pln')">⚡ Token PLN</button>
-                                <button class="menu-btn" onclick="selectCategory('emoney')">💳 E-Money & QRIS</button>
-                                <button class="menu-btn" onclick="selectCategory('game')">🎮 Voucher Game</button>
-                                <button class="menu-btn" onclick="selectCategory('streaming')">📺 Voucher Streaming</button>
+                                <button class="menu-btn" onclick="selectCategory('pulsa')">📱 Pulsa Reguler (193 produk)</button>
+                                <button class="menu-btn" onclick="selectCategory('data')">📶 Paket Internet (161 produk)</button>
+                                <button class="menu-btn" onclick="selectCategory('pln')">⚡ Token PLN (2 produk)</button>
+                                <button class="menu-btn" onclick="selectCategory('emoney')">💳 E-Money & QRIS (105 produk)</button>
+                                <button class="menu-btn" onclick="selectCategory('games')">🎮 Voucher Game (78 produk)</button>
+                                <button class="menu-btn" onclick="selectCategory('voucher')">📺 Voucher Digital (8 produk)</button>
                                 <button class="menu-btn secondary" onclick="window.location.href='pascabayar.php'">💳 Pascabayar & Tagihan</button>
                             </div>
                             <div style="margin-top: 15px; background: #fff3cd; padding: 10px; border-radius: 8px; font-size: 12px; color: #856404;">
@@ -842,6 +842,198 @@ if ($pdo) {
                 
                 messagesContainer.scrollTop = messagesContainer.scrollHeight;
             }
+        }
+        
+        function selectCategory(category) {
+            const messagesContainer = document.querySelector('.chat-messages');
+            const currentTime = new Date().toLocaleTimeString('id-ID', {hour: '2-digit', minute:'2-digit'});
+            
+            // Add user selection message
+            const userMessage = document.createElement('div');
+            userMessage.className = 'message message-user';
+            
+            let categoryName = '';
+            switch(category) {
+                case 'pulsa': categoryName = '📱 Pulsa Reguler'; break;
+                case 'data': categoryName = '📶 Paket Internet'; break;
+                case 'pln': categoryName = '⚡ Token PLN'; break;
+                case 'emoney': categoryName = '💳 E-Money & QRIS'; break;
+                case 'games': categoryName = '🎮 Voucher Game'; break;
+                case 'voucher': categoryName = '📺 Voucher Digital'; break;
+            }
+            
+            userMessage.innerHTML = `
+                <div>${categoryName}</div>
+                <div class="message-time">${currentTime} ✓✓</div>
+            `;
+            messagesContainer.appendChild(userMessage);
+            
+            // Add bot response with organized brands
+            setTimeout(() => {
+                const botMessage = document.createElement('div');
+                botMessage.className = 'message message-bot';
+                
+                let responseContent = '';
+                
+                if (category === 'pulsa') {
+                    responseContent = `
+                        <div>📱 <strong>Pulsa Reguler - Pilih Operator</strong></div>
+                        <div style="margin-top: 12px; color: #555; font-size: 13px; line-height: 1.4;">
+                            Silakan pilih operator seluler:
+                        </div>
+                        <div class="menu-buttons" style="margin-top: 15px;">
+                            <button class="menu-btn" onclick="window.location.href='products.php?category=pulsa&search=Telkomsel'">
+                                🔴 Telkomsel <span style="font-size: 11px; opacity: 0.8;">(166 produk)</span>
+                            </button>
+                            <button class="menu-btn" onclick="window.location.href='products.php?category=pulsa&search=Indosat'">
+                                🟡 Indosat <span style="font-size: 11px; opacity: 0.8;">(78 produk)</span>
+                            </button>
+                            <button class="menu-btn" onclick="window.location.href='products.php?category=pulsa&search=Tri'">
+                                🔵 Tri <span style="font-size: 11px; opacity: 0.8;">(40 produk)</span>
+                            </button>
+                            <button class="menu-btn" onclick="window.location.href='products.php?category=pulsa&search=Smartfren'">
+                                🟣 Smartfren <span style="font-size: 11px; opacity: 0.8;">(37 produk)</span>
+                            </button>
+                            <button class="menu-btn" onclick="window.location.href='products.php?category=pulsa&search=XL'">
+                                🔷 XL <span style="font-size: 11px; opacity: 0.8;">(36 produk)</span>
+                            </button>
+                            <button class="menu-btn" onclick="window.location.href='products.php?category=pulsa&search=Axis'">
+                                ⚫ Axis <span style="font-size: 11px; opacity: 0.8;">(17 produk)</span>
+                            </button>
+                        </div>
+                    `;
+                } else if (category === 'data') {
+                    responseContent = `
+                        <div>📶 <strong>Paket Internet - Pilih Operator</strong></div>
+                        <div style="margin-top: 12px; color: #555; font-size: 13px; line-height: 1.4;">
+                            Pilih operator untuk paket internet:
+                        </div>
+                        <div class="menu-buttons" style="margin-top: 15px;">
+                            <button class="menu-btn" onclick="window.location.href='products.php?category=data&search=Telkomsel'">
+                                🔴 Telkomsel Data <span style="font-size: 11px; opacity: 0.8;">(105 produk)</span>
+                            </button>
+                            <button class="menu-btn" onclick="window.location.href='products.php?category=data&search=Tri'">
+                                🔵 Tri Data <span style="font-size: 11px; opacity: 0.8;">(90 produk)</span>
+                            </button>
+                            <button class="menu-btn" onclick="window.location.href='products.php?category=data&search=Indosat'">
+                                🟡 Indosat Data <span style="font-size: 11px; opacity: 0.8;">(63 produk)</span>
+                            </button>
+                            <button class="menu-btn" onclick="window.location.href='products.php?category=data&search=Axis'">
+                                ⚫ Axis Data <span style="font-size: 11px; opacity: 0.8;">(38 produk)</span>
+                            </button>
+                            <button class="menu-btn" onclick="window.location.href='products.php?category=data&search=Smartfren'">
+                                🟣 Smartfren Data <span style="font-size: 11px; opacity: 0.8;">(27 produk)</span>
+                            </button>
+                            <button class="menu-btn" onclick="window.location.href='products.php?category=data&search=XL'">
+                                🔷 XL Data <span style="font-size: 11px; opacity: 0.8;">(14 produk)</span>
+                            </button>
+                        </div>
+                    `;
+                } else if (category === 'emoney') {
+                    responseContent = `
+                        <div>💳 <strong>E-Money & Digital Wallet</strong></div>
+                        <div style="margin-top: 12px; color: #555; font-size: 13px; line-height: 1.4;">
+                            Pilih platform pembayaran digital:
+                        </div>
+                        <div class="menu-buttons" style="margin-top: 15px;">
+                            <button class="menu-btn" onclick="window.location.href='products.php?category=emoney&search=GoPay'">
+                                💚 GoPay <span style="font-size: 11px; opacity: 0.8;">(8 produk)</span>
+                            </button>
+                            <button class="menu-btn" onclick="window.location.href='products.php?category=emoney&search=OVO'">
+                                🟣 OVO <span style="font-size: 11px; opacity: 0.8;">(8 produk)</span>
+                            </button>
+                            <button class="menu-btn" onclick="window.location.href='products.php?category=emoney&search=DANA'">
+                                💙 DANA <span style="font-size: 11px; opacity: 0.8;">(8 produk)</span>
+                            </button>
+                            <button class="menu-btn" onclick="window.location.href='products.php?category=emoney&search=LinkAja'">
+                                ❤️ LinkAja <span style="font-size: 11px; opacity: 0.8;">(8 produk)</span>
+                            </button>
+                            <button class="menu-btn" onclick="window.location.href='products.php?category=emoney&search=ShopeePay'">
+                                🧡 ShopeePay <span style="font-size: 11px; opacity: 0.8;">(8 produk)</span>
+                            </button>
+                            <button class="menu-btn secondary" onclick="window.location.href='products.php?category=emoney'">📋 Lihat Semua E-Money</button>
+                        </div>
+                    `;
+                } else if (category === 'games') {
+                    responseContent = `
+                        <div>🎮 <strong>Voucher Game - Pilih Game</strong></div>
+                        <div style="margin-top: 12px; color: #555; font-size: 13px; line-height: 1.4;">
+                            Pilih game favorit Anda:
+                        </div>
+                        <div class="menu-buttons" style="margin-top: 15px;">
+                            <button class="menu-btn" onclick="window.location.href='products.php?category=games&search=Mobile+Legends'">
+                                ⚔️ Mobile Legends <span style="font-size: 11px; opacity: 0.8;">(29 produk)</span>
+                            </button>
+                            <button class="menu-btn" onclick="window.location.href='products.php?category=games&search=Free+Fire'">
+                                🔥 Free Fire <span style="font-size: 11px; opacity: 0.8;">(23 produk)</span>
+                            </button>
+                            <button class="menu-btn" onclick="window.location.href='products.php?category=games&search=PUBG'">
+                                🎯 PUBG Mobile <span style="font-size: 11px; opacity: 0.8;">(14 produk)</span>
+                            </button>
+                            <button class="menu-btn" onclick="window.location.href='products.php?category=games&search=Valorant'">
+                                💥 Valorant <span style="font-size: 11px; opacity: 0.8;">(8 produk)</span>
+                            </button>
+                            <button class="menu-btn secondary" onclick="window.location.href='products.php?category=games'">🕹️ Lihat Semua Game</button>
+                        </div>
+                    `;
+                } else {
+                    // Default redirect to products page
+                    responseContent = `
+                        <div>📋 <strong>Produk ${categoryName}</strong></div>
+                        <div style="margin-top: 12px; color: #555; font-size: 13px; line-height: 1.4;">
+                            Mengarahkan ke halaman produk...
+                        </div>
+                        <div class="menu-buttons" style="margin-top: 15px;">
+                            <button class="menu-btn" onclick="window.location.href='products.php?category=${category}'">📋 Lihat Semua Produk</button>
+                        </div>
+                    `;
+                }
+                
+                responseContent += `<div class="message-time">${currentTime}</div>`;
+                
+                botMessage.innerHTML = responseContent;
+                messagesContainer.appendChild(botMessage);
+                messagesContainer.scrollTop = messagesContainer.scrollHeight;
+            }, 1000);
+            
+            messagesContainer.scrollTop = messagesContainer.scrollHeight;
+        }
+        
+        function backToMenu() {
+            const messagesContainer = document.querySelector('.chat-messages');
+            const currentTime = new Date().toLocaleTimeString('id-ID', {hour: '2-digit', minute:'2-digit'});
+            
+            const botMessage = document.createElement('div');
+            botMessage.className = 'message message-bot';
+            botMessage.innerHTML = `
+                <div>🏠 <strong>Menu Utama Bot Pulsa</strong></div>
+                <div style="margin-top: 12px; color: #555; font-size: 13px; line-height: 1.4;">
+                    Silakan pilih layanan yang Anda butuhkan:
+                </div>
+                
+                <div class="menu-buttons" style="margin-top: 15px;">
+                    <button class="menu-btn" onclick="selectMenu('beli_produk')">
+                        🛒 Beli Produk Digital
+                    </button>
+                    <button class="menu-btn secondary" onclick="selectMenu('cek_saldo')">
+                        💰 Cek Saldo & Mutasi
+                    </button>
+                    <button class="menu-btn secondary" onclick="selectMenu('deposit')">
+                        📥 Deposit / Top Up Saldo
+                    </button>
+                    <button class="menu-btn secondary" onclick="selectMenu('bantuan')">
+                        🆘 Bantuan & Info
+                    </button>
+                </div>
+                
+                <div style="margin-top: 15px; background: #f8f9fa; padding: 10px; border-radius: 8px; font-size: 11px; color: #666;">
+                    ⏰ Online 24/7 • 🚀 Proses Instan • 💯 Terpercaya
+                </div>
+                
+                <div class="message-time">${currentTime}</div>
+            `;
+            messagesContainer.appendChild(botMessage);
+            messagesContainer.scrollTop = messagesContainer.scrollHeight;
         }
         
         // Enter key support
