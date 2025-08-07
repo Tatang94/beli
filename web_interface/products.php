@@ -353,15 +353,27 @@ $category_names = [
                 <select name="category" class="filter-select" onchange="this.form.submit()">
                     <option value="all" <?= $category == 'all' ? 'selected' : '' ?>>Semua Kategori</option>
                     <option value="pulsa" <?= $category == 'pulsa' ? 'selected' : '' ?>>Pulsa</option>
-                    <option value="paket_data" <?= $category == 'paket_data' ? 'selected' : '' ?>>Paket Data</option>
-                    <option value="pln" <?= $category == 'pln' ? 'selected' : '' ?>>PLN</option>
+                    <option value="data" <?= $category == 'data' ? 'selected' : '' ?>>Data</option>
+                    <option value="games" <?= $category == 'games' ? 'selected' : '' ?>>Games</option>
+                    <option value="voucher" <?= $category == 'voucher' ? 'selected' : '' ?>>Voucher</option>
                     <option value="emoney" <?= $category == 'emoney' ? 'selected' : '' ?>>E-Money</option>
-                    <option value="game" <?= $category == 'game' ? 'selected' : '' ?>>Voucher Game</option>
-                    <option value="streaming" <?= $category == 'streaming' ? 'selected' : '' ?>>TV & Streaming</option>
-                    <option value="bpjs" <?= $category == 'bpjs' ? 'selected' : '' ?>>BPJS</option>
-                    <option value="pdam" <?= $category == 'pdam' ? 'selected' : '' ?>>PDAM</option>
-                    <option value="multifinance" <?= $category == 'multifinance' ? 'selected' : '' ?>>Multifinance</option>
-                    <option value="internet_provider" <?= $category == 'internet_provider' ? 'selected' : '' ?>>Internet Provider</option>
+                    <option value="pln" <?= $category == 'pln' ? 'selected' : '' ?>>PLN</option>
+                    <option value="china_topup" <?= $category == 'china_topup' ? 'selected' : '' ?>>China TOPUP</option>
+                    <option value="malaysia_topup" <?= $category == 'malaysia_topup' ? 'selected' : '' ?>>Malaysia TOPUP</option>
+                    <option value="philippines_topup" <?= $category == 'philippines_topup' ? 'selected' : '' ?>>Philippines TOPUP</option>
+                    <option value="singapore_topup" <?= $category == 'singapore_topup' ? 'selected' : '' ?>>Singapore TOPUP</option>
+                    <option value="thailand_topup" <?= $category == 'thailand_topup' ? 'selected' : '' ?>>Thailand TOPUP</option>
+                    <option value="paket_sms_telpon" <?= $category == 'paket_sms_telpon' ? 'selected' : '' ?>>Paket SMS & Telpon</option>
+                    <option value="vietnam_topup" <?= $category == 'vietnam_topup' ? 'selected' : '' ?>>Vietnam TOPUP</option>
+                    <option value="streaming" <?= $category == 'streaming' ? 'selected' : '' ?>>Streaming</option>
+                    <option value="tv" <?= $category == 'tv' ? 'selected' : '' ?>>TV</option>
+                    <option value="aktivasi_voucher" <?= $category == 'aktivasi_voucher' ? 'selected' : '' ?>>Aktivasi Voucher</option>
+                    <option value="masa_aktif" <?= $category == 'masa_aktif' ? 'selected' : '' ?>>Masa Aktif</option>
+                    <option value="bundling" <?= $category == 'bundling' ? 'selected' : '' ?>>Bundling</option>
+                    <option value="aktivasi_perdana" <?= $category == 'aktivasi_perdana' ? 'selected' : '' ?>>Aktivasi Perdana</option>
+                    <option value="gas" <?= $category == 'gas' ? 'selected' : '' ?>>Gas</option>
+                    <option value="esim" <?= $category == 'esim' ? 'selected' : '' ?>>eSIM</option>
+                    <option value="media_sosial" <?= $category == 'media_sosial' ? 'selected' : '' ?>>Media Sosial</option>
                     <option value="lainnya" <?= $category == 'lainnya' ? 'selected' : '' ?>>Lainnya</option>
                 </select>
                 <input type="text" name="search" class="search-input" placeholder="Cari produk..." value="<?= htmlspecialchars($search) ?>">
