@@ -591,7 +591,7 @@ $current_category_name = $category_names[$category] ?? 'Produk';
         
         function selectProduct(code, name, price) {
             if (confirm(`Pilih produk: ${name}\nHarga: Rp ${price.toLocaleString('id-ID')}\n\nLanjutkan ke pembelian?`)) {
-                window.location.href = `purchase.php?product=${code}`;
+                window.location.href = `mobile_purchase.php?product=${code}`;
             }
         }
         
