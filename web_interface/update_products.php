@@ -215,17 +215,8 @@ function extractBrand($product_name) {
     return 'Lainnya';
 }
 
-function updateProductsFromAPI() {
-    $username = DIGIFLAZZ_USERNAME;
-    $api_key = DIGIFLAZZ_KEY;
-    $sign = md5($username . $api_key . 'pricelist');
-    
-    $data = [
-        'cmd' => 'prepaid',
-        'username' => $username,
-        'sign' => $sign
-    ];
-    
+// Fungsi untuk mengambil data dari API
+function fetchApiData($data) {
     $ch = curl_init();
     curl_setopt($ch, CURLOPT_URL, 'https://api.digiflazz.com/v1/price-list');
     curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
@@ -242,14 +233,52 @@ function updateProductsFromAPI() {
     $http_code = curl_getinfo($ch, CURLINFO_HTTP_CODE);
     curl_close($ch);
     
-    if ($http_code !== 200) {
-        return ['success' => false, 'message' => 'HTTP Error: ' . $http_code];
+    return ['response' => $response, 'http_code' => $http_code];
+}
+
+function updateProductsFromAPI() {
+    $username = DIGIFLAZZ_USERNAME;
+    $api_key = DIGIFLAZZ_KEY;
+    $sign = md5($username . $api_key . 'pricelist');
+    
+    // Ambil produk prepaid dan pascabayar
+    $data_prepaid = [
+        'cmd' => 'prepaid',
+        'username' => $username,
+        'sign' => $sign
+    ];
+    
+    $data_postpaid = [
+        'cmd' => 'pasca',
+        'username' => $username,
+        'sign' => $sign
+    ];
+
+    
+    // Ambil produk prepaid
+    $prepaid_result = fetchApiData($data_prepaid);
+    if ($prepaid_result['http_code'] !== 200) {
+        return ['success' => false, 'message' => 'HTTP Error untuk prepaid: ' . $prepaid_result['http_code']];
     }
     
-    $result = json_decode($response, true);
-    if (!$result || !isset($result['data'])) {
-        return ['success' => false, 'message' => 'Invalid API response'];
+    $prepaid_data = json_decode($prepaid_result['response'], true);
+    if (!$prepaid_data || !isset($prepaid_data['data'])) {
+        return ['success' => false, 'message' => 'Invalid API response untuk prepaid'];
     }
+    
+    // Ambil produk pascabayar
+    $postpaid_result = fetchApiData($data_postpaid);
+    $postpaid_data = ['data' => []]; // Default jika gagal
+    
+    if ($postpaid_result['http_code'] === 200) {
+        $temp_postpaid = json_decode($postpaid_result['response'], true);
+        if ($temp_postpaid && isset($temp_postpaid['data'])) {
+            $postpaid_data = $temp_postpaid;
+        }
+    }
+    
+    // Gabungkan data prepaid dan pascabayar
+    $all_products = array_merge($prepaid_data['data'], $postpaid_data['data']);
     
     try {
         $pdo = new PDO("sqlite:../bot_database.db");
@@ -274,7 +303,7 @@ function updateProductsFromAPI() {
             (name, price, digiflazz_code, brand, type, seller, description) 
             VALUES (?, ?, ?, ?, ?, ?, ?)");
         
-        foreach ($result['data'] as $product) {
+        foreach ($all_products as $product) {
             // Hanya ambil produk yang aktif dan tersedia untuk dijual
             if ($product['buyer_product_status'] !== true || 
                 $product['seller_product_status'] !== true) {
@@ -299,8 +328,10 @@ function updateProductsFromAPI() {
         
         return [
             'success' => true, 
-            'message' => "Berhasil mengupdate {$insert_count} produk dari API Digiflazz",
-            'total_products' => $insert_count
+            'message' => "Berhasil mengupdate {$insert_count} produk (prepaid + pascabayar) dari API Digiflazz",
+            'total_products' => $insert_count,
+            'prepaid_count' => count($prepaid_data['data']),
+            'postpaid_count' => count($postpaid_data['data'])
         ];
         
     } catch (Exception $e) {

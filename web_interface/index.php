@@ -428,6 +428,9 @@ if ($pdo) {
                 case 'bantuan':
                     menuText = '🆘 Bantuan & Info';
                     break;
+                case 'pascabayar':
+                    menuText = '💳 Pascabayar & Tagihan';
+                    break;
 
             }
             
@@ -457,6 +460,7 @@ if ($pdo) {
                                 <button class="menu-btn" onclick="selectCategory('emoney')">💳 E-Money & QRIS</button>
                                 <button class="menu-btn" onclick="selectCategory('game')">🎮 Voucher Game</button>
                                 <button class="menu-btn" onclick="selectCategory('streaming')">📺 Voucher Streaming</button>
+                                <button class="menu-btn secondary" onclick="window.location.href='pascabayar.php'">💳 Pascabayar & Tagihan</button>
                             </div>
                             <div style="margin-top: 15px; background: #fff3cd; padding: 10px; border-radius: 8px; font-size: 12px; color: #856404;">
                                 💡 <strong>Tips:</strong> Pastikan nomor tujuan sudah benar sebelum melakukan pembelian
@@ -545,6 +549,25 @@ if ($pdo) {
                             
                             <div style="margin-top: 15px; background: #fff3cd; padding: 10px; border-radius: 8px; font-size: 11px; color: #856404;">
                                 💡 <strong>Tips:</strong> Jika mengalami masalah transaksi, siapkan bukti transfer dan nomor referensi
+                            </div>
+                        `;
+                        break;
+                    case 'pascabayar':
+                        responseContent = `
+                            <div>💳 <strong>Layanan Pascabayar & Tagihan</strong></div>
+                            <div style="margin-top: 12px; color: #555; font-size: 13px; line-height: 1.4;">
+                                Bayar tagihan bulanan dengan mudah dan cepat:
+                            </div>
+                            <div class="menu-buttons" style="margin-top: 15px;">
+                                <button class="menu-btn" onclick="window.location.href='pascabayar.php?category=pln_pascabayar'">⚡ PLN Pascabayar</button>
+                                <button class="menu-btn" onclick="window.location.href='pascabayar.php?category=pdam'">💧 PDAM / Air</button>
+                                <button class="menu-btn" onclick="window.location.href='pascabayar.php?category=hp_pascabayar'">📱 Telepon Pascabayar</button>
+                                <button class="menu-btn" onclick="window.location.href='pascabayar.php?category=internet_pascabayar'">🌐 Internet Pascabayar</button>
+                                <button class="menu-btn" onclick="window.location.href='pascabayar.php?category=bpjs_kesehatan'">🏥 BPJS Kesehatan</button>
+                                <button class="menu-btn secondary" onclick="window.location.href='pascabayar.php'">📋 Lihat Semua Pascabayar</button>
+                            </div>
+                            <div style="margin-top: 15px; background: #e3f2fd; padding: 10px; border-radius: 8px; font-size: 12px; color: #1976d2;">
+                                ℹ️ <strong>Info:</strong> Pascabayar adalah layanan bayar setelah pakai, seperti listrik PLN, air PDAM, telepon rumah, dll.
                             </div>
                         `;
                         break;
