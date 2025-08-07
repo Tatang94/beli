@@ -319,8 +319,6 @@ $category_names = [
         </div>
         
         <div class="content">
-            <a href="admincenter.php" class="back-btn">⬅️ Kembali ke Admin Panel</a>
-            
             <?php if (isset($_SESSION['success_message'])): ?>
                 <div class="alert alert-success">
                     <?= htmlspecialchars($_SESSION['success_message']) ?>
@@ -334,16 +332,6 @@ $category_names = [
                 </div>
                 <?php unset($_SESSION['error_message']); ?>
             <?php endif; ?>
-            
-            <div class="update-section">
-                <h4>📦 Ambil Produk dari API Digiflazz</h4>
-                <p>Klik tombol di bawah untuk mengambil daftar produk terbaru dari API Digiflazz.</p>
-                <form method="post" style="display: inline;">
-                    <button type="submit" name="update_products" class="update-btn" onclick="return confirm('Yakin ingin mengupdate produk? Ini akan mengganti semua produk yang ada.')">
-                        🔄 Update Produk Sekarang
-                    </button>
-                </form>
-            </div>
             
             <div class="stats">
                 📊 Total produk dalam database: <strong><?= number_format($total_products) ?></strong>
@@ -416,7 +404,7 @@ $category_names = [
                 <?php else: ?>
                     <div class="no-products">
                         <h3>📭 Belum Ada Produk</h3>
-                        <p>Klik tombol "Update Produk Sekarang" di atas untuk mengambil produk dari API Digiflazz.</p>
+                        <p>Belum ada produk di kategori ini.</p>
                     </div>
                 <?php endif; ?>
             </div>
