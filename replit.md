@@ -56,6 +56,12 @@ This is a fully functional Telegram bot for selling digital products (mobile cre
 - **ADMIN ACCESS SEPARATION**: Completely removed all admin panel buttons from main chat
 - Admin access exclusively through direct URL: /admincenter
 - Clean user interface without any admin references or buttons
+- **ADMIN MENU CUSTOMIZATION (August 7, 2025)**: Updated admin panel menu per user request
+- Changed menu items to: Ambil List Produk, Atur Margin, Lihat Statistics, Jumlah Pembeli
+- Created margin.php for managing profit margins by category
+- Created statistics.php for comprehensive analytics and reporting
+- Created buyers.php for customer data and transaction analysis
+- Admin panel now focused on core business management functions
 
 # User Preferences
 

@@ -318,35 +318,35 @@ try {
                 </div>
                 
                 <div class="admin-menu">
-                    <a href="update_products.php" class="menu-item">
-                        <div class="menu-icon">🔄</div>
-                        <div class="menu-text">
-                            <div class="menu-title">Update Database Produk</div>
-                            <div class="menu-desc">Sinkronisasi produk terbaru dari Digiflazz API untuk memperbarui daftar dan harga produk</div>
-                        </div>
-                    </a>
-                    
                     <a href="products.php" class="menu-item">
-                        <div class="menu-icon">📦</div>
+                        <div class="menu-icon">📋</div>
                         <div class="menu-text">
-                            <div class="menu-title">Kelola Produk & Kategori</div>
-                            <div class="menu-desc">Lihat, edit, dan atur produk berdasarkan kategori, brand, dan tipe produk</div>
+                            <div class="menu-title">Ambil List Produk</div>
+                            <div class="menu-desc">Lihat dan kelola daftar lengkap produk yang tersedia</div>
                         </div>
                     </a>
                     
-                    <a href="#" class="menu-item" onclick="alert('Fitur statistik akan segera hadir')">
+                    <a href="margin.php" class="menu-item">
+                        <div class="menu-icon">💰</div>
+                        <div class="menu-text">
+                            <div class="menu-title">Atur Margin</div>
+                            <div class="menu-desc">Kelola margin keuntungan untuk setiap kategori produk</div>
+                        </div>
+                    </a>
+                    
+                    <a href="statistics.php" class="menu-item">
                         <div class="menu-icon">📊</div>
                         <div class="menu-text">
-                            <div class="menu-title">Statistik & Laporan</div>
-                            <div class="menu-desc">Monitor transaksi, pendapatan, dan analisis penggunaan bot</div>
+                            <div class="menu-title">Lihat Statistics</div>
+                            <div class="menu-desc">Monitor transaksi, pendapatan, dan analisis penjualan</div>
                         </div>
                     </a>
                     
-                    <a href="#" class="menu-item" onclick="alert('Fitur broadcast akan segera hadir')">
-                        <div class="menu-icon">📢</div>
+                    <a href="buyers.php" class="menu-item">
+                        <div class="menu-icon">👥</div>
                         <div class="menu-text">
-                            <div class="menu-title">Broadcast Message</div>
-                            <div class="menu-desc">Kirim pengumuman atau promo ke semua pengguna bot</div>
+                            <div class="menu-title">Jumlah Pembeli</div>
+                            <div class="menu-desc">Data pembeli dan aktivitas transaksi pengguna</div>
                         </div>
                     </a>
                 </div>
