@@ -7,20 +7,109 @@ require_once 'config.php';
 
 function categorizeProduct($product_name) {
     $name_lower = strtolower($product_name);
-    if (strpos($name_lower, 'pulsa') !== false) return 'pulsa';
-    if (strpos($name_lower, 'data') !== false) return 'paket_data';
-    if (strpos($name_lower, 'pln') !== false) return 'pln';
-    if (strpos($name_lower, 'ovo') !== false || strpos($name_lower, 'dana') !== false) return 'emoney';
-    if (strpos($name_lower, 'game') !== false) return 'game';
+    
+    // Pulsa & Kredit
+    if (strpos($name_lower, 'pulsa') !== false || 
+        strpos($name_lower, 'kredit') !== false ||
+        strpos($name_lower, 'regular') !== false) return 'pulsa';
+    
+    // Paket Data & Internet
+    if (strpos($name_lower, 'data') !== false || 
+        strpos($name_lower, 'internet') !== false ||
+        strpos($name_lower, 'kuota') !== false ||
+        strpos($name_lower, 'unlimited') !== false) return 'paket_data';
+    
+    // PLN & Listrik
+    if (strpos($name_lower, 'pln') !== false || 
+        strpos($name_lower, 'listrik') !== false ||
+        strpos($name_lower, 'token') !== false) return 'pln';
+    
+    // E-Wallet & E-Money
+    if (strpos($name_lower, 'ovo') !== false || 
+        strpos($name_lower, 'dana') !== false ||
+        strpos($name_lower, 'gopay') !== false ||
+        strpos($name_lower, 'shopee') !== false ||
+        strpos($name_lower, 'link') !== false ||
+        strpos($name_lower, 'jenius') !== false ||
+        strpos($name_lower, 'sakuku') !== false ||
+        strpos($name_lower, 'tcash') !== false ||
+        strpos($name_lower, 'doku') !== false ||
+        strpos($name_lower, 'grab') !== false ||
+        strpos($name_lower, 'gojek') !== false) return 'emoney';
+    
+    // Gaming & Voucher Game
+    if (strpos($name_lower, 'game') !== false || 
+        strpos($name_lower, 'mobile legends') !== false ||
+        strpos($name_lower, 'ml') !== false ||
+        strpos($name_lower, 'pubg') !== false ||
+        strpos($name_lower, 'free fire') !== false ||
+        strpos($name_lower, 'valorant') !== false ||
+        strpos($name_lower, 'steam') !== false ||
+        strpos($name_lower, 'garena') !== false ||
+        strpos($name_lower, 'diamond') !== false ||
+        strpos($name_lower, 'uc') !== false ||
+        strpos($name_lower, 'voucher') !== false) return 'game';
+    
+    // TV & Streaming
+    if (strpos($name_lower, 'tv') !== false || 
+        strpos($name_lower, 'netflix') !== false ||
+        strpos($name_lower, 'disney') !== false ||
+        strpos($name_lower, 'spotify') !== false ||
+        strpos($name_lower, 'youtube') !== false ||
+        strpos($name_lower, 'vidio') !== false ||
+        strpos($name_lower, 'viu') !== false ||
+        strpos($name_lower, 'iflix') !== false) return 'streaming';
+    
+    // BPJS & Asuransi
+    if (strpos($name_lower, 'bpjs') !== false || 
+        strpos($name_lower, 'asuransi') !== false ||
+        strpos($name_lower, 'kesehatan') !== false) return 'bpjs';
+    
+    // PDAM & Air
+    if (strpos($name_lower, 'pdam') !== false || 
+        strpos($name_lower, 'air') !== false) return 'pdam';
+    
+    // Cicilan & Multifinance
+    if (strpos($name_lower, 'cicilan') !== false || 
+        strpos($name_lower, 'finance') !== false ||
+        strpos($name_lower, 'kredit') !== false) return 'multifinance';
+    
+    // Internet & WiFi Provider
+    if (strpos($name_lower, 'wifi') !== false || 
+        strpos($name_lower, 'internet') !== false ||
+        strpos($name_lower, 'indihome') !== false ||
+        strpos($name_lower, 'biznet') !== false ||
+        strpos($name_lower, 'mnc') !== false ||
+        strpos($name_lower, 'first') !== false) return 'internet_provider';
+    
     return 'lainnya';
 }
 
 function extractBrand($product_name) {
     $name_lower = strtolower($product_name);
-    $brands = ['telkomsel', 'indosat', 'xl', 'tri', 'smartfren', 'axis', 'pln'];
+    
+    // Provider Seluler
+    $brands = [
+        'telkomsel', 'indosat', 'xl', 'tri', 'three', 'smartfren', 'axis', 'by.u',
+        'pln', 'ovo', 'dana', 'gopay', 'shopeepay', 'linkaja', 'jenius', 'sakuku',
+        'mobile legends', 'pubg', 'free fire', 'valorant', 'steam', 'garena',
+        'netflix', 'disney', 'spotify', 'youtube', 'vidio', 'viu', 'iflix',
+        'grab', 'gojek', 'uber', 'maxim', 'bpjs', 'pdam', 'indihome', 'biznet',
+        'mnc', 'first media', 'myrepublic', 'oxygen', 'cbr', 'iconnet'
+    ];
+    
     foreach ($brands as $brand) {
-        if (strpos($name_lower, $brand) !== false) return ucfirst($brand);
+        if (strpos($name_lower, $brand) !== false) {
+            return ucwords($brand);
+        }
     }
+    
+    // Ekstrak brand dari awal nama produk jika tidak ditemukan
+    $words = explode(' ', $product_name);
+    if (count($words) > 0) {
+        return ucfirst(strtolower($words[0]));
+    }
+    
     return 'Lainnya';
 }
 

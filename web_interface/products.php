@@ -356,7 +356,13 @@ $category_names = [
                     <option value="paket_data" <?= $category == 'paket_data' ? 'selected' : '' ?>>Paket Data</option>
                     <option value="pln" <?= $category == 'pln' ? 'selected' : '' ?>>PLN</option>
                     <option value="emoney" <?= $category == 'emoney' ? 'selected' : '' ?>>E-Money</option>
-                    <option value="game" <?= $category == 'game' ? 'selected' : '' ?>>Game</option>
+                    <option value="game" <?= $category == 'game' ? 'selected' : '' ?>>Voucher Game</option>
+                    <option value="streaming" <?= $category == 'streaming' ? 'selected' : '' ?>>TV & Streaming</option>
+                    <option value="bpjs" <?= $category == 'bpjs' ? 'selected' : '' ?>>BPJS</option>
+                    <option value="pdam" <?= $category == 'pdam' ? 'selected' : '' ?>>PDAM</option>
+                    <option value="multifinance" <?= $category == 'multifinance' ? 'selected' : '' ?>>Multifinance</option>
+                    <option value="internet_provider" <?= $category == 'internet_provider' ? 'selected' : '' ?>>Internet Provider</option>
+                    <option value="lainnya" <?= $category == 'lainnya' ? 'selected' : '' ?>>Lainnya</option>
                 </select>
                 <input type="text" name="search" class="search-input" placeholder="Cari produk..." value="<?= htmlspecialchars($search) ?>">
                 <button type="submit" class="update-btn">🔍 Cari</button>
