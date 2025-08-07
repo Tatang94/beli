@@ -1,0 +1,411 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Panduan Import Database - Bot Telegram</title>
+    <style>
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            max-width: 1000px;
+            margin: 0 auto;
+            padding: 20px;
+            line-height: 1.6;
+            background: #f5f5f5;
+        }
+        
+        .container {
+            background: white;
+            border-radius: 10px;
+            padding: 30px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+        }
+        
+        h1 {
+            color: #2c3e50;
+            text-align: center;
+            border-bottom: 3px solid #3498db;
+            padding-bottom: 10px;
+        }
+        
+        h2 {
+            color: #34495e;
+            border-left: 4px solid #3498db;
+            padding-left: 15px;
+            margin-top: 30px;
+        }
+        
+        .step {
+            background: #ecf0f1;
+            border-radius: 8px;
+            padding: 20px;
+            margin: 15px 0;
+            border-left: 5px solid #3498db;
+        }
+        
+        .step h3 {
+            color: #2980b9;
+            margin-top: 0;
+        }
+        
+        .warning {
+            background: #fff3cd;
+            border: 1px solid #ffeeba;
+            color: #856404;
+            padding: 15px;
+            border-radius: 5px;
+            margin: 15px 0;
+        }
+        
+        .success {
+            background: #d4edda;
+            border: 1px solid #c3e6cb;
+            color: #155724;
+            padding: 15px;
+            border-radius: 5px;
+            margin: 15px 0;
+        }
+        
+        .error {
+            background: #f8d7da;
+            border: 1px solid #f5c6cb;
+            color: #721c24;
+            padding: 15px;
+            border-radius: 5px;
+            margin: 15px 0;
+        }
+        
+        code {
+            background: #f8f9fa;
+            padding: 2px 5px;
+            border-radius: 3px;
+            font-family: 'Courier New', monospace;
+            border: 1px solid #e9ecef;
+        }
+        
+        .code-block {
+            background: #2c3e50;
+            color: #ecf0f1;
+            padding: 15px;
+            border-radius: 5px;
+            font-family: 'Courier New', monospace;
+            overflow-x: auto;
+            margin: 15px 0;
+        }
+        
+        .checklist {
+            background: #e8f5e8;
+            border: 1px solid #d4edda;
+            padding: 20px;
+            border-radius: 5px;
+            margin: 20px 0;
+        }
+        
+        .checklist ul {
+            list-style: none;
+            padding: 0;
+        }
+        
+        .checklist li {
+            padding: 5px 0;
+            border-bottom: 1px solid #c3e6cb;
+        }
+        
+        .checklist li:before {
+            content: "☐ ";
+            color: #28a745;
+            font-weight: bold;
+            margin-right: 10px;
+        }
+        
+        .screenshot {
+            text-align: center;
+            margin: 20px 0;
+            padding: 15px;
+            background: #f8f9fa;
+            border-radius: 5px;
+        }
+        
+        .screenshot img {
+            max-width: 100%;
+            border: 2px solid #dee2e6;
+            border-radius: 5px;
+        }
+        
+        .btn {
+            display: inline-block;
+            padding: 10px 20px;
+            background: #007bff;
+            color: white;
+            text-decoration: none;
+            border-radius: 5px;
+            margin: 10px 5px;
+        }
+        
+        .btn:hover {
+            background: #0056b3;
+        }
+        
+        .btn-success {
+            background: #28a745;
+        }
+        
+        .btn-success:hover {
+            background: #1e7e34;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>📊 Panduan Import Database Bot Telegram</h1>
+        
+        <div class="warning">
+            <strong>⚠️ PENTING:</strong> Database harus diimport terlebih dahulu sebelum bot dapat berfungsi!
+        </div>
+
+        <h2>🗄️ Langkah 1: Buat Database di cPanel</h2>
+        
+        <div class="step">
+            <h3>1.1 Akses MySQL Databases</h3>
+            <ol>
+                <li>Login ke cPanel hosting Anda</li>
+                <li>Cari dan klik menu <strong>"MySQL Databases"</strong></li>
+                <li>Biasanya berada di bagian "Databases"</li>
+            </ol>
+        </div>
+
+        <div class="step">
+            <h3>1.2 Buat Database Baru</h3>
+            <ol>
+                <li>Di bagian <strong>"Create New Database"</strong></li>
+                <li>Masukkan nama database: <code>telegram_bot</code> atau <code>botpulsa</code></li>
+                <li>Klik tombol <strong>"Create Database"</strong></li>
+                <li>Catat nama database lengkap (biasanya: <code>cpaneluser_telegram_bot</code>)</li>
+            </ol>
+            
+            <div class="warning">
+                <strong>Catatan:</strong> Nama database di cPanel biasanya otomatis ditambahkan prefix username cPanel Anda.
+            </div>
+        </div>
+
+        <div class="step">
+            <h3>1.3 Buat User Database</h3>
+            <ol>
+                <li>Scroll ke bagian <strong>"MySQL Users"</strong></li>
+                <li>Di "Add New User":
+                    <ul>
+                        <li>Username: <code>botuser</code> (atau nama lain)</li>
+                        <li>Password: buat password yang kuat</li>
+                    </ul>
+                </li>
+                <li>Klik <strong>"Create User"</strong></li>
+                <li>Catat username lengkap (biasanya: <code>cpaneluser_botuser</code>)</li>
+            </ol>
+        </div>
+
+        <div class="step">
+            <h3>1.4 Berikan Privileges</h3>
+            <ol>
+                <li>Di bagian <strong>"Add User To Database"</strong></li>
+                <li>Pilih user yang baru dibuat</li>
+                <li>Pilih database yang baru dibuat</li>
+                <li>Klik <strong>"Add"</strong></li>
+                <li>Centang <strong>"ALL PRIVILEGES"</strong></li>
+                <li>Klik <strong>"Make Changes"</strong></li>
+            </ol>
+        </div>
+
+        <h2>📥 Langkah 2: Import File Database</h2>
+
+        <div class="step">
+            <h3>2.1 Akses phpMyAdmin</h3>
+            <ol>
+                <li>Kembali ke halaman utama cPanel</li>
+                <li>Cari dan klik <strong>"phpMyAdmin"</strong></li>
+                <li>Tunggu phpMyAdmin terbuka</li>
+            </ol>
+        </div>
+
+        <div class="step">
+            <h3>2.2 Pilih Database</h3>
+            <ol>
+                <li>Di sidebar kiri phpMyAdmin</li>
+                <li>Klik nama database yang baru dibuat</li>
+                <li>Database harus kosong (tidak ada tabel)</li>
+            </ol>
+        </div>
+
+        <div class="step">
+            <h3>2.3 Import File SQL</h3>
+            <ol>
+                <li>Klik tab <strong>"Import"</strong> di bagian atas</li>
+                <li>Klik <strong>"Choose File"</strong> atau <strong>"Browse"</strong></li>
+                <li>Pilih file <code>database.sql</code> dari folder <code>setup/</code></li>
+                <li>Pastikan format dipilih <strong>"SQL"</strong></li>
+                <li>Klik tombol <strong>"Go"</strong> atau <strong>"Import"</strong></li>
+            </ol>
+        </div>
+
+        <div class="step">
+            <h3>2.4 Verifikasi Import</h3>
+            <div class="success">
+                <strong>✅ Import berhasil jika:</strong>
+                <ul>
+                    <li>Muncul pesan hijau "Import has been successfully finished"</li>
+                    <li>Tidak ada pesan error berwarna merah</li>
+                    <li>Di sidebar kiri muncul beberapa tabel baru</li>
+                </ul>
+            </div>
+            
+            <div class="error">
+                <strong>❌ Import gagal jika:</strong>
+                <ul>
+                    <li>Muncul pesan error merah</li>
+                    <li>Tidak ada tabel yang dibuat</li>
+                    <li>Ada warning tentang charset atau collation</li>
+                </ul>
+            </div>
+        </div>
+
+        <h2>📋 Langkah 3: Verifikasi Tabel Database</h2>
+
+        <div class="step">
+            <h3>3.1 Periksa Tabel yang Dibuat</h3>
+            <p>Setelah import berhasil, harus ada tabel-tabel berikut:</p>
+            
+            <div class="checklist">
+                <ul>
+                    <li><code>users</code> - Data pengguna bot</li>
+                    <li><code>products</code> - Katalog produk Digiflazz</li>
+                    <li><code>transactions</code> - Riwayat transaksi</li>
+                    <li><code>deposits</code> - Data deposit pengguna</li>
+                    <li><code>settings</code> - Pengaturan bot</li>
+                    <li><code>user_sessions</code> - Session pengguna</li>
+                </ul>
+            </div>
+        </div>
+
+        <div class="step">
+            <h3>3.2 Periksa Data Default</h3>
+            <ol>
+                <li>Klik tabel <strong>"users"</strong></li>
+                <li>Klik tab <strong>"Browse"</strong></li>
+                <li>Harus ada 1 record admin default</li>
+                <li>Klik tabel <strong>"settings"</strong></li>
+                <li>Harus ada beberapa pengaturan default</li>
+            </ol>
+        </div>
+
+        <h2>⚙️ Langkah 4: Update Konfigurasi</h2>
+
+        <div class="step">
+            <h3>4.1 Edit config.php</h3>
+            <p>Sekarang update file <code>config.php</code> dengan detail database:</p>
+            
+            <div class="code-block">
+// Database Configuration
+define('DB_HOST', 'localhost');
+define('DB_NAME', 'cpaneluser_telegram_bot');  // Nama database lengkap
+define('DB_USER', 'cpaneluser_botuser');       // Username database lengkap  
+define('DB_PASS', 'password_yang_dibuat');     // Password database
+            </div>
+        </div>
+
+        <div class="step">
+            <h3>4.2 Update Admin ID</h3>
+            <p>Ganti admin ID default dengan ID Telegram Anda:</p>
+            
+            <div class="code-block">
+// Ganti 7044289974 dengan ID Telegram Anda
+define('ADMIN_IDS', [ID_TELEGRAM_ANDA]);
+            </div>
+            
+            <div class="warning">
+                <strong>Cara mendapatkan ID Telegram:</strong>
+                <ol>
+                    <li>Chat bot <strong>@userinfobot</strong> di Telegram</li>
+                    <li>Kirim pesan apa saja</li>
+                    <li>Bot akan memberikan ID Telegram Anda</li>
+                </ol>
+            </div>
+        </div>
+
+        <h2>🧪 Langkah 5: Test Koneksi Database</h2>
+
+        <div class="step">
+            <h3>5.1 Test via Setup Webhook</h3>
+            <ol>
+                <li>Buka <code>setup/webhook_setup.php</code> di browser</li>
+                <li>Periksa bagian "Test Koneksi Database"</li>
+                <li>Harus menampilkan status hijau (✅)</li>
+                <li>Menampilkan jumlah record di setiap tabel</li>
+            </ol>
+        </div>
+
+        <div class="success">
+            <h3>✅ Database Siap Digunakan!</h3>
+            <p>Jika semua langkah di atas berhasil, database sudah siap dan bot dapat berfungsi.</p>
+            <p>Lanjutkan ke langkah berikutnya: setup webhook dan update produk.</p>
+        </div>
+
+        <h2>🚨 Troubleshooting Database</h2>
+
+        <div class="error">
+            <h3>❌ Error: "Access denied for user"</h3>
+            <ul>
+                <li>Periksa username dan password database di <code>config.php</code></li>
+                <li>Pastikan user sudah ditambahkan ke database dengan privileges</li>
+                <li>Periksa format nama: <code>cpaneluser_namadb</code></li>
+            </ul>
+        </div>
+
+        <div class="error">
+            <h3>❌ Error: "Unknown database"</h3>
+            <ul>
+                <li>Periksa nama database di <code>config.php</code></li>
+                <li>Pastikan database sudah dibuat di cPanel</li>
+                <li>Periksa format nama lengkap dengan prefix</li>
+            </ul>
+        </div>
+
+        <div class="error">
+            <h3>❌ Error saat Import SQL</h3>
+            <ul>
+                <li>Pastikan file <code>database.sql</code> tidak corrupt</li>
+                <li>Coba import ulang dari file backup</li>
+                <li>Periksa apakah database kosong sebelum import</li>
+                <li>Hubungi hosting support jika masih error</li>
+            </ul>
+        </div>
+
+        <div class="step">
+            <h3>💡 Tips Debugging</h3>
+            <ul>
+                <li>Selalu catat nama database, username, dan password yang dibuat</li>
+                <li>Test koneksi database sebelum lanjut ke langkah berikutnya</li>
+                <li>Backup database setelah import berhasil</li>
+                <li>Gunakan phpMyAdmin untuk monitoring database</li>
+            </ul>
+        </div>
+
+        <div class="checklist">
+            <h3>📝 Checklist Database Setup</h3>
+            <ul>
+                <li>Database MySQL sudah dibuat di cPanel</li>
+                <li>User database sudah dibuat dengan password kuat</li>
+                <li>User sudah ditambahkan ke database dengan ALL PRIVILEGES</li>
+                <li>File database.sql berhasil diimport tanpa error</li>
+                <li>Semua tabel terlihat di phpMyAdmin</li>
+                <li>Ada data default di tabel users dan settings</li>
+                <li>File config.php sudah diupdate dengan detail database</li>
+                <li>Test koneksi database sukses (status hijau)</li>
+            </ul>
+        </div>
+
+        <div style="text-align: center; margin-top: 40px;">
+            <a href="webhook_setup.php" class="btn btn-success">🚀 Lanjut ke Setup Webhook</a>
+            <a href="../admin/update_products.php" class="btn">📦 Update Produk</a>
+        </div>
+    </div>
+</body>
+</html>

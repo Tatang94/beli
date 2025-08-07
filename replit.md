@@ -17,6 +17,11 @@ This is a fully functional Telegram bot for selling digital products (mobile cre
 - Generated full PHP implementation with webhook support, database schema, and setup scripts
 - Added comprehensive documentation and installation guide for hosting deployment
 - Both Python and PHP versions now available with identical functionality
+- **PHP STRUCTURE IMPROVEMENT**: Separated PHP files into modular structure with organized folders
+- Created includes/ folder for core libraries (database, telegram, digiflazz, handlers)
+- Added setup/ folder with database import guide and webhook configuration tools
+- Added admin/ folder for product management and bot administration
+- Comprehensive installation documentation with step-by-step database import guide
 
 # User Preferences
 
