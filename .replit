@@ -2,7 +2,7 @@ modules = ["php-8.2", "python-3.11"]
 
 [nix]
 channel = "stable-25_05"
-packages = ["sqlite"]
+packages = ["sqlite", "php82"]
 
 [workflows]
 runButton = "Project"
