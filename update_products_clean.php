@@ -64,32 +64,24 @@ function updateProductsFromAPI() {
         $pdo = new PDO("sqlite:bot_database.db");
         $pdo->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
         
+        // Gunakan struktur tabel yang sudah ada
         $pdo->exec("CREATE TABLE IF NOT EXISTS products (
-            id INTEGER PRIMARY KEY AUTOINCREMENT,
-            product_name TEXT NOT NULL,
-            buyer_sku_code TEXT UNIQUE NOT NULL,
-            buyer_product_status TEXT,
-            seller_product_status TEXT,
-            unlimited_stock TEXT,
-            multi TEXT,
-            start_cut_off TEXT,
-            end_cut_off TEXT,
-            desc TEXT,
-            price INTEGER NOT NULL,
-            category TEXT,
+            product_id INTEGER PRIMARY KEY AUTOINCREMENT,
+            name TEXT,
+            price INTEGER,
+            digiflazz_code TEXT,
+            description TEXT,
             brand TEXT,
             type TEXT,
-            status TEXT DEFAULT 'active',
-            updated_at DATETIME DEFAULT CURRENT_TIMESTAMP
+            seller TEXT
         )");
         
         $pdo->exec("DELETE FROM products");
         
         $insert_count = 0;
-        $stmt = $pdo->prepare("INSERT INTO products 
-            (product_name, buyer_sku_code, buyer_product_status, seller_product_status, 
-             unlimited_stock, multi, start_cut_off, end_cut_off, desc, price, category, brand, type) 
-            VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)");
+        $stmt = $pdo->prepare("INSERT OR REPLACE INTO products 
+            (digiflazz_code, name, price, brand, type, seller, description) 
+            VALUES (?, ?, ?, ?, ?, ?, ?)");
         
         foreach ($result['data'] as $product) {
             if ($product['buyer_product_status'] === false || 
@@ -101,19 +93,13 @@ function updateProductsFromAPI() {
             $brand = extractBrand($product['product_name']);
             
             $stmt->execute([
-                $product['product_name'],
                 $product['buyer_sku_code'],
-                $product['buyer_product_status'] ? 'active' : 'inactive',
-                $product['seller_product_status'] ? 'active' : 'inactive',
-                $product['unlimited_stock'] ? 'yes' : 'no',
-                $product['multi'] ? 'yes' : 'no',
-                $product['start_cut_off'] ?? '',
-                $product['end_cut_off'] ?? '',
-                $product['desc'] ?? '',
+                $product['product_name'],
                 (int)$product['price'],
-                $category,
                 $brand,
-                'digital'
+                $category,
+                $product['seller_name'] ?? 'Digiflazz',
+                $product['desc'] ?? ''
             ]);
             
             $insert_count++;

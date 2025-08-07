@@ -27,24 +27,16 @@ try {
     $pdo = new PDO("sqlite:bot_database.db");
     $pdo->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
     
-    // Pastikan tabel products ada
+    // Pastikan tabel products ada sesuai struktur yang sudah ada
     $pdo->exec("CREATE TABLE IF NOT EXISTS products (
-        id INTEGER PRIMARY KEY AUTOINCREMENT,
-        product_name TEXT NOT NULL,
-        buyer_sku_code TEXT UNIQUE NOT NULL,
-        buyer_product_status TEXT,
-        seller_product_status TEXT,
-        unlimited_stock TEXT,
-        multi TEXT,
-        start_cut_off TEXT,
-        end_cut_off TEXT,
-        desc TEXT,
-        price INTEGER NOT NULL,
-        category TEXT,
+        product_id INTEGER PRIMARY KEY AUTOINCREMENT,
+        name TEXT,
+        price INTEGER,
+        digiflazz_code TEXT,
+        description TEXT,
         brand TEXT,
         type TEXT,
-        status TEXT DEFAULT 'active',
-        updated_at DATETIME DEFAULT CURRENT_TIMESTAMP
+        seller TEXT
     )");
     
 } catch (PDOException $e) {
@@ -63,12 +55,12 @@ if ($pdo) {
         $params = [];
         
         if ($category !== 'all' && !empty($category)) {
-            $where_conditions[] = "category = ?";
+            $where_conditions[] = "type = ?";
             $params[] = $category;
         }
         
         if (!empty($search)) {
-            $where_conditions[] = "(product_name LIKE ? OR brand LIKE ?)";
+            $where_conditions[] = "(name LIKE ? OR brand LIKE ?)";
             $params[] = "%{$search}%";
             $params[] = "%{$search}%";
         }
@@ -383,13 +375,13 @@ $category_names = [
             <div class="product-grid">
                 <?php if (!empty($products)): ?>
                     <?php foreach($products as $product): ?>
-                        <div class="product-card" onclick="buyProduct('<?= htmlspecialchars($product['buyer_sku_code']) ?>', '<?= htmlspecialchars($product['product_name']) ?>', <?= $product['price'] ?>)">
-                            <div class="product-name"><?= htmlspecialchars($product['product_name']) ?></div>
-                            <div class="product-price">Rp <?= number_format($product['price']) ?></div>
+                        <div class="product-card" onclick="buyProduct('<?= htmlspecialchars($product['digiflazz_code'] ?? '') ?>', '<?= htmlspecialchars($product['name'] ?? '') ?>', <?= $product['price'] ?? 0 ?>)">
+                            <div class="product-name"><?= htmlspecialchars($product['name'] ?? 'Produk Tidak Tersedia') ?></div>
+                            <div class="product-price">Rp <?= number_format($product['price'] ?? 0) ?></div>
                             <div class="product-code">
-                                Kode: <?= htmlspecialchars($product['buyer_sku_code']) ?> | 
-                                Brand: <?= htmlspecialchars($product['brand']) ?> |
-                                Kategori: <?= htmlspecialchars($product['category']) ?>
+                                Kode: <?= htmlspecialchars($product['digiflazz_code'] ?? 'N/A') ?> | 
+                                Brand: <?= htmlspecialchars($product['brand'] ?? 'Unknown') ?> |
+                                Kategori: <?= htmlspecialchars($product['type'] ?? 'Unknown') ?>
                             </div>
                         </div>
                     <?php endforeach; ?>
