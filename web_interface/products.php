@@ -319,7 +319,7 @@ $category_names = [
         </div>
         
         <div class="content">
-            <a href="index.php" class="back-btn">⬅️ Kembali ke Menu</a>
+            <a href="admincenter.php" class="back-btn">⬅️ Kembali ke Admin Panel</a>
             
             <?php if (isset($_SESSION['success_message'])): ?>
                 <div class="alert alert-success">
