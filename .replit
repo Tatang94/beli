@@ -28,9 +28,6 @@ author = "agent"
 task = "shell.exec"
 args = "python bot_working.py"
 
-[workflows.workflow.metadata]
-outputType = "webview"
-
 [[workflows.workflow]]
 name = "Web Server"
 author = "agent"
@@ -39,9 +36,6 @@ author = "agent"
 task = "shell.exec"
 args = "php -S 0.0.0.0:5000"
 waitForPort = 5000
-
-[workflows.workflow.metadata]
-outputType = "webview"
 
 [agent]
 expertMode = true

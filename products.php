@@ -6,62 +6,96 @@
 require_once 'config.php';
 session_start();
 
-$category = $_GET['category'] ?? 'pulsa';
+// Handle update products request
+if (isset($_POST['update_products'])) {
+    include 'update_products_clean.php';
+    $result = updateProductsFromAPI();
+    if ($result['success']) {
+        $_SESSION['success_message'] = $result['message'];
+    } else {
+        $_SESSION['error_message'] = $result['message'];
+    }
+    header('Location: products.php');
+    exit;
+}
 
-// Database connection dengan fallback
+$category = $_GET['category'] ?? 'all';
+$search = $_GET['search'] ?? '';
+
+// Database connection SQLite
 try {
-    $pdo = new PDO("mysql:host=" . DB_HOST . ";dbname=" . DB_NAME . ";charset=utf8mb4", DB_USER, DB_PASS);
+    $pdo = new PDO("sqlite:bot_database.db");
     $pdo->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
+    
+    // Pastikan tabel products ada
+    $pdo->exec("CREATE TABLE IF NOT EXISTS products (
+        id INTEGER PRIMARY KEY AUTOINCREMENT,
+        product_name TEXT NOT NULL,
+        buyer_sku_code TEXT UNIQUE NOT NULL,
+        buyer_product_status TEXT,
+        seller_product_status TEXT,
+        unlimited_stock TEXT,
+        multi TEXT,
+        start_cut_off TEXT,
+        end_cut_off TEXT,
+        desc TEXT,
+        price INTEGER NOT NULL,
+        category TEXT,
+        brand TEXT,
+        type TEXT,
+        status TEXT DEFAULT 'active',
+        updated_at DATETIME DEFAULT CURRENT_TIMESTAMP
+    )");
+    
 } catch (PDOException $e) {
     $pdo = null;
+    $_SESSION['error_message'] = 'Database connection error: ' . $e->getMessage();
 }
 
-// Ambil produk dari database atau buat dummy data
+// Ambil produk dari database
 $products = [];
+$total_products = 0;
+
 if ($pdo) {
     try {
-        $stmt = $pdo->prepare("SELECT * FROM products WHERE category LIKE ? AND status = 'active' ORDER BY price ASC LIMIT 20");
-        $stmt->execute(["%{$category}%"]);
+        // Query untuk mengambil produk
+        $where_conditions = [];
+        $params = [];
+        
+        if ($category !== 'all' && !empty($category)) {
+            $where_conditions[] = "category = ?";
+            $params[] = $category;
+        }
+        
+        if (!empty($search)) {
+            $where_conditions[] = "(product_name LIKE ? OR brand LIKE ?)";
+            $params[] = "%{$search}%";
+            $params[] = "%{$search}%";
+        }
+        
+        $where_sql = '';
+        if (!empty($where_conditions)) {
+            $where_sql = 'WHERE ' . implode(' AND ', $where_conditions);
+        }
+        
+        // Hitung total produk
+        $count_sql = "SELECT COUNT(*) FROM products {$where_sql}";
+        $stmt = $pdo->prepare($count_sql);
+        $stmt->execute($params);
+        $total_products = $stmt->fetchColumn();
+        
+        // Ambil produk dengan limit
+        $limit = 50;
+        $page = max(1, (int)($_GET['page'] ?? 1));
+        $offset = ($page - 1) * $limit;
+        
+        $sql = "SELECT * FROM products {$where_sql} ORDER BY brand ASC, price ASC LIMIT {$limit} OFFSET {$offset}";
+        $stmt = $pdo->prepare($sql);
+        $stmt->execute($params);
         $products = $stmt->fetchAll(PDO::FETCH_ASSOC);
+        
     } catch (PDOException $e) {
-        // Fallback data
-    }
-}
-
-// Jika tidak ada data di database, gunakan data dummy
-if (empty($products)) {
-    switch($category) {
-        case 'pulsa':
-            $products = [
-                ['product_name' => 'Telkomsel 5.000', 'price' => 5500, 'product_code' => 'S5'],
-                ['product_name' => 'Telkomsel 10.000', 'price' => 10200, 'product_code' => 'S10'],
-                ['product_name' => 'Telkomsel 20.000', 'price' => 20200, 'product_code' => 'S20'],
-                ['product_name' => 'Indosat 5.000', 'price' => 5300, 'product_code' => 'I5'],
-                ['product_name' => 'Indosat 10.000', 'price' => 10100, 'product_code' => 'I10'],
-                ['product_name' => 'XL 5.000', 'price' => 5400, 'product_code' => 'X5'],
-                ['product_name' => 'XL 10.000', 'price' => 10400, 'product_code' => 'X10'],
-                ['product_name' => 'Tri 5.000', 'price' => 5200, 'product_code' => 'T5'],
-            ];
-            break;
-        case 'paket_data':
-            $products = [
-                ['product_name' => 'Telkomsel Data 1GB', 'price' => 15000, 'product_code' => 'SD1GB'],
-                ['product_name' => 'Telkomsel Data 2GB', 'price' => 25000, 'product_code' => 'SD2GB'],
-                ['product_name' => 'Indosat Data 1GB', 'price' => 14000, 'product_code' => 'ID1GB'],
-                ['product_name' => 'XL Data 1GB', 'price' => 16000, 'product_code' => 'XD1GB'],
-            ];
-            break;
-        case 'pln':
-            $products = [
-                ['product_name' => 'PLN 20.000', 'price' => 20500, 'product_code' => 'PLN20'],
-                ['product_name' => 'PLN 50.000', 'price' => 50500, 'product_code' => 'PLN50'],
-                ['product_name' => 'PLN 100.000', 'price' => 100500, 'product_code' => 'PLN100'],
-            ];
-            break;
-        default:
-            $products = [
-                ['product_name' => 'Produk akan segera tersedia', 'price' => 0, 'product_code' => 'SOON'],
-            ];
+        $_SESSION['error_message'] = 'Query error: ' . $e->getMessage();
     }
 }
 
@@ -189,6 +223,104 @@ $category_names = [
             padding: 40px 20px;
         }
         
+        .update-section {
+            background: #fff3cd;
+            border: 1px solid #ffeaa7;
+            border-radius: 8px;
+            padding: 15px;
+            margin-bottom: 20px;
+        }
+        
+        .update-btn {
+            background: #28a745;
+            color: white;
+            border: none;
+            padding: 10px 20px;
+            border-radius: 8px;
+            cursor: pointer;
+            font-size: 14px;
+            margin-top: 10px;
+        }
+        
+        .update-btn:hover {
+            background: #218838;
+        }
+        
+        .filters {
+            display: flex;
+            gap: 10px;
+            margin-bottom: 20px;
+            flex-wrap: wrap;
+        }
+        
+        .filter-select {
+            padding: 8px 12px;
+            border: 1px solid #ddd;
+            border-radius: 6px;
+            font-size: 14px;
+        }
+        
+        .search-input {
+            flex: 1;
+            padding: 8px 12px;
+            border: 1px solid #ddd;
+            border-radius: 6px;
+            font-size: 14px;
+            min-width: 200px;
+        }
+        
+        .alert {
+            padding: 10px 15px;
+            margin-bottom: 15px;
+            border-radius: 6px;
+            font-size: 14px;
+        }
+        
+        .alert-success {
+            background: #d4edda;
+            border: 1px solid #c3e6cb;
+            color: #155724;
+        }
+        
+        .alert-error {
+            background: #f8d7da;
+            border: 1px solid #f5c6cb;
+            color: #721c24;
+        }
+        
+        .stats {
+            background: #f8f9fa;
+            padding: 10px 15px;
+            border-radius: 6px;
+            margin-bottom: 15px;
+            font-size: 14px;
+            color: #666;
+        }
+        
+        .pagination {
+            text-align: center;
+            margin-top: 20px;
+        }
+        
+        .pagination a, .pagination span {
+            display: inline-block;
+            padding: 8px 12px;
+            margin: 0 2px;
+            text-decoration: none;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+        }
+        
+        .pagination a:hover {
+            background: #f5f5f5;
+        }
+        
+        .pagination .current {
+            background: #007bff;
+            color: white;
+            border-color: #007bff;
+        }
+        
         @media (max-width: 480px) {
             .container {
                 max-width: 100%;
@@ -207,19 +339,64 @@ $category_names = [
         <div class="content">
             <a href="index.php" class="back-btn">⬅️ Kembali ke Menu</a>
             
+            <?php if (isset($_SESSION['success_message'])): ?>
+                <div class="alert alert-success">
+                    <?= htmlspecialchars($_SESSION['success_message']) ?>
+                </div>
+                <?php unset($_SESSION['success_message']); ?>
+            <?php endif; ?>
+            
+            <?php if (isset($_SESSION['error_message'])): ?>
+                <div class="alert alert-error">
+                    <?= htmlspecialchars($_SESSION['error_message']) ?>
+                </div>
+                <?php unset($_SESSION['error_message']); ?>
+            <?php endif; ?>
+            
+            <div class="update-section">
+                <h4>📦 Ambil Produk dari API Digiflazz</h4>
+                <p>Klik tombol di bawah untuk mengambil daftar produk terbaru dari API Digiflazz.</p>
+                <form method="post" style="display: inline;">
+                    <button type="submit" name="update_products" class="update-btn" onclick="return confirm('Yakin ingin mengupdate produk? Ini akan mengganti semua produk yang ada.')">
+                        🔄 Update Produk Sekarang
+                    </button>
+                </form>
+            </div>
+            
+            <div class="stats">
+                📊 Total produk dalam database: <strong><?= number_format($total_products) ?></strong>
+            </div>
+            
+            <form method="get" class="filters">
+                <select name="category" class="filter-select" onchange="this.form.submit()">
+                    <option value="all" <?= $category == 'all' ? 'selected' : '' ?>>Semua Kategori</option>
+                    <option value="pulsa" <?= $category == 'pulsa' ? 'selected' : '' ?>>Pulsa</option>
+                    <option value="paket_data" <?= $category == 'paket_data' ? 'selected' : '' ?>>Paket Data</option>
+                    <option value="pln" <?= $category == 'pln' ? 'selected' : '' ?>>PLN</option>
+                    <option value="emoney" <?= $category == 'emoney' ? 'selected' : '' ?>>E-Money</option>
+                    <option value="game" <?= $category == 'game' ? 'selected' : '' ?>>Game</option>
+                </select>
+                <input type="text" name="search" class="search-input" placeholder="Cari produk..." value="<?= htmlspecialchars($search) ?>">
+                <button type="submit" class="update-btn">🔍 Cari</button>
+            </form>
+            
             <div class="product-grid">
-                <?php if (!empty($products) && $products[0]['price'] > 0): ?>
+                <?php if (!empty($products)): ?>
                     <?php foreach($products as $product): ?>
-                        <div class="product-card" onclick="buyProduct('<?= htmlspecialchars($product['product_code']) ?>', '<?= htmlspecialchars($product['product_name']) ?>', <?= $product['price'] ?>)">
+                        <div class="product-card" onclick="buyProduct('<?= htmlspecialchars($product['buyer_sku_code']) ?>', '<?= htmlspecialchars($product['product_name']) ?>', <?= $product['price'] ?>)">
                             <div class="product-name"><?= htmlspecialchars($product['product_name']) ?></div>
                             <div class="product-price">Rp <?= number_format($product['price']) ?></div>
-                            <div class="product-code">Kode: <?= htmlspecialchars($product['product_code']) ?></div>
+                            <div class="product-code">
+                                Kode: <?= htmlspecialchars($product['buyer_sku_code']) ?> | 
+                                Brand: <?= htmlspecialchars($product['brand']) ?> |
+                                Kategori: <?= htmlspecialchars($product['category']) ?>
+                            </div>
                         </div>
                     <?php endforeach; ?>
                 <?php else: ?>
                     <div class="no-products">
-                        <h3>Produk Segera Hadir</h3>
-                        <p>Kategori ini sedang dalam pengembangan.</p>
+                        <h3>📭 Belum Ada Produk</h3>
+                        <p>Klik tombol "Update Produk Sekarang" di atas untuk mengambil produk dari API Digiflazz.</p>
                     </div>
                 <?php endif; ?>
             </div>
