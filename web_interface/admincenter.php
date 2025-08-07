@@ -19,7 +19,7 @@ if (isset($_GET['logout'])) {
 
 // Get database stats
 try {
-    $pdo = new PDO("sqlite:bot_database.db");
+    $pdo = new PDO("sqlite:../bot_database.db");
     $pdo->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
     
     // Check if products table exists, if not create it
@@ -343,38 +343,47 @@ try {
                     </div>
                 </div>
                 
-                <div class="admin-menu">
-                    <a href="products.php" class="menu-item">
+                <div class="admin-menu" id="adminMenu">
+                    <div class="menu-item" onclick="loadContent('products')">
                         <div class="menu-icon">📋</div>
                         <div class="menu-text">
                             <div class="menu-title">Ambil List Produk</div>
                             <div class="menu-desc">Lihat dan kelola daftar lengkap produk yang tersedia</div>
                         </div>
-                    </a>
+                    </div>
                     
-                    <a href="margin.php" class="menu-item">
+                    <div class="menu-item" onclick="loadContent('margin')">
                         <div class="menu-icon">💰</div>
                         <div class="menu-text">
                             <div class="menu-title">Atur Margin</div>
                             <div class="menu-desc">Kelola margin keuntungan untuk setiap kategori produk</div>
                         </div>
-                    </a>
+                    </div>
                     
-                    <a href="statistics.php" class="menu-item">
+                    <div class="menu-item" onclick="loadContent('statistics')">
                         <div class="menu-icon">📊</div>
                         <div class="menu-text">
                             <div class="menu-title">Lihat Statistics</div>
                             <div class="menu-desc">Monitor transaksi, pendapatan, dan analisis penjualan</div>
                         </div>
-                    </a>
+                    </div>
                     
-                    <a href="buyers.php" class="menu-item">
+                    <div class="menu-item" onclick="loadContent('buyers')">
                         <div class="menu-icon">👥</div>
                         <div class="menu-text">
                             <div class="menu-title">Jumlah Pembeli</div>
                             <div class="menu-desc">Data pembeli dan aktivitas transaksi pengguna</div>
                         </div>
-                    </a>
+                    </div>
+                </div>
+                
+                <!-- Content area untuk konten dinamis -->
+                <div id="dynamicContent" style="display: none; margin-top: 30px; padding: 20px; background: white; border-radius: 15px; box-shadow: 0 5px 15px rgba(0,0,0,0.1);">
+                    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px;">
+                        <h3 id="contentTitle">Loading...</h3>
+                        <button onclick="backToMenu()" style="background: #6c757d; color: white; border: none; padding: 8px 15px; border-radius: 5px; cursor: pointer;">← Kembali</button>
+                    </div>
+                    <div id="contentBody">Loading...</div>
                 </div>
                 
                 <div style="text-align: center; margin-top: 30px;">
@@ -384,5 +393,125 @@ try {
             <?php endif; ?>
         </div>
     </div>
+    
+    <script>
+        function loadContent(type) {
+            document.getElementById('adminMenu').style.display = 'none';
+            document.getElementById('dynamicContent').style.display = 'block';
+            
+            const contentTitle = document.getElementById('contentTitle');
+            const contentBody = document.getElementById('contentBody');
+            
+            contentBody.innerHTML = '<div style="text-align: center; padding: 20px;">Loading...</div>';
+            
+            switch(type) {
+                case 'products':
+                    contentTitle.textContent = '📋 Kelola Produk';
+                    loadProducts();
+                    break;
+                case 'margin':
+                    contentTitle.textContent = '💰 Atur Margin';
+                    loadMargin();
+                    break;
+                case 'statistics':
+                    contentTitle.textContent = '📊 Statistik';
+                    loadStatistics();
+                    break;
+                case 'buyers':
+                    contentTitle.textContent = '👥 Data Pembeli';
+                    loadBuyers();
+                    break;
+            }
+        }
+        
+        function backToMenu() {
+            document.getElementById('adminMenu').style.display = 'grid';
+            document.getElementById('dynamicContent').style.display = 'none';
+        }
+        
+        function loadProducts() {
+            fetch('update_products.php')
+                .then(response => response.text())
+                .then(data => {
+                    document.getElementById('contentBody').innerHTML = `
+                        <div style="background: #e8f5e8; padding: 15px; border-radius: 8px; margin-bottom: 20px;">
+                            <h4>📦 Update Produk dari API Digiflazz</h4>
+                            <p>Klik tombol di bawah untuk mengambil produk terbaru dari API</p>
+                            <button onclick="updateProducts()" style="background: #28a745; color: white; border: none; padding: 10px 20px; border-radius: 5px; cursor: pointer; margin-top: 10px;">
+                                🔄 Update Produk Sekarang
+                            </button>
+                        </div>
+                        <div id="updateResult"></div>
+                        <iframe src="products.php" style="width: 100%; height: 400px; border: 1px solid #ddd; border-radius: 8px;"></iframe>
+                    `;
+                });
+        }
+        
+        function loadMargin() {
+            document.getElementById('contentBody').innerHTML = `
+                <iframe src="margin.php" style="width: 100%; height: 500px; border: 1px solid #ddd; border-radius: 8px;"></iframe>
+            `;
+        }
+        
+        function loadStatistics() {
+            document.getElementById('contentBody').innerHTML = `
+                <div style="background: #f8f9fa; padding: 20px; border-radius: 8px; text-align: center;">
+                    <h4>📊 Statistik Sistem</h4>
+                    <div style="margin: 20px 0;">
+                        <div style="display: inline-block; margin: 10px; padding: 15px; background: white; border-radius: 8px; box-shadow: 0 2px 5px rgba(0,0,0,0.1);">
+                            <div style="font-size: 24px; font-weight: bold; color: #28a745;"><?= number_format($products_count) ?></div>
+                            <div style="font-size: 12px; color: #666;">Total Produk</div>
+                        </div>
+                        <div style="display: inline-block; margin: 10px; padding: 15px; background: white; border-radius: 8px; box-shadow: 0 2px 5px rgba(0,0,0,0.1);">
+                            <div style="font-size: 24px; font-weight: bold; color: #007bff;">24/7</div>
+                            <div style="font-size: 12px; color: #666;">Status Online</div>
+                        </div>
+                    </div>
+                    <p style="color: #666; margin-top: 20px;">Sistem berjalan normal dan siap melayani transaksi</p>
+                </div>
+            `;
+        }
+        
+        function loadBuyers() {
+            document.getElementById('contentBody').innerHTML = `
+                <div style="background: #f8f9fa; padding: 20px; border-radius: 8px; text-align: center;">
+                    <h4>👥 Data Pembeli</h4>
+                    <div style="margin: 20px 0;">
+                        <div style="display: inline-block; margin: 10px; padding: 15px; background: white; border-radius: 8px; box-shadow: 0 2px 5px rgba(0,0,0,0.1);">
+                            <div style="font-size: 24px; font-weight: bold; color: #ff6b6b;">0</div>
+                            <div style="font-size: 12px; color: #666;">Pembeli Hari Ini</div>
+                        </div>
+                        <div style="display: inline-block; margin: 10px; padding: 15px; background: white; border-radius: 8px; box-shadow: 0 2px 5px rgba(0,0,0,0.1);">
+                            <div style="font-size: 24px; font-weight: bold; color: #17a2b8;">0</div>
+                            <div style="font-size: 12px; color: #666;">Total Transaksi</div>
+                        </div>
+                    </div>
+                    <p style="color: #666; margin-top: 20px;">Belum ada transaksi tercatat</p>
+                </div>
+            `;
+        }
+        
+        function updateProducts() {
+            document.getElementById('updateResult').innerHTML = '<div style="padding: 10px; background: #fff3cd; border-radius: 5px;">Sedang mengupdate produk...</div>';
+            
+            fetch('update_products.php', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/x-www-form-urlencoded',
+                },
+                body: 'update_products=1'
+            })
+            .then(response => response.text())
+            .then(data => {
+                document.getElementById('updateResult').innerHTML = '<div style="padding: 10px; background: #d4edda; border-radius: 5px;">Produk berhasil diupdate!</div>';
+                setTimeout(() => {
+                    location.reload();
+                }, 2000);
+            })
+            .catch(error => {
+                document.getElementById('updateResult').innerHTML = '<div style="padding: 10px; background: #f8d7da; border-radius: 5px;">Error: ' + error + '</div>';
+            });
+        }
+    </script>
 </body>
 </html>
