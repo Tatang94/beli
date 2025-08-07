@@ -121,6 +121,11 @@ This is a fully functional Telegram bot for selling digital products (mobile cre
 - Both Web Server (PHP) and Working Bot (Python) workflows running successfully
 - Cleaned up duplicate navigation elements in admin interface
 - Project now fully operational in standard Replit environment with enhanced security
+- **CATEGORIZATION FIX (August 7, 2025)**: Fixed product categorization to properly separate pulsa from data packages
+- Updated categorizeProduct() function to use official Digiflazz API category and type fields
+- Enhanced detection patterns to ensure pulsa products don't contain data/internet/kuota keywords
+- Implemented strict separation between pulsa (category='Pulsa', type='Umum'/'Pulsa Transfer') and data packages
+- Now properly uses API response fields: category, type, and brand from Digiflazz for accurate classification
 
 # User Preferences
 

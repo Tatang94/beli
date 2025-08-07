@@ -5,44 +5,49 @@
 
 require_once 'config.php';
 
-function categorizeProduct($product_name) {
+function categorizeProduct($product_name, $api_category = '', $api_type = '') {
     $name_lower = strtolower($product_name);
+    $category_lower = strtolower($api_category);
+    $type_lower = strtolower($api_type);
     
-    // Pulsa & Kredit - Most comprehensive pattern matching
-    if (strpos($name_lower, 'pulsa') !== false || 
-        strpos($name_lower, 'kredit') !== false ||
-        strpos($name_lower, 'regular') !== false ||
-        strpos($name_lower, 'credit') !== false ||
-        // Simple Telkomsel pulsa detection - just numbers with operator name
-        (strpos($name_lower, 'telkomsel') !== false && 
-         preg_match('/\b\d+\.?\d*\b/', $name_lower) &&
+    // Prioritas tinggi: gunakan kategori dari API Digiflazz jika tersedia
+    if (!empty($api_category)) {
+        if ($category_lower === 'pulsa') {
+            // Pastikan benar-benar pulsa, bukan paket data
+            if ($type_lower === 'umum' || $type_lower === 'pulsa transfer' || 
+                (strpos($name_lower, 'pulsa') !== false && 
+                 strpos($name_lower, 'data') === false && 
+                 strpos($name_lower, 'internet') === false &&
+                 strpos($name_lower, 'kuota') === false &&
+                 strpos($name_lower, 'paket') === false)) {
+                return 'pulsa';
+            }
+        }
+        
+        if ($category_lower === 'pascabayar') {
+            return 'pln_pascabayar'; // Default for pascabayar
+        }
+    }
+    
+    // Pulsa Murni - SANGAT KETAT untuk menghindari campur dengan data
+    if ((strpos($name_lower, 'pulsa') !== false && 
          strpos($name_lower, 'data') === false && 
          strpos($name_lower, 'internet') === false &&
-         strpos($name_lower, 'freedom') === false &&
-         strpos($name_lower, 'sakti') === false) ||
-        // Other operators - simple detection
-        (strpos($name_lower, 'indosat') !== false && 
-         preg_match('/\b\d+\.?\d*\b/', $name_lower) &&
+         strpos($name_lower, 'kuota') === false &&
+         strpos($name_lower, 'paket') === false &&
+         strpos($name_lower, 'gb') === false &&
+         strpos($name_lower, 'mb') === false) ||
+        (strpos($name_lower, 'kredit') !== false && 
          strpos($name_lower, 'data') === false && 
          strpos($name_lower, 'internet') === false) ||
-        (strpos($name_lower, 'xl') !== false && 
-         preg_match('/\b\d+\.?\d*\b/', $name_lower) &&
+        // Operator pulsa detection - lebih ketat
+        (preg_match('/^(telkomsel|indosat|xl|tri|smartfren|axis|by\.u)\s+\d+\.?\d*$/i', $product_name) &&
          strpos($name_lower, 'data') === false && 
-         strpos($name_lower, 'internet') === false) ||
-        (strpos($name_lower, 'tri') !== false && 
-         preg_match('/\b\d+\.?\d*\b/', $name_lower) &&
-         strpos($name_lower, 'data') === false && 
-         strpos($name_lower, 'internet') === false) ||
-        (strpos($name_lower, 'smartfren') !== false && 
-         preg_match('/\b\d+\.?\d*\b/', $name_lower) &&
-         strpos($name_lower, 'data') === false && 
-         strpos($name_lower, 'internet') === false) ||
-        (strpos($name_lower, 'axis') !== false && 
-         preg_match('/\b\d+\.?\d*\b/', $name_lower) &&
-         strpos($name_lower, 'data') === false && 
-         strpos($name_lower, 'internet') === false)) return 'pulsa';
+         strpos($name_lower, 'internet') === false &&
+         strpos($name_lower, 'kuota') === false &&
+         strpos($name_lower, 'paket') === false)) return 'pulsa';
     
-    // Paket Data & Internet - more comprehensive
+    // Paket Data & Internet - Prioritas tinggi untuk mencegah masuk kategori pulsa
     if (strpos($name_lower, 'data') !== false || 
         strpos($name_lower, 'internet') !== false ||
         strpos($name_lower, 'kuota') !== false ||
@@ -55,7 +60,9 @@ function categorizeProduct($product_name) {
         strpos($name_lower, '5g') !== false ||
         strpos($name_lower, 'hotrod') !== false ||
         strpos($name_lower, 'bronet') !== false ||
-        strpos($name_lower, 'freedom') !== false) return 'data';
+        strpos($name_lower, 'freedom') !== false ||
+        strpos($name_lower, 'gift') !== false ||
+        strpos($name_lower, 'voucher') !== false && strpos($name_lower, 'data') !== false) return 'data';
     
     // Games & Gaming - comprehensive
     if (strpos($name_lower, 'game') !== false || 
@@ -502,8 +509,13 @@ function updateProductsFromAPI() {
                 continue;
             }
             
-            $category = categorizeProduct($product['product_name']);
-            $brand = extractBrand($product['product_name']);
+            // Gunakan kategori dari API Digiflazz jika tersedia, fallback ke kategorisasi manual
+            $api_category = $product['category'] ?? '';
+            $api_type = $product['type'] ?? '';
+            $api_brand = $product['brand'] ?? '';
+            
+            $category = categorizeProduct($product['product_name'], $api_category, $api_type);
+            $brand = !empty($api_brand) ? $api_brand : extractBrand($product['product_name']);
             
             $stmt->execute([
                 $product['product_name'] ?? 'Unknown Product',
