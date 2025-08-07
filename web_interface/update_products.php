@@ -118,20 +118,23 @@ function categorizeProduct($product_name) {
     
     // === KATEGORI PASCABAYAR ===
     
-    // PLN Pascabayar
+    // PLN Pascabayar - lebih comprehensive
     if ((strpos($name_lower, 'pln') !== false && strpos($name_lower, 'pascabayar') !== false) ||
         (strpos($name_lower, 'pln') !== false && strpos($name_lower, 'postpaid') !== false) ||
-        (strpos($name_lower, 'pln') !== false && strpos($name_lower, 'tagihan') !== false)) return 'pln_pascabayar';
+        (strpos($name_lower, 'pln') !== false && strpos($name_lower, 'tagihan') !== false) ||
+        (strpos($name_lower, 'listrik') !== false && strpos($name_lower, 'pascabayar') !== false) ||
+        (strpos($name_lower, 'listrik') !== false && strpos($name_lower, 'tagihan') !== false)) return 'pln_pascabayar';
     
     // PDAM
     if (strpos($name_lower, 'pdam') !== false || 
         (strpos($name_lower, 'air') !== false && strpos($name_lower, 'tagihan') !== false)) return 'pdam';
     
-    // HP Pascabayar
-    if ((strpos($name_lower, 'pascabayar') !== false || strpos($name_lower, 'postpaid') !== false) &&
+    // HP Pascabayar - lebih comprehensive
+    if ((strpos($name_lower, 'pascabayar') !== false || strpos($name_lower, 'postpaid') !== false || strpos($name_lower, 'tagihan') !== false) &&
         (strpos($name_lower, 'telkomsel') !== false || strpos($name_lower, 'indosat') !== false ||
          strpos($name_lower, 'xl') !== false || strpos($name_lower, 'tri') !== false ||
-         strpos($name_lower, 'smartfren') !== false)) return 'hp_pascabayar';
+         strpos($name_lower, 'smartfren') !== false || strpos($name_lower, 'axis') !== false ||
+         strpos($name_lower, 'halo') !== false || strpos($name_lower, 'matrix') !== false)) return 'hp_pascabayar';
     
     // Internet Pascabayar
     if ((strpos($name_lower, 'internet') !== false && strpos($name_lower, 'pascabayar') !== false) ||
@@ -139,8 +142,10 @@ function categorizeProduct($product_name) {
         strpos($name_lower, 'biznet') !== false || strpos($name_lower, 'first media') !== false ||
         strpos($name_lower, 'mnc play') !== false) return 'internet_pascabayar';
     
-    // BPJS Kesehatan
-    if (strpos($name_lower, 'bpjs') !== false && strpos($name_lower, 'kesehatan') !== false) return 'bpjs_kesehatan';
+    // BPJS Kesehatan - lebih comprehensive
+    if ((strpos($name_lower, 'bpjs') !== false && strpos($name_lower, 'kesehatan') !== false) ||
+        (strpos($name_lower, 'bpjs') !== false && strpos($name_lower, 'kes') !== false) ||
+        (strpos($name_lower, 'bpjs') !== false && strpos($name_lower, 'jkn') !== false)) return 'bpjs_kesehatan';
     
     // Multifinance
     if (strpos($name_lower, 'multifinance') !== false ||
@@ -149,7 +154,11 @@ function categorizeProduct($product_name) {
         strpos($name_lower, 'adira') !== false ||
         strpos($name_lower, 'baf') !== false ||
         strpos($name_lower, 'oto') !== false ||
-        strpos($name_lower, 'wom') !== false) return 'multifinance';
+        strpos($name_lower, 'wom') !== false ||
+        strpos($name_lower, 'mega') !== false ||
+        strpos($name_lower, 'bussan') !== false ||
+        strpos($name_lower, 'acc') !== false ||
+        strpos($name_lower, 'dipo') !== false) return 'multifinance';
     
     // PBB
     if (strpos($name_lower, 'pbb') !== false ||
@@ -172,7 +181,9 @@ function categorizeProduct($product_name) {
         (strpos($name_lower, 'pajak') !== false && strpos($name_lower, 'kendaraan') !== false)) return 'samsat';
     
     // BPJS Ketenagakerjaan
-    if (strpos($name_lower, 'bpjs') !== false && strpos($name_lower, 'ketenagakerjaan') !== false) return 'bpjs_ketenagakerjaan';
+    if ((strpos($name_lower, 'bpjs') !== false && strpos($name_lower, 'ketenagakerjaan') !== false) ||
+        (strpos($name_lower, 'bpjs') !== false && strpos($name_lower, 'tk') !== false) ||
+        (strpos($name_lower, 'bpjs') !== false && strpos($name_lower, 'tenaga') !== false)) return 'bpjs_ketenagakerjaan';
     
     // PLN Nontaglis
     if (strpos($name_lower, 'pln') !== false && strpos($name_lower, 'nontaglis') !== false) return 'pln_nontaglis';
@@ -314,9 +325,9 @@ function updateProductsFromAPI() {
             $brand = extractBrand($product['product_name']);
             
             $stmt->execute([
-                $product['product_name'],
-                (int)$product['price'],
-                $product['buyer_sku_code'],
+                $product['product_name'] ?? 'Unknown Product',
+                (int)($product['price'] ?? 0),
+                $product['buyer_sku_code'] ?? '',
                 $brand,
                 $category,
                 $product['seller_name'] ?? 'Digiflazz',
@@ -326,12 +337,26 @@ function updateProductsFromAPI() {
             $insert_count++;
         }
         
+        // Hitung produk pascabayar yang berhasil dimasukkan
+        $pascabayar_categories = [
+            'pln_pascabayar', 'pdam', 'hp_pascabayar', 'internet_pascabayar', 
+            'bpjs_kesehatan', 'multifinance', 'pbb', 'gas_negara', 
+            'tv_pascabayar', 'samsat', 'bpjs_ketenagakerjaan', 'pln_nontaglis',
+            'telkomsel_omni', 'indosat_only4u', 'tri_cuanmax', 'xl_axis_cuanku', 'by_u'
+        ];
+        
+        $placeholders = str_repeat('?,', count($pascabayar_categories) - 1) . '?';
+        $stmt_count = $pdo->prepare("SELECT COUNT(*) FROM products WHERE type IN ({$placeholders})");
+        $stmt_count->execute($pascabayar_categories);
+        $pascabayar_count = $stmt_count->fetchColumn();
+        
         return [
             'success' => true, 
-            'message' => "Berhasil mengupdate {$insert_count} produk (prepaid + pascabayar) dari API Digiflazz",
+            'message' => "Berhasil mengupdate {$insert_count} produk total (prepaid + pascabayar) dari API Digiflazz. Pascabayar: {$pascabayar_count} produk",
             'total_products' => $insert_count,
             'prepaid_count' => count($prepaid_data['data']),
-            'postpaid_count' => count($postpaid_data['data'])
+            'postpaid_count' => count($postpaid_data['data']),
+            'pascabayar_in_db' => $pascabayar_count
         ];
         
     } catch (Exception $e) {

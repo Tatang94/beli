@@ -101,6 +101,11 @@ This is a fully functional Telegram bot for selling digital products (mobile cre
 - Added comprehensive pascabayar navigation in main index.php interface
 - Fixed function scope issues in API calling functions for proper error handling
 - Pascabayar categories now fully functional with real-time data from API
+- **PASCABAYAR CATEGORIZATION IMPROVEMENT (August 7, 2025)**: Enhanced product detection
+- Improved categorization engine to detect more pascabayar products
+- Added comprehensive patterns for PLN, BPJS, HP Pascabayar, and Multifinance
+- Current database contains 1,126+ products with 73+ pascabayar products properly categorized
+- Fixed price field errors and improved data validation for API responses
 
 # User Preferences
 
