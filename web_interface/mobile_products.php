@@ -38,7 +38,7 @@ try {
     }
     
     $where_clause = empty($where_conditions) ? "" : "WHERE " . implode(" AND ", $where_conditions);
-    $query = "SELECT * FROM products $where_clause ORDER BY category, brand, name LIMIT 50";
+    $query = "SELECT * FROM products $where_clause ORDER BY category, brand, name LIMIT 100";
     
     $stmt = $pdo->prepare($query);
     $stmt->execute($params);
@@ -54,13 +54,11 @@ try {
 }
 
 $category_names = [
-    'pulsa' => 'Pulsa',
-    'data' => 'Paket Data', 
-    'games' => 'Voucher Game',
-    'emoney' => 'E-Money',
-    'pln' => 'Token PLN',
-    'voucher' => 'Voucher',
-    'lainnya' => 'Lainnya',
+    'Pulsa' => 'Pulsa',
+    'Data' => 'Paket Data', 
+    'Game' => 'Voucher Game',
+    'E-Money' => 'E-Money',
+    'PLN' => 'Token PLN',
     'all' => 'Semua Produk'
 ];
 

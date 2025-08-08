@@ -47,13 +47,11 @@ foreach ($grouped_products as $product) {
 }
 
 $category_icons = [
-    'data' => '🌐',
-    'pulsa' => '📱', 
-    'emoney' => '💳',
-    'games' => '🎮',
-    'pln' => '⚡',
-    'voucher' => '🎫',
-    'lainnya' => '📦'
+    'Data' => '🌐',
+    'Pulsa' => '📱', 
+    'E-Money' => '💳',
+    'Game' => '🎮',
+    'PLN' => '⚡'
 ];
 ?>
 <!DOCTYPE html>

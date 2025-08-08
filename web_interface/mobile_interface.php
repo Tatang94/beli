@@ -655,28 +655,28 @@ if ($pdo) {
                     
                     <!-- Primary Categories Grid -->
                     <div class="menu-grid primary-categories">
-                        <button class="menu-item data ripple" onclick="selectCategory('data')">
+                        <button class="menu-item data ripple" onclick="selectCategory('Data')">
                             <div class="menu-icon">🌐</div>
                             <div class="menu-text">Paket Data</div>
-                            <div class="menu-desc">542 produk • Semua Operator</div>
+                            <div class="menu-desc">Semua Operator</div>
                         </button>
                         
-                        <button class="menu-item games ripple" onclick="selectCategory('games')">
+                        <button class="menu-item games ripple" onclick="selectCategory('Game')">
                             <div class="menu-icon">🎮</div>
                             <div class="menu-text">Voucher Game</div>
-                            <div class="menu-desc">133 produk • ML, FF, PUBG</div>
+                            <div class="menu-desc">ML, FF, PUBG, Call of Duty</div>
                         </button>
                         
-                        <button class="menu-item emoney ripple" onclick="selectCategory('emoney')">
+                        <button class="menu-item emoney ripple" onclick="selectCategory('E-Money')">
                             <div class="menu-icon">💳</div>
                             <div class="menu-text">E-Money</div>
-                            <div class="menu-desc">40 produk • OVO, DANA, GoPay</div>
+                            <div class="menu-desc">OVO, DANA, GoPay, BRIZZI</div>
                         </button>
                         
-                        <button class="menu-item pulsa ripple" onclick="selectCategory('pulsa')">
+                        <button class="menu-item pulsa ripple" onclick="selectCategory('Pulsa')">
                             <div class="menu-icon">📱</div>
                             <div class="menu-text">Pulsa</div>
-                            <div class="menu-desc">6 produk • Semua Operator</div>
+                            <div class="menu-desc">Semua Operator</div>
                         </button>
                     </div>
                     
@@ -687,22 +687,10 @@ if ($pdo) {
                             Kategori Lainnya
                         </div>
                         <div class="menu-grid secondary">
-                            <button class="menu-item pln ripple" onclick="selectCategory('pln')">
+                            <button class="menu-item pln ripple" onclick="selectCategory('PLN')">
                                 <div class="menu-icon">⚡</div>
                                 <div class="menu-text">Token PLN</div>
-                                <div class="menu-desc">7 produk</div>
-                            </button>
-                            
-                            <button class="menu-item voucher ripple" onclick="selectCategory('voucher')">
-                                <div class="menu-icon">🎫</div>
-                                <div class="menu-text">Voucher</div>
-                                <div class="menu-desc">8 produk</div>
-                            </button>
-                            
-                            <button class="menu-item lainnya ripple" onclick="selectCategory('lainnya')">
-                                <div class="menu-icon">📦</div>
-                                <div class="menu-text">Lainnya</div>
-                                <div class="menu-desc">442 produk</div>
+                                <div class="menu-desc">Token Listrik</div>
                             </button>
                             
                             <button class="menu-item all ripple" onclick="window.location.href='products_grouped.php'">
