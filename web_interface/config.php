@@ -24,7 +24,7 @@ define('DB_PASS', 'password_database');     // Ganti dengan password database An
 date_default_timezone_set('Asia/Jakarta');
 
 // Konfigurasi Error Reporting (Matikan di production)
-error_reporting(E_ALL & ~E_DEPRECATED & ~E_STRICT);
+error_reporting(E_ALL & ~E_DEPRECATED);
 ini_set('display_errors', 0);
 ini_set('log_errors', 1);
 
