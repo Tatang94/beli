@@ -24,15 +24,34 @@ $action = $_GET['action'] ?? 'home';
 $products = [];
 $categories = [];
 
-// Kategori aktual dengan produk yang tersedia (setelah redistributrasi)
+// 26 Kategori lengkap sesuai dokumentasi Digiflazz 2025
 $default_categories = [
-    ['category' => 'Data', 'count' => 0],
     ['category' => 'Pulsa', 'count' => 0],
+    ['category' => 'Data', 'count' => 0], 
     ['category' => 'Game', 'count' => 0],
     ['category' => 'E-Money', 'count' => 0],
     ['category' => 'PLN', 'count' => 0],
+    ['category' => 'PLN Pascabayar', 'count' => 0],
     ['category' => 'Streaming', 'count' => 0],
-    ['category' => 'Voucher', 'count' => 0]
+    ['category' => 'Voucher', 'count' => 0],
+    ['category' => 'PDAM', 'count' => 0],
+    ['category' => 'Gas', 'count' => 0],
+    ['category' => 'SMS Telpon', 'count' => 0],
+    ['category' => 'Media Sosial', 'count' => 0],
+    ['category' => 'Aktivasi', 'count' => 0],
+    ['category' => 'eSIM', 'count' => 0],
+    ['category' => 'Bundling', 'count' => 0],
+    ['category' => 'BPJS', 'count' => 0],
+    ['category' => 'Multifinance', 'count' => 0],
+    ['category' => 'PBB', 'count' => 0],
+    ['category' => 'SAMSAT', 'count' => 0],
+    ['category' => 'China Topup', 'count' => 0],
+    ['category' => 'Malaysia Topup', 'count' => 0],
+    ['category' => 'Philippines Topup', 'count' => 0],
+    ['category' => 'Singapore Topup', 'count' => 0],
+    ['category' => 'Thailand Topup', 'count' => 0],
+    ['category' => 'Vietnam Topup', 'count' => 0],
+    ['category' => 'Lainnya', 'count' => 0]
 ];
 
 if ($pdo) {
@@ -91,15 +110,34 @@ if ($pdo) {
     $categories = $default_categories;
 }
 
-// Category icons (hanya kategori aktif)
+// Category icons untuk 26 kategori lengkap
 $cat_icons = [
-    'Data' => '🌐',
     'Pulsa' => '📱',
+    'Data' => '🌐',
     'Game' => '🎮', 
     'E-Money' => '💳',
     'PLN' => '⚡',
+    'PLN Pascabayar' => '🏢',
     'Streaming' => '📺',
-    'Voucher' => '🎫'
+    'Voucher' => '🎫',
+    'PDAM' => '💧',
+    'Gas' => '🔥',
+    'SMS Telpon' => '💬',
+    'Media Sosial' => '📲',
+    'Aktivasi' => '🔄',
+    'eSIM' => '📧',
+    'Bundling' => '📦',
+    'BPJS' => '🏥',
+    'Multifinance' => '💰',
+    'PBB' => '🏛️',
+    'SAMSAT' => '🚗',
+    'China Topup' => '🇨🇳',
+    'Malaysia Topup' => '🇲🇾',
+    'Philippines Topup' => '🇵🇭',
+    'Singapore Topup' => '🇸🇬',
+    'Thailand Topup' => '🇹🇭',
+    'Vietnam Topup' => '🇻🇳',
+    'Lainnya' => '🗂️'
 ];
 
 ?>
@@ -382,8 +420,11 @@ $cat_icons = [
                     <p>Kode: <?= htmlspecialchars($_GET['code'] ?? '') ?></p>
                 </div>
                 
-                <form style="display: grid; gap: 15px;">
-                    <input type="text" placeholder="Nomor Tujuan (08xxx)" style="padding: 10px; border: 1px solid #ddd; border-radius: 5px;" required>
+                <form method="post" action="mobile_purchase.php" style="display: grid; gap: 15px;">
+                    <input type="hidden" name="product_code" value="<?= htmlspecialchars($_GET['code'] ?? '') ?>">
+                    <input type="hidden" name="product_name" value="<?= htmlspecialchars($_GET['name'] ?? '') ?>">
+                    <input type="hidden" name="product_price" value="<?= htmlspecialchars($_GET['price'] ?? '') ?>">
+                    <input type="text" name="target_number" placeholder="Nomor Tujuan (08xxx)" style="padding: 10px; border: 1px solid #ddd; border-radius: 5px;" required>
                     <button type="submit" class="buy-btn">Lanjutkan Pembayaran</button>
                 </form>
                 
