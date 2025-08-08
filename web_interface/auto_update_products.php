@@ -100,6 +100,15 @@ function categorizeProduct($product_name, $api_category = '', $api_type = '') {
     if (strpos($name_lower, 'voucher') !== false ||
         strpos($name_lower, 'google play') !== false) return 'voucher';
     
+    // SMS & Telepon
+    if (strpos($name_lower, 'sms') !== false || 
+        strpos($name_lower, 'telepon') !== false ||
+        strpos($name_lower, 'telpon') !== false ||
+        strpos($name_lower, 'paket sms') !== false ||
+        strpos($name_lower, 'paket telepon') !== false ||
+        strpos($name_lower, 'paket telpon') !== false ||
+        strpos($name_lower, 'unlimited telpon') !== false) return 'sms_telpon';
+    
     return 'lainnya';
 }
 

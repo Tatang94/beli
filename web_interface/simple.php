@@ -75,6 +75,7 @@ $cat_icons = [
     'emoney' => '💳',
     'pln' => '⚡',
     'voucher' => '🎫',
+    'sms_telpon' => '📞',
     'lainnya' => '📦'
 ];
 
