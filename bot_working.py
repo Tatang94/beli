@@ -49,7 +49,6 @@ Ketik /menu untuk melihat layanan lengkap!
 
 async def menu_command(update, context):
     """Handle /menu command"""
-    from telegram import InlineKeyboardButton, InlineKeyboardMarkup
     
     keyboard = [
         [InlineKeyboardButton("📱 Pulsa", callback_data='pulsa'),
@@ -87,6 +86,7 @@ def main():
         # Try to run the Telegram bot
         try:
             from telegram.ext import Application, CommandHandler, MessageHandler, filters
+            from telegram import InlineKeyboardButton, InlineKeyboardMarkup
             
             if TOKEN and TOKEN != "YOUR_TELEGRAM_BOT_TOKEN":
                 application = Application.builder().token(TOKEN).build()
