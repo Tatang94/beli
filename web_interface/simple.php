@@ -24,7 +24,7 @@ $action = $_GET['action'] ?? 'home';
 $products = [];
 $categories = [];
 
-// 26 Kategori Lengkap sesuai dokumentasi Digiflazz API
+// Kategori aktual dengan produk yang tersedia (setelah redistributrasi)
 $default_categories = [
     ['category' => 'Data', 'count' => 0],
     ['category' => 'Pulsa', 'count' => 0],
@@ -32,26 +32,7 @@ $default_categories = [
     ['category' => 'E-Money', 'count' => 0],
     ['category' => 'PLN', 'count' => 0],
     ['category' => 'Streaming', 'count' => 0],
-    ['category' => 'Voucher', 'count' => 0],
-    ['category' => 'SMS Telpon', 'count' => 0],
-    ['category' => 'PDAM', 'count' => 0],
-    ['category' => 'Gas', 'count' => 0],
-    ['category' => 'Media Sosial', 'count' => 0],
-    ['category' => 'Aktivasi', 'count' => 0],
-    ['category' => 'eSIM', 'count' => 0],
-    ['category' => 'Bundling', 'count' => 0],
-    ['category' => 'PLN Pascabayar', 'count' => 0],
-    ['category' => 'BPJS', 'count' => 0],
-    ['category' => 'Multifinance', 'count' => 0],
-    ['category' => 'PBB', 'count' => 0],
-    ['category' => 'SAMSAT', 'count' => 0],
-    ['category' => 'China Topup', 'count' => 0],
-    ['category' => 'Malaysia Topup', 'count' => 0],
-    ['category' => 'Philippines Topup', 'count' => 0],
-    ['category' => 'Singapore Topup', 'count' => 0],
-    ['category' => 'Thailand Topup', 'count' => 0],
-    ['category' => 'Vietnam Topup', 'count' => 0],
-    ['category' => 'Lainnya', 'count' => 0]
+    ['category' => 'Voucher', 'count' => 0]
 ];
 
 if ($pdo) {
@@ -110,7 +91,7 @@ if ($pdo) {
     $categories = $default_categories;
 }
 
-// Category icons (disesuaikan dengan nama kategori di database)
+// Category icons (hanya kategori aktif)
 $cat_icons = [
     'Data' => '🌐',
     'Pulsa' => '📱',
@@ -118,31 +99,7 @@ $cat_icons = [
     'E-Money' => '💳',
     'PLN' => '⚡',
     'Streaming' => '📺',
-    'Voucher' => '🎫',
-    'SMS Telpon' => '📞',
-    'PDAM' => '💧',
-    'Gas' => '🔥',
-    'Media Sosial' => '📱',
-    'Aktivasi' => '🔑',
-    'eSIM' => '📱',
-    'Bundling' => '📦',
-    'Pascabayar' => '💳',
-    'PLN Pascabayar' => '⚡',
-    'BPJS' => '🏥',
-    'Multifinance' => '🏦',
-    'PBB' => '🏠',
-    'SAMSAT' => '🚗',
-    'China Topup' => '🇨🇳',
-    'Malaysia Topup' => '🇲🇾',
-    'Philippines Topup' => '🇵🇭',
-    'Singapore Topup' => '🇸🇬',
-    'Thailand Topup' => '🇹🇭',
-    'Vietnam Topup' => '🇻🇳',
-    'Lainnya' => '📦',
-    'BPJS' => '🏥',
-    'Multifinance' => '🏦',
-    'PBB' => '🏠',
-    'SAMSAT' => '🚗'
+    'Voucher' => '🎫'
 ];
 
 ?>
