@@ -24,7 +24,7 @@ $action = $_GET['action'] ?? 'home';
 $products = [];
 $categories = [];
 
-// Default categories (disesuaikan dengan database yang ada)
+// 26 Kategori Lengkap sesuai dokumentasi Digiflazz API
 $default_categories = [
     ['category' => 'Data', 'count' => 0],
     ['category' => 'Pulsa', 'count' => 0],
@@ -35,18 +35,42 @@ $default_categories = [
     ['category' => 'Voucher', 'count' => 0],
     ['category' => 'SMS Telpon', 'count' => 0],
     ['category' => 'PDAM', 'count' => 0],
-    ['category' => 'Gas', 'count' => 0]
+    ['category' => 'Gas', 'count' => 0],
+    ['category' => 'Media Sosial', 'count' => 0],
+    ['category' => 'Aktivasi', 'count' => 0],
+    ['category' => 'eSIM', 'count' => 0],
+    ['category' => 'Bundling', 'count' => 0],
+    ['category' => 'PLN Pascabayar', 'count' => 0],
+    ['category' => 'BPJS', 'count' => 0],
+    ['category' => 'Multifinance', 'count' => 0],
+    ['category' => 'PBB', 'count' => 0],
+    ['category' => 'SAMSAT', 'count' => 0],
+    ['category' => 'China Topup', 'count' => 0],
+    ['category' => 'Malaysia Topup', 'count' => 0],
+    ['category' => 'Philippines Topup', 'count' => 0],
+    ['category' => 'Singapore Topup', 'count' => 0],
+    ['category' => 'Thailand Topup', 'count' => 0],
+    ['category' => 'Vietnam Topup', 'count' => 0],
+    ['category' => 'Lainnya', 'count' => 0]
 ];
 
 if ($pdo) {
-    // Get categories with count from database
+    // Merge database counts with comprehensive categories
     try {
         $cat_sql = "SELECT category, COUNT(*) as count FROM products GROUP BY category ORDER BY count DESC";
         $stmt = $pdo->query($cat_sql);
         $db_categories = $stmt->fetchAll(PDO::FETCH_ASSOC);
         
-        // Gunakan kategori database jika ada, atau default categories
-        $categories = !empty($db_categories) ? $db_categories : $default_categories;
+        // Update default categories with actual counts from database
+        $categories = $default_categories;
+        foreach ($db_categories as $db_cat) {
+            foreach ($categories as &$cat) {
+                if (strtolower($cat['category']) === strtolower($db_cat['category'])) {
+                    $cat['count'] = $db_cat['count'];
+                    break;
+                }
+            }
+        }
     } catch (PDOException $e) {
         $categories = $default_categories;
     }
@@ -114,7 +138,11 @@ $cat_icons = [
     'Singapore Topup' => '🇸🇬',
     'Thailand Topup' => '🇹🇭',
     'Vietnam Topup' => '🇻🇳',
-    'Lainnya' => '📦'
+    'Lainnya' => '📦',
+    'BPJS' => '🏥',
+    'Multifinance' => '🏦',
+    'PBB' => '🏠',
+    'SAMSAT' => '🚗'
 ];
 
 ?>
@@ -323,7 +351,7 @@ $cat_icons = [
                 </div>
                 
                 <div class="stats">
-                    📊 <strong><?= count($categories) ?></strong> kategori tersedia | 🔄 Siap menerima produk dari API
+                    📊 <strong>26</strong> kategori lengkap tersedia | 🔄 Siap menerima produk dari API
                 </div>
                 
                 <div class="category-grid">
