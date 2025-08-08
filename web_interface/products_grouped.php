@@ -12,14 +12,24 @@ try {
     $pdo = new PDO("sqlite:bot_database.db");
     $pdo->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
     
-    // Ambil semua produk dikelompokkan berdasarkan kategori dan brand
+    // Ambil semua produk dikelompokkan berdasarkan kategori dan brand dengan sorting
     $query = "
         SELECT category, brand, COUNT(*) as total_products, 
                MIN(price) as min_price, MAX(price) as max_price,
                GROUP_CONCAT(name, ' | ') as sample_products
         FROM products 
+        WHERE type = 'PREPAID' OR type IS NULL OR type = ''
         GROUP BY category, brand 
-        ORDER BY category, total_products DESC
+        ORDER BY 
+            CASE category 
+                WHEN 'Data' THEN 1
+                WHEN 'Pulsa' THEN 2  
+                WHEN 'Game' THEN 3
+                WHEN 'E-Money' THEN 4
+                WHEN 'PLN' THEN 5
+                ELSE 6
+            END,
+            brand ASC
     ";
     $stmt = $pdo->query($query);
     $grouped_products = $stmt->fetchAll(PDO::FETCH_ASSOC);
@@ -269,6 +279,7 @@ $category_icons = [
         
         <div class="nav-buttons">
             <a href="mobile_interface.php" class="nav-btn">🏠 Beranda</a>
+            <a href="products_detailed.php" class="nav-btn">📊 Detail Hierarki</a>
             <a href="mobile_products.php" class="nav-btn">📱 Mobile View</a>
         </div>
         

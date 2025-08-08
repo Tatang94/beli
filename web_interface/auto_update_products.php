@@ -181,6 +181,11 @@ function updateProductsDatabase($products_data, $pdo) {
                 continue;
             }
             
+            // Filter hanya produk PREPAID (sesuai permintaan user)
+            if (isset($product['type']) && strtoupper($product['type']) !== 'PREPAID') {
+                continue; // Skip non-prepaid products
+            }
+            
             // Hitung harga jual dengan margin
             $base_price = (int)$product['price'];
             $selling_price = $base_price + ($base_price * $margin_percentage / 100);

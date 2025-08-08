@@ -693,10 +693,10 @@ if ($pdo) {
                                 <div class="menu-desc">Token Listrik</div>
                             </button>
                             
-                            <button class="menu-item all ripple" onclick="window.location.href='products_grouped.php'">
-                                <div class="menu-icon">📋</div>
-                                <div class="menu-text">Produk Terkelompok</div>
-                                <div class="menu-desc">Dikelompokkan per kategori</div>
+                            <button class="menu-item all ripple" onclick="window.location.href='products_detailed.php'">
+                                <div class="menu-icon">📊</div>
+                                <div class="menu-text">Struktur Hierarki</div>
+                                <div class="menu-desc">Category → Brand → Produk</div>
                             </button>
                         </div>
                     </div>
