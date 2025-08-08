@@ -4,10 +4,9 @@
  * Halaman daftar produk dengan UI/UX mobile-first
  */
 
-require_once 'config.php';
-
-// Session start
+// Session start (harus sebelum output apapun)
 session_start();
+require_once 'config.php';
 
 $category = $_GET['category'] ?? 'all';
 $brand = $_GET['brand'] ?? '';

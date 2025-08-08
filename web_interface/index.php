@@ -4,10 +4,9 @@
  * Interface seperti Telegram tapi diakses via web browser
  */
 
-require_once 'config.php';
-
-// Session start untuk tracking user
+// Session start untuk tracking user (harus sebelum output apapun)
 session_start();
+require_once 'config.php';
 
 // Inisialisasi user ID jika belum ada
 if (!isset($_SESSION['user_id'])) {

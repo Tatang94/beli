@@ -44,9 +44,6 @@ task = "shell.exec"
 args = "cd web_interface && php -S 0.0.0.0:5000"
 waitForPort = 5000
 
-[workflows.workflow.metadata]
-outputType = "webview"
-
 [[workflows.workflow]]
 name = "Product Auto Update"
 author = "agent"

@@ -4,10 +4,9 @@
  * UI/UX yang mobile-first dengan Material Design
  */
 
-require_once 'config.php';
-
-// Session start untuk tracking user
+// Session start untuk tracking user (harus sebelum output apapun)
 session_start();
+require_once 'config.php';
 
 // Inisialisasi user ID jika belum ada
 if (!isset($_SESSION['user_id'])) {
@@ -706,10 +705,10 @@ if ($pdo) {
                                 <div class="menu-desc">442 produk</div>
                             </button>
                             
-                            <button class="menu-item all ripple" onclick="selectCategory('all')">
-                                <div class="menu-icon">🛍️</div>
-                                <div class="menu-text">Semua Produk</div>
-                                <div class="menu-desc">1178 total</div>
+                            <button class="menu-item all ripple" onclick="window.location.href='products_grouped.php'">
+                                <div class="menu-icon">📋</div>
+                                <div class="menu-text">Produk Terkelompok</div>
+                                <div class="menu-desc">Dikelompokkan per kategori</div>
                             </button>
                         </div>
                     </div>
