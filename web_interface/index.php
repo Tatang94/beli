@@ -41,8 +41,8 @@ if ($pdo) {
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Bot Pulsa Digital - PPOB Indonesia</title>
     <script>
-        // Redirect ke mobile interface
-        window.location.href = 'mobile_interface.php';
+        // Redirect ke simple interface
+        window.location.href = 'simple.php';
     </script>
     <style>
         * {
