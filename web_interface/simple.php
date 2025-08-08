@@ -24,18 +24,18 @@ $action = $_GET['action'] ?? 'home';
 $products = [];
 $categories = [];
 
-// Default categories jika database kosong
+// Default categories (disesuaikan dengan database yang ada)
 $default_categories = [
-    ['category' => 'pulsa', 'count' => 0],
-    ['category' => 'data', 'count' => 0],
-    ['category' => 'games', 'count' => 0],
-    ['category' => 'emoney', 'count' => 0],
-    ['category' => 'pln', 'count' => 0],
-    ['category' => 'streaming', 'count' => 0],
-    ['category' => 'voucher', 'count' => 0],
-    ['category' => 'sms_telpon', 'count' => 0],
-    ['category' => 'pdam', 'count' => 0],
-    ['category' => 'gas', 'count' => 0]
+    ['category' => 'Data', 'count' => 0],
+    ['category' => 'Pulsa', 'count' => 0],
+    ['category' => 'Game', 'count' => 0],
+    ['category' => 'E-Money', 'count' => 0],
+    ['category' => 'PLN', 'count' => 0],
+    ['category' => 'Streaming', 'count' => 0],
+    ['category' => 'Voucher', 'count' => 0],
+    ['category' => 'SMS Telpon', 'count' => 0],
+    ['category' => 'PDAM', 'count' => 0],
+    ['category' => 'Gas', 'count' => 0]
 ];
 
 if ($pdo) {
@@ -50,9 +50,6 @@ if ($pdo) {
     } catch (PDOException $e) {
         $categories = $default_categories;
     }
-} else {
-    $categories = $default_categories;
-}
     
     // Get products based on filters
     if ($action == 'products') {
@@ -85,37 +82,39 @@ if ($pdo) {
             // Silent fail
         }
     }
+} else {
+    $categories = $default_categories;
 }
 
-// Category icons (berdasarkan dokumentasi Digiflazz lengkap)
+// Category icons (disesuaikan dengan nama kategori di database)
 $cat_icons = [
-    'pulsa' => '📱',
-    'data' => '🌐', 
-    'games' => '🎮',
-    'emoney' => '💳',
-    'pln' => '⚡',
-    'voucher' => '🎫',
-    'streaming' => '📺',
-    'sms_telpon' => '📞',
-    'pdam' => '💧',
-    'gas' => '🔥',
-    'media_sosial' => '📱',
-    'aktivasi' => '🔑',
-    'esim' => '📱',
-    'bundling' => '📦',
-    'pascabayar' => '💳',
-    'pln_pascabayar' => '⚡',
-    'bpjs' => '🏥',
-    'multifinance' => '🏦',
-    'pbb' => '🏠',
-    'samsat' => '🚗',
-    'china_topup' => '🇨🇳',
-    'malaysia_topup' => '🇲🇾',
-    'philippines_topup' => '🇵🇭',
-    'singapore_topup' => '🇸🇬',
-    'thailand_topup' => '🇹🇭',
-    'vietnam_topup' => '🇻🇳',
-    'lainnya' => '📦'
+    'Data' => '🌐',
+    'Pulsa' => '📱',
+    'Game' => '🎮', 
+    'E-Money' => '💳',
+    'PLN' => '⚡',
+    'Streaming' => '📺',
+    'Voucher' => '🎫',
+    'SMS Telpon' => '📞',
+    'PDAM' => '💧',
+    'Gas' => '🔥',
+    'Media Sosial' => '📱',
+    'Aktivasi' => '🔑',
+    'eSIM' => '📱',
+    'Bundling' => '📦',
+    'Pascabayar' => '💳',
+    'PLN Pascabayar' => '⚡',
+    'BPJS' => '🏥',
+    'Multifinance' => '🏦',
+    'PBB' => '🏠',
+    'SAMSAT' => '🚗',
+    'China Topup' => '🇨🇳',
+    'Malaysia Topup' => '🇲🇾',
+    'Philippines Topup' => '🇵🇭',
+    'Singapore Topup' => '🇸🇬',
+    'Thailand Topup' => '🇹🇭',
+    'Vietnam Topup' => '🇻🇳',
+    'Lainnya' => '📦'
 ];
 
 ?>
