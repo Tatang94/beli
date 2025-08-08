@@ -10,19 +10,39 @@ require_once 'config.php';
 session_start();
 
 $category = $_GET['category'] ?? 'all';
+$brand = $_GET['brand'] ?? '';
+$search_query = $_GET['search'] ?? '';
 
 // Database connection
 try {
     $pdo = new PDO("sqlite:bot_database.db");
     $pdo->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
     
-    // Get products by category
-    if ($category === 'all') {
-        $stmt = $pdo->query("SELECT * FROM products ORDER BY category, name LIMIT 50");
-    } else {
-        $stmt = $pdo->prepare("SELECT * FROM products WHERE category = ? ORDER BY name LIMIT 50");
-        $stmt->execute([$category]);
+    // Build query based on filters
+    $where_conditions = [];
+    $params = [];
+    
+    if ($category !== 'all') {
+        $where_conditions[] = "category = ?";
+        $params[] = $category;
     }
+    
+    if (!empty($brand)) {
+        $where_conditions[] = "brand = ?";
+        $params[] = $brand;
+    }
+    
+    if (!empty($search_query)) {
+        $where_conditions[] = "(name LIKE ? OR brand LIKE ?)";
+        $params[] = "%$search_query%";
+        $params[] = "%$search_query%";
+    }
+    
+    $where_clause = empty($where_conditions) ? "" : "WHERE " . implode(" AND ", $where_conditions);
+    $query = "SELECT * FROM products $where_clause ORDER BY category, brand, name LIMIT 50";
+    
+    $stmt = $pdo->prepare($query);
+    $stmt->execute($params);
     $products = $stmt->fetchAll(PDO::FETCH_ASSOC);
     
     // Get categories
@@ -41,11 +61,16 @@ $category_names = [
     'emoney' => 'E-Money',
     'pln' => 'Token PLN',
     'voucher' => 'Voucher',
-    'streaming' => 'Streaming',
+    'lainnya' => 'Lainnya',
     'all' => 'Semua Produk'
 ];
 
-$current_category_name = $category_names[$category] ?? 'Produk';
+// Determine page title
+if (!empty($brand)) {
+    $current_category_name = "Produk $brand";
+} else {
+    $current_category_name = $category_names[$category] ?? 'Produk';
+}
 ?>
 <!DOCTYPE html>
 <html lang="id">

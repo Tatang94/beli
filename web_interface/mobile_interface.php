@@ -355,6 +355,134 @@ if ($pdo) {
             box-shadow: 0 4px 12px rgba(253, 187, 45, 0.3);
         }
         
+        .menu-item.pln {
+            background: linear-gradient(135deg, #fdcb6e 0%, #e17055 100%);
+            box-shadow: 0 4px 12px rgba(253, 203, 110, 0.3);
+        }
+        
+        .menu-item.voucher {
+            background: linear-gradient(135deg, #fd79a8 0%, #e84393 100%);
+            box-shadow: 0 4px 12px rgba(253, 121, 168, 0.3);
+        }
+        
+        .menu-item.lainnya {
+            background: linear-gradient(135deg, #81ecec 0%, #00b894 100%);
+            box-shadow: 0 4px 12px rgba(129, 236, 236, 0.3);
+        }
+        
+        .menu-item.all {
+            background: linear-gradient(135deg, #fab1a0 0%, #e17055 100%);
+            box-shadow: 0 4px 12px rgba(250, 177, 160, 0.3);
+        }
+        
+        /* Secondary Menu Styling */
+        .menu-grid.secondary .menu-item {
+            padding: 16px 12px;
+            min-height: 85px;
+        }
+        
+        .menu-grid.secondary .menu-icon {
+            font-size: 24px;
+        }
+        
+        .menu-grid.secondary .menu-text {
+            font-size: 12px;
+        }
+        
+        .menu-grid.secondary .menu-desc {
+            font-size: 10px;
+        }
+        
+        /* Brand Carousel */
+        .brand-carousel {
+            display: flex;
+            gap: 12px;
+            overflow-x: auto;
+            padding: 4px 0 12px 0;
+            scrollbar-width: none;
+            -ms-overflow-style: none;
+        }
+        
+        .brand-carousel::-webkit-scrollbar {
+            display: none;
+        }
+        
+        .brand-chip {
+            background: white;
+            border: 1px solid #e0e0e0;
+            border-radius: 12px;
+            padding: 12px 16px;
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            min-width: 140px;
+            flex-shrink: 0;
+        }
+        
+        .brand-chip:hover {
+            border-color: #667eea;
+            box-shadow: 0 2px 8px rgba(102, 126, 234, 0.15);
+        }
+        
+        .brand-chip:active {
+            transform: scale(0.98);
+        }
+        
+        .brand-logo {
+            width: 32px;
+            height: 32px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: 700;
+            font-size: 14px;
+            color: white;
+        }
+        
+        .brand-logo.telkomsel {
+            background: linear-gradient(135deg, #e74c3c 0%, #c0392b 100%);
+        }
+        
+        .brand-logo.indosat {
+            background: linear-gradient(135deg, #f1c40f 0%, #f39c12 100%);
+        }
+        
+        .brand-logo.tri {
+            background: linear-gradient(135deg, #9b59b6 0%, #8e44ad 100%);
+        }
+        
+        .brand-logo.axis {
+            background: linear-gradient(135deg, #3498db 0%, #2980b9 100%);
+        }
+        
+        .brand-logo.smartfren {
+            background: linear-gradient(135deg, #e67e22 0%, #d35400 100%);
+        }
+        
+        .brand-logo.xl {
+            background: linear-gradient(135deg, #1abc9c 0%, #16a085 100%);
+        }
+        
+        .brand-info {
+            display: flex;
+            flex-direction: column;
+            gap: 2px;
+        }
+        
+        .brand-name {
+            font-size: 13px;
+            font-weight: 600;
+            color: #333;
+        }
+        
+        .brand-count {
+            font-size: 11px;
+            color: #666;
+        }
+        
         /* Bottom Input */
         .input-container {
             background: white;
@@ -526,30 +654,116 @@ if ($pdo) {
                         <strong>Pilih layanan yang Anda butuhkan:</strong>
                     </div>
                     
-                    <div class="menu-grid">
-                        <button class="menu-item pulsa ripple" onclick="selectCategory('pulsa')">
-                            <div class="menu-icon">📱</div>
-                            <div class="menu-text">Pulsa</div>
-                            <div class="menu-desc">Semua Operator</div>
-                        </button>
-                        
+                    <!-- Primary Categories Grid -->
+                    <div class="menu-grid primary-categories">
                         <button class="menu-item data ripple" onclick="selectCategory('data')">
                             <div class="menu-icon">🌐</div>
                             <div class="menu-text">Paket Data</div>
-                            <div class="menu-desc">Internet & Kuota</div>
+                            <div class="menu-desc">542 produk • Semua Operator</div>
                         </button>
                         
                         <button class="menu-item games ripple" onclick="selectCategory('games')">
                             <div class="menu-icon">🎮</div>
                             <div class="menu-text">Voucher Game</div>
-                            <div class="menu-desc">Mobile Legends, FF, PUBG</div>
+                            <div class="menu-desc">133 produk • ML, FF, PUBG</div>
                         </button>
                         
                         <button class="menu-item emoney ripple" onclick="selectCategory('emoney')">
                             <div class="menu-icon">💳</div>
                             <div class="menu-text">E-Money</div>
-                            <div class="menu-desc">OVO, DANA, GoPay</div>
+                            <div class="menu-desc">40 produk • OVO, DANA, GoPay</div>
                         </button>
+                        
+                        <button class="menu-item pulsa ripple" onclick="selectCategory('pulsa')">
+                            <div class="menu-icon">📱</div>
+                            <div class="menu-text">Pulsa</div>
+                            <div class="menu-desc">6 produk • Semua Operator</div>
+                        </button>
+                    </div>
+                    
+                    <!-- Additional Categories -->
+                    <div class="additional-categories" style="margin-top: 16px;">
+                        <div class="category-title" style="color: #666; font-size: 13px; margin-bottom: 12px; font-weight: 500;">
+                            <span class="material-icons" style="font-size: 16px; vertical-align: middle; margin-right: 4px;">category</span>
+                            Kategori Lainnya
+                        </div>
+                        <div class="menu-grid secondary">
+                            <button class="menu-item pln ripple" onclick="selectCategory('pln')">
+                                <div class="menu-icon">⚡</div>
+                                <div class="menu-text">Token PLN</div>
+                                <div class="menu-desc">7 produk</div>
+                            </button>
+                            
+                            <button class="menu-item voucher ripple" onclick="selectCategory('voucher')">
+                                <div class="menu-icon">🎫</div>
+                                <div class="menu-text">Voucher</div>
+                                <div class="menu-desc">8 produk</div>
+                            </button>
+                            
+                            <button class="menu-item lainnya ripple" onclick="selectCategory('lainnya')">
+                                <div class="menu-icon">📦</div>
+                                <div class="menu-text">Lainnya</div>
+                                <div class="menu-desc">442 produk</div>
+                            </button>
+                            
+                            <button class="menu-item all ripple" onclick="selectCategory('all')">
+                                <div class="menu-icon">🛍️</div>
+                                <div class="menu-text">Semua Produk</div>
+                                <div class="menu-desc">1178 total</div>
+                            </button>
+                        </div>
+                    </div>
+                    
+                    <!-- Popular Brands Section -->
+                    <div class="popular-brands" style="margin-top: 20px;">
+                        <div class="category-title" style="color: #666; font-size: 13px; margin-bottom: 12px; font-weight: 500;">
+                            <span class="material-icons" style="font-size: 16px; vertical-align: middle; margin-right: 4px;">star</span>
+                            Brand Populer
+                        </div>
+                        <div class="brand-carousel">
+                            <button class="brand-chip" onclick="selectBrand('TELKOMSEL')">
+                                <span class="brand-logo telkomsel">T</span>
+                                <span class="brand-info">
+                                    <span class="brand-name">Telkomsel</span>
+                                    <span class="brand-count">277 produk</span>
+                                </span>
+                            </button>
+                            <button class="brand-chip" onclick="selectBrand('INDOSAT')">
+                                <span class="brand-logo indosat">I</span>
+                                <span class="brand-info">
+                                    <span class="brand-name">Indosat</span>
+                                    <span class="brand-count">203 produk</span>
+                                </span>
+                            </button>
+                            <button class="brand-chip" onclick="selectBrand('TRI')">
+                                <span class="brand-logo tri">3</span>
+                                <span class="brand-info">
+                                    <span class="brand-name">Tri</span>
+                                    <span class="brand-count">161 produk</span>
+                                </span>
+                            </button>
+                            <button class="brand-chip" onclick="selectBrand('AXIS')">
+                                <span class="brand-logo axis">A</span>
+                                <span class="brand-info">
+                                    <span class="brand-name">Axis</span>
+                                    <span class="brand-count">68 produk</span>
+                                </span>
+                            </button>
+                            <button class="brand-chip" onclick="selectBrand('SMARTFREN')">
+                                <span class="brand-logo smartfren">S</span>
+                                <span class="brand-info">
+                                    <span class="brand-name">Smartfren</span>
+                                    <span class="brand-count">66 produk</span>
+                                </span>
+                            </button>
+                            <button class="brand-chip" onclick="selectBrand('XL')">
+                                <span class="brand-logo xl">XL</span>
+                                <span class="brand-info">
+                                    <span class="brand-name">XL</span>
+                                    <span class="brand-count">53 produk</span>
+                                </span>
+                            </button>
+                        </div>
                     </div>
                     
                     <div class="message-time" id="messageTime"></div>
@@ -589,7 +803,11 @@ if ($pdo) {
                 'pulsa': 'Pulsa',
                 'data': 'Paket Data',
                 'games': 'Voucher Game',
-                'emoney': 'E-Money'
+                'emoney': 'E-Money',
+                'pln': 'Token PLN',
+                'voucher': 'Voucher',
+                'lainnya': 'Lainnya',
+                'all': 'Semua Produk'
             };
             
             addUserMessage(`Saya ingin membeli ${categoryNames[category]}`);
@@ -622,6 +840,24 @@ if ($pdo) {
                     addBotMessage('Terima kasih atas pesan Anda. Tim customer service kami akan segera merespons.');
                 }, 1000);
             }
+        }
+        
+        // Brand selection
+        function selectBrand(brand) {
+            addUserMessage(`Saya ingin melihat produk ${brand}`);
+            
+            setTimeout(() => {
+                addBotMessage(`Sedang memuat produk dari brand <strong>${brand}</strong>...
+                <div class="loading-dots">
+                    <span></span>
+                    <span></span>
+                    <span></span>
+                </div>`);
+                
+                setTimeout(() => {
+                    window.location.href = `mobile_products.php?brand=${brand}`;
+                }, 1500);
+            }, 500);
         }
         
         // Add user message
