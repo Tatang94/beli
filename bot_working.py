@@ -13,6 +13,10 @@ try:
     from telegram.ext import Application, CommandHandler, MessageHandler, filters
     from telegram import InlineKeyboardButton, InlineKeyboardMarkup
 except ImportError:
+    Application = None
+    CommandHandler = None
+    MessageHandler = None
+    filters = None
     InlineKeyboardButton = None
     InlineKeyboardMarkup = None
 
