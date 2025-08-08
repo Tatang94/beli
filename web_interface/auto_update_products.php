@@ -64,13 +64,32 @@ function categorizeProduct($product_name, $api_category = '', $api_type = '') {
     $api_category_lower = strtolower($api_category);
     $api_type_lower = strtolower($api_type);
     
-    // Pulsa (hanya pulsa murni, bukan paket data)
+    // Pulsa - deteksi berdasarkan brand + nominal atau kata pulsa
+    $pulsa_brands = ['telkomsel', 'indosat', 'xl', 'axis', 'tri', 'smartfren', 'by.u'];
+    $is_pulsa_brand = false;
+    
+    foreach ($pulsa_brands as $brand) {
+        if (strpos($name_lower, $brand) !== false) {
+            $is_pulsa_brand = true;
+            break;
+        }
+    }
+    
+    // Pulsa jika: ada kata "pulsa" ATAU (brand pulsa + tidak ada kata data/internet/kuota/paket/gb/mb)
     if ((strpos($name_lower, 'pulsa') !== false && 
          strpos($name_lower, 'data') === false && 
          strpos($name_lower, 'internet') === false &&
          strpos($name_lower, 'kuota') === false &&
          strpos($name_lower, 'paket') === false) ||
-         strpos($api_category_lower, 'pulsa') !== false) return 'pulsa';
+        ($is_pulsa_brand && 
+         strpos($name_lower, 'data') === false && 
+         strpos($name_lower, 'internet') === false &&
+         strpos($name_lower, 'kuota') === false &&
+         strpos($name_lower, 'paket') === false &&
+         strpos($name_lower, 'gb') === false &&
+         strpos($name_lower, 'mb') === false &&
+         preg_match('/\b\d+\.?\d*\b/', $name_lower)) || // ada angka (nominal)
+         strpos($api_category_lower, 'pulsa') !== false) return 'Pulsa';
     
     // Data & Internet
     if (strpos($name_lower, 'data') !== false || 
@@ -79,7 +98,7 @@ function categorizeProduct($product_name, $api_category = '', $api_type = '') {
         (strpos($name_lower, 'paket') !== false && strpos($name_lower, 'data') !== false) ||
         strpos($name_lower, 'gb') !== false ||
         strpos($name_lower, 'mb') !== false ||
-        strpos($name_lower, 'unlimited') !== false) return 'data';
+        strpos($name_lower, 'unlimited') !== false) return 'Data';
     
     // Games & Voucher Game
     if (strpos($name_lower, 'game') !== false || 
@@ -97,7 +116,7 @@ function categorizeProduct($product_name, $api_category = '', $api_type = '') {
         strpos($name_lower, 'aov') !== false ||
         strpos($name_lower, 'call of duty') !== false ||
         strpos($name_lower, 'cod') !== false ||
-        strpos($name_lower, 'garena') !== false) return 'games';
+        strpos($name_lower, 'garena') !== false) return 'Game';
     
     // E-Money & Digital Wallet (lebih lengkap)
     if (strpos($name_lower, 'ovo') !== false || 
@@ -112,13 +131,13 @@ function categorizeProduct($product_name, $api_category = '', $api_type = '') {
         strpos($name_lower, 'brizzi') !== false ||
         strpos($name_lower, 'flazz') !== false ||
         strpos($name_lower, 'e-toll') !== false ||
-        strpos($name_lower, 'mandiri e-money') !== false) return 'emoney';
+        strpos($name_lower, 'mandiri e-money') !== false) return 'E-Money';
     
     // PLN & Token Listrik
     if (strpos($name_lower, 'pln') !== false || 
         strpos($name_lower, 'listrik') !== false || 
         strpos($name_lower, 'token') !== false ||
-        strpos($api_category_lower, 'pln') !== false) return 'pln';
+        strpos($api_category_lower, 'pln') !== false) return 'PLN';
     
     // Streaming & TV
     if (strpos($name_lower, 'netflix') !== false ||
@@ -133,24 +152,24 @@ function categorizeProduct($product_name, $api_category = '', $api_type = '') {
         strpos($name_lower, 'apple music') !== false ||
         strpos($name_lower, 'hbo') !== false ||
         strpos($name_lower, 'mola tv') !== false ||
-        strpos($name_lower, 'vision+') !== false) return 'streaming';
+        strpos($name_lower, 'vision+') !== false) return 'Streaming';
     
     // PDAM & Air
     if (strpos($name_lower, 'pdam') !== false ||
         strpos($name_lower, 'air') !== false ||
         strpos($name_lower, 'aetra') !== false ||
         strpos($name_lower, 'palyja') !== false ||
-        strpos($api_category_lower, 'pdam') !== false) return 'pdam';
+        strpos($api_category_lower, 'pdam') !== false) return 'PDAM';
     
     // Gas PGN
     if (strpos($name_lower, 'gas') !== false ||
-        strpos($name_lower, 'pgn') !== false) return 'gas';
+        strpos($name_lower, 'pgn') !== false) return 'Gas';
     
     // Voucher Google Play, Apple, dll
     if (strpos($name_lower, 'voucher') !== false ||
         strpos($name_lower, 'google play') !== false ||
         strpos($name_lower, 'apple') !== false ||
-        strpos($name_lower, 'itunes') !== false) return 'voucher';
+        strpos($name_lower, 'itunes') !== false) return 'Voucher';
     
     // SMS & Telepon
     if (strpos($name_lower, 'sms') !== false || 
@@ -159,27 +178,27 @@ function categorizeProduct($product_name, $api_category = '', $api_type = '') {
         strpos($name_lower, 'paket sms') !== false ||
         strpos($name_lower, 'paket telepon') !== false ||
         strpos($name_lower, 'paket telpon') !== false ||
-        strpos($name_lower, 'unlimited telpon') !== false) return 'sms_telpon';
+        strpos($name_lower, 'unlimited telpon') !== false) return 'SMS Telpon';
     
     // Media Sosial
     if (strpos($name_lower, 'facebook') !== false ||
         strpos($name_lower, 'instagram') !== false ||
         strpos($name_lower, 'twitter') !== false ||
         strpos($name_lower, 'tiktok') !== false ||
-        strpos($name_lower, 'whatsapp') !== false) return 'media_sosial';
+        strpos($name_lower, 'whatsapp') !== false) return 'Media Sosial';
     
     // Aktivasi & Masa Aktif
     if (strpos($name_lower, 'aktivasi') !== false ||
         strpos($name_lower, 'masa aktif') !== false ||
-        strpos($name_lower, 'extend') !== false) return 'aktivasi';
+        strpos($name_lower, 'extend') !== false) return 'Aktivasi';
     
     // eSIM
     if (strpos($name_lower, 'esim') !== false ||
-        strpos($name_lower, 'e-sim') !== false) return 'esim';
+        strpos($name_lower, 'e-sim') !== false) return 'eSIM';
     
     // Bundling Packages
     if (strpos($name_lower, 'bundling') !== false ||
-        strpos($name_lower, 'combo') !== false) return 'bundling';
+        strpos($name_lower, 'combo') !== false) return 'Bundling';
     
     // Pascabayar categories
     if (strpos($api_category_lower, 'pascabayar') !== false ||
@@ -187,25 +206,25 @@ function categorizeProduct($product_name, $api_category = '', $api_type = '') {
         strpos($name_lower, 'pascabayar') !== false ||
         strpos($name_lower, 'tagihan') !== false) {
         
-        if (strpos($name_lower, 'pln') !== false) return 'pln_pascabayar';
-        if (strpos($name_lower, 'pdam') !== false) return 'pdam';
-        if (strpos($name_lower, 'bpjs') !== false) return 'bpjs';
-        if (strpos($name_lower, 'multifinance') !== false) return 'multifinance';
-        if (strpos($name_lower, 'pbb') !== false) return 'pbb';
-        if (strpos($name_lower, 'samsat') !== false) return 'samsat';
+        if (strpos($name_lower, 'pln') !== false) return 'PLN Pascabayar';
+        if (strpos($name_lower, 'pdam') !== false) return 'PDAM';
+        if (strpos($name_lower, 'bpjs') !== false) return 'BPJS';
+        if (strpos($name_lower, 'multifinance') !== false) return 'Multifinance';
+        if (strpos($name_lower, 'pbb') !== false) return 'PBB';
+        if (strpos($name_lower, 'samsat') !== false) return 'SAMSAT';
         
-        return 'pascabayar';
+        return 'Lainnya';
     }
     
     // International Top Up
-    if (strpos($name_lower, 'china') !== false) return 'china_topup';
-    if (strpos($name_lower, 'malaysia') !== false) return 'malaysia_topup';
-    if (strpos($name_lower, 'philippines') !== false) return 'philippines_topup';
-    if (strpos($name_lower, 'singapore') !== false) return 'singapore_topup';
-    if (strpos($name_lower, 'thailand') !== false) return 'thailand_topup';
-    if (strpos($name_lower, 'vietnam') !== false) return 'vietnam_topup';
+    if (strpos($name_lower, 'china') !== false) return 'China Topup';
+    if (strpos($name_lower, 'malaysia') !== false) return 'Malaysia Topup';
+    if (strpos($name_lower, 'philippines') !== false) return 'Philippines Topup';
+    if (strpos($name_lower, 'singapore') !== false) return 'Singapore Topup';
+    if (strpos($name_lower, 'thailand') !== false) return 'Thailand Topup';
+    if (strpos($name_lower, 'vietnam') !== false) return 'Vietnam Topup';
     
-    return 'lainnya';
+    return 'Lainnya';
 }
 
 // Function untuk ambil data produk dari Digiflazz API
