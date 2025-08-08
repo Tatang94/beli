@@ -24,15 +24,35 @@ $action = $_GET['action'] ?? 'home';
 $products = [];
 $categories = [];
 
+// Default categories jika database kosong
+$default_categories = [
+    ['category' => 'pulsa', 'count' => 0],
+    ['category' => 'data', 'count' => 0],
+    ['category' => 'games', 'count' => 0],
+    ['category' => 'emoney', 'count' => 0],
+    ['category' => 'pln', 'count' => 0],
+    ['category' => 'streaming', 'count' => 0],
+    ['category' => 'voucher', 'count' => 0],
+    ['category' => 'sms_telpon', 'count' => 0],
+    ['category' => 'pdam', 'count' => 0],
+    ['category' => 'gas', 'count' => 0]
+];
+
 if ($pdo) {
-    // Get categories with count
+    // Get categories with count from database
     try {
         $cat_sql = "SELECT category, COUNT(*) as count FROM products GROUP BY category ORDER BY count DESC";
         $stmt = $pdo->query($cat_sql);
-        $categories = $stmt->fetchAll(PDO::FETCH_ASSOC);
+        $db_categories = $stmt->fetchAll(PDO::FETCH_ASSOC);
+        
+        // Gunakan kategori database jika ada, atau default categories
+        $categories = !empty($db_categories) ? $db_categories : $default_categories;
     } catch (PDOException $e) {
-        // Silent fail
+        $categories = $default_categories;
     }
+} else {
+    $categories = $default_categories;
+}
     
     // Get products based on filters
     if ($action == 'products') {
@@ -304,7 +324,7 @@ $cat_icons = [
                 </div>
                 
                 <div class="stats">
-                    📊 <strong><?= count($categories) ?></strong> kategori produk tersedia
+                    📊 <strong><?= count($categories) ?></strong> kategori tersedia | 🔄 Siap menerima produk dari API
                 </div>
                 
                 <div class="category-grid">
