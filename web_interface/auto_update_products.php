@@ -75,12 +75,16 @@ function categorizeProduct($product_name, $api_category = '', $api_type = '') {
         }
     }
     
-    // Pulsa jika: ada kata "pulsa" ATAU (brand pulsa + tidak ada kata data/internet/kuota/paket/gb/mb)
+    // PULSA - HANYA kredit pulsa murni (tidak termasuk paket/data/sms/telepon)
     if ((strpos($name_lower, 'pulsa') !== false && 
          strpos($name_lower, 'data') === false && 
          strpos($name_lower, 'internet') === false &&
          strpos($name_lower, 'kuota') === false &&
-         strpos($name_lower, 'paket') === false) ||
+         strpos($name_lower, 'paket') === false &&
+         strpos($name_lower, 'sms') === false &&
+         strpos($name_lower, 'telepon') === false &&
+         strpos($name_lower, 'telpon') === false &&
+         strpos($name_lower, 'unlimited') === false) ||
         ($is_pulsa_brand && 
          strpos($name_lower, 'data') === false && 
          strpos($name_lower, 'internet') === false &&
@@ -88,17 +92,37 @@ function categorizeProduct($product_name, $api_category = '', $api_type = '') {
          strpos($name_lower, 'paket') === false &&
          strpos($name_lower, 'gb') === false &&
          strpos($name_lower, 'mb') === false &&
-         preg_match('/\b\d+\.?\d*\b/', $name_lower)) || // ada angka (nominal)
-         strpos($api_category_lower, 'pulsa') !== false) return 'Pulsa';
+         strpos($name_lower, 'sms') === false &&
+         strpos($name_lower, 'telepon') === false &&
+         strpos($name_lower, 'telpon') === false &&
+         strpos($name_lower, 'unlimited') === false &&
+         preg_match('/\b\d+\.?\d*\b/', $name_lower)) || // ada angka (nominal) tapi bukan paket
+         (strpos($api_category_lower, 'pulsa') !== false && 
+          strpos($name_lower, 'paket') === false &&
+          strpos($name_lower, 'data') === false &&
+          strpos($name_lower, 'sms') === false &&
+          strpos($name_lower, 'telepon') === false)) return 'Pulsa';
     
-    // Data & Internet
-    if (strpos($name_lower, 'data') !== false || 
-        strpos($name_lower, 'internet') !== false ||
-        strpos($name_lower, 'kuota') !== false ||
-        (strpos($name_lower, 'paket') !== false && strpos($name_lower, 'data') !== false) ||
-        strpos($name_lower, 'gb') !== false ||
-        strpos($name_lower, 'mb') !== false ||
-        strpos($name_lower, 'unlimited') !== false) return 'Data';
+    // DATA - HANYA paket data/internet/kuota (tidak termasuk SMS/telepon)
+    if ((strpos($name_lower, 'data') !== false ||
+         strpos($name_lower, 'internet') !== false ||
+         strpos($name_lower, 'kuota') !== false ||
+         strpos($name_lower, 'gb') !== false ||
+         strpos($name_lower, 'mb') !== false ||
+         (strpos($name_lower, 'paket') !== false && 
+          (strpos($name_lower, 'data') !== false || 
+           strpos($name_lower, 'internet') !== false ||
+           strpos($name_lower, 'kuota') !== false ||
+           strpos($name_lower, 'gb') !== false ||
+           strpos($name_lower, 'mb') !== false)) ||
+         (strpos($name_lower, 'unlimited') !== false && 
+          strpos($name_lower, 'data') !== false)) &&
+        // PASTIKAN bukan paket SMS/Telepon
+        strpos($name_lower, 'sms') === false &&
+        strpos($name_lower, 'telepon') === false &&
+        strpos($name_lower, 'telpon') === false &&
+        strpos($name_lower, 'voice') === false &&
+        strpos($name_lower, 'call') === false) return 'Data';
     
     // Games & Voucher Game
     if (strpos($name_lower, 'game') !== false || 
@@ -171,14 +195,30 @@ function categorizeProduct($product_name, $api_category = '', $api_type = '') {
         strpos($name_lower, 'apple') !== false ||
         strpos($name_lower, 'itunes') !== false) return 'Voucher';
     
-    // SMS & Telepon
-    if (strpos($name_lower, 'sms') !== false || 
-        strpos($name_lower, 'telepon') !== false ||
-        strpos($name_lower, 'telpon') !== false ||
-        strpos($name_lower, 'paket sms') !== false ||
-        strpos($name_lower, 'paket telepon') !== false ||
-        strpos($name_lower, 'paket telpon') !== false ||
-        strpos($name_lower, 'unlimited telpon') !== false) return 'SMS Telpon';
+    // SMS TELPON - HANYA paket SMS dan telepon (tidak termasuk data/pulsa biasa)
+    if ((strpos($name_lower, 'sms') !== false || 
+         strpos($name_lower, 'telepon') !== false ||
+         strpos($name_lower, 'telpon') !== false ||
+         strpos($name_lower, 'voice') !== false ||
+         strpos($name_lower, 'call') !== false ||
+         (strpos($name_lower, 'paket') !== false && 
+          (strpos($name_lower, 'sms') !== false || 
+           strpos($name_lower, 'telepon') !== false || 
+           strpos($name_lower, 'telpon') !== false ||
+           strpos($name_lower, 'voice') !== false ||
+           strpos($name_lower, 'call') !== false)) ||
+         (strpos($name_lower, 'unlimited') !== false && 
+          (strpos($name_lower, 'telepon') !== false ||
+           strpos($name_lower, 'telpon') !== false ||
+           strpos($name_lower, 'sms') !== false ||
+           strpos($name_lower, 'voice') !== false ||
+           strpos($name_lower, 'call') !== false))) &&
+        // PASTIKAN bukan data/pulsa biasa
+        strpos($name_lower, 'data') === false &&
+        strpos($name_lower, 'internet') === false &&
+        strpos($name_lower, 'kuota') === false &&
+        strpos($name_lower, 'gb') === false &&
+        strpos($name_lower, 'mb') === false) return 'SMS Telpon';
     
     // Media Sosial
     if (strpos($name_lower, 'facebook') !== false ||
@@ -196,9 +236,16 @@ function categorizeProduct($product_name, $api_category = '', $api_type = '') {
     if (strpos($name_lower, 'esim') !== false ||
         strpos($name_lower, 'e-sim') !== false) return 'eSIM';
     
-    // Bundling Packages
+    // BUNDLING - Paket gabungan (pulsa+data+sms, dll)
     if (strpos($name_lower, 'bundling') !== false ||
-        strpos($name_lower, 'combo') !== false) return 'Bundling';
+        strpos($name_lower, 'combo') !== false ||
+        (strpos($name_lower, 'paket') !== false && 
+         ((strpos($name_lower, 'pulsa') !== false && strpos($name_lower, 'data') !== false) ||
+          (strpos($name_lower, 'pulsa') !== false && strpos($name_lower, 'sms') !== false) ||
+          (strpos($name_lower, 'data') !== false && strpos($name_lower, 'sms') !== false) ||
+          (strpos($name_lower, 'data') !== false && strpos($name_lower, 'telepon') !== false))) ||
+        (strpos($name_lower, 'all in one') !== false) ||
+        (strpos($name_lower, 'lengkap') !== false && strpos($name_lower, 'paket') !== false)) return 'Bundling';
     
     // Pascabayar categories
     if (strpos($api_category_lower, 'pascabayar') !== false ||
