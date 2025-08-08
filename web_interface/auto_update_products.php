@@ -181,9 +181,9 @@ function updateProductsDatabase($products_data, $pdo) {
                 continue;
             }
             
-            // Filter hanya produk PREPAID (sesuai permintaan user)
-            if (isset($product['type']) && strtoupper($product['type']) !== 'PREPAID') {
-                continue; // Skip non-prepaid products
+            // Filter untuk skip POSTPAID saja (terima semua yang lain)
+            if (isset($product['type']) && strtoupper($product['type']) === 'POSTPAID') {
+                continue; // Skip postpaid products only
             }
             
             // Hitung harga jual dengan margin

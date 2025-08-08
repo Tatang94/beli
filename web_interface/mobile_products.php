@@ -38,7 +38,7 @@ try {
     }
     
     $where_clause = empty($where_conditions) ? "" : "WHERE " . implode(" AND ", $where_conditions);
-    $query = "SELECT * FROM products $where_clause ORDER BY category, brand, name LIMIT 100";
+    $query = "SELECT * FROM products $where_clause ORDER BY category, brand, name LIMIT 500";
     
     $stmt = $pdo->prepare($query);
     $stmt->execute($params);

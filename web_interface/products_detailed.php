@@ -30,7 +30,7 @@ try {
     
     $query = "
         SELECT * FROM products 
-        WHERE (type = 'PREPAID' OR type IS NULL OR type = '') 
+        WHERE (type != 'POSTPAID' OR type IS NULL OR type = '') 
         $category_where
         ORDER BY 
             CASE category 

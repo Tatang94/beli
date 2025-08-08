@@ -18,7 +18,7 @@ try {
                MIN(price) as min_price, MAX(price) as max_price,
                GROUP_CONCAT(name, ' | ') as sample_products
         FROM products 
-        WHERE type = 'PREPAID' OR type IS NULL OR type = ''
+        WHERE type != 'POSTPAID' OR type IS NULL OR type = ''
         GROUP BY category, brand 
         ORDER BY 
             CASE category 
