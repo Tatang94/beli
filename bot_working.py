@@ -62,6 +62,19 @@ async def menu_command(update, context):
     reply_markup = InlineKeyboardMarkup(keyboard)
     await update.message.reply_text("🏪 *PILIH LAYANAN:*", reply_markup=reply_markup, parse_mode='Markdown')
 
+async def handle_text_message(update, context):
+    """Handle general text messages"""
+    message_text = update.message.text.lower()
+    
+    if any(keyword in message_text for keyword in ['pulsa', 'isi ulang']):
+        response = "📱 *LAYANAN PULSA*\n\nKetik /menu untuk melihat daftar lengkap!"
+    elif any(keyword in message_text for keyword in ['data', 'internet']):
+        response = "🌐 *PAKET DATA*\n\nKetik /menu untuk melihat paket lengkap!"
+    else:
+        response = "🤖 Ketik /start untuk memulai atau /menu untuk melihat layanan."
+    
+    await update.message.reply_text(response, parse_mode='Markdown')
+
 def main():
     """Main bot function with Telegram integration"""
     try:
@@ -73,20 +86,27 @@ def main():
         
         # Try to run the Telegram bot
         try:
-            from telegram.ext import Application, CommandHandler
+            from telegram.ext import Application, CommandHandler, MessageHandler, filters
             
-            application = Application.builder().token(TOKEN).build()
-            application.add_handler(CommandHandler("start", start_command))
-            application.add_handler(CommandHandler("menu", menu_command))
-            
-            logger.info("Telegram Bot handlers configured successfully!")
-            logger.info("Bot is now ready to receive commands: /start, /menu")
-            
-            # Run in polling mode
-            application.run_polling(allowed_updates=['message'])
-            
-        except ImportError:
-            logger.info("Telegram library not fully configured, running in status mode")
+            if TOKEN and TOKEN != "YOUR_TELEGRAM_BOT_TOKEN":
+                application = Application.builder().token(TOKEN).build()
+                application.add_handler(CommandHandler("start", start_command))
+                application.add_handler(CommandHandler("menu", menu_command))
+                application.add_handler(MessageHandler(filters.TEXT & ~filters.COMMAND, handle_text_message))
+                
+                logger.info("Telegram Bot handlers configured successfully!")
+                logger.info("Bot is now ready to receive commands: /start, /menu")
+                logger.info(f"Bot will run with token: ...{TOKEN[-10:]}")
+                
+                # Run in polling mode
+                application.run_polling(allowed_updates=['message'])
+            else:
+                logger.info("Bot token not properly configured, running in demo mode")
+                
+        except ImportError as e:
+            logger.info(f"Telegram library import issue: {e}")
+        except Exception as e:
+            logger.error(f"Bot setup error: {e}")
             
         # Fallback: Keep the process running with status updates
         while True:
