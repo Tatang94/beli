@@ -56,26 +56,32 @@ function generateSignature($username, $apikey, $devcmd) {
     return md5($username . $apikey . $devcmd);
 }
 
-// Function untuk kategorisasi produk (versi singkat untuk auto update)
+// Function untuk kategorisasi produk (versi lengkap berdasarkan dokumentasi Digiflazz 2025)
 function categorizeProduct($product_name, $api_category = '', $api_type = '') {
     $name_lower = strtolower($product_name);
     
-    // Pulsa
+    // Gunakan kategori API jika tersedia dan valid
+    $api_category_lower = strtolower($api_category);
+    $api_type_lower = strtolower($api_type);
+    
+    // Pulsa (hanya pulsa murni, bukan paket data)
     if ((strpos($name_lower, 'pulsa') !== false && 
          strpos($name_lower, 'data') === false && 
          strpos($name_lower, 'internet') === false &&
          strpos($name_lower, 'kuota') === false &&
-         strpos($name_lower, 'paket') === false)) return 'pulsa';
+         strpos($name_lower, 'paket') === false) ||
+         strpos($api_category_lower, 'pulsa') !== false) return 'pulsa';
     
-    // Data
+    // Data & Internet
     if (strpos($name_lower, 'data') !== false || 
         strpos($name_lower, 'internet') !== false ||
         strpos($name_lower, 'kuota') !== false ||
-        strpos($name_lower, 'paket') !== false ||
+        (strpos($name_lower, 'paket') !== false && strpos($name_lower, 'data') !== false) ||
         strpos($name_lower, 'gb') !== false ||
-        strpos($name_lower, 'mb') !== false) return 'data';
+        strpos($name_lower, 'mb') !== false ||
+        strpos($name_lower, 'unlimited') !== false) return 'data';
     
-    // Games
+    // Games & Voucher Game
     if (strpos($name_lower, 'game') !== false || 
         strpos($name_lower, 'mobile legends') !== false ||
         strpos($name_lower, 'ml') !== false ||
@@ -83,22 +89,68 @@ function categorizeProduct($product_name, $api_category = '', $api_type = '') {
         strpos($name_lower, 'free fire') !== false ||
         strpos($name_lower, 'ff') !== false ||
         strpos($name_lower, 'diamond') !== false ||
-        strpos($name_lower, 'uc') !== false) return 'games';
+        strpos($name_lower, 'uc') !== false ||
+        strpos($name_lower, 'genshin') !== false ||
+        strpos($name_lower, 'honkai') !== false ||
+        strpos($name_lower, 'roblox') !== false ||
+        strpos($name_lower, 'steam') !== false ||
+        strpos($name_lower, 'aov') !== false ||
+        strpos($name_lower, 'call of duty') !== false ||
+        strpos($name_lower, 'cod') !== false ||
+        strpos($name_lower, 'garena') !== false) return 'games';
     
-    // E-Money
+    // E-Money & Digital Wallet (lebih lengkap)
     if (strpos($name_lower, 'ovo') !== false || 
         strpos($name_lower, 'dana') !== false ||
         strpos($name_lower, 'gopay') !== false ||
-        strpos($name_lower, 'shopee') !== false) return 'emoney';
+        strpos($name_lower, 'shopee') !== false ||
+        strpos($name_lower, 'linkaja') !== false ||
+        strpos($name_lower, 'tcash') !== false ||
+        strpos($name_lower, 'jenius') !== false ||
+        strpos($name_lower, 'sakuku') !== false ||
+        strpos($name_lower, 'isaku') !== false ||
+        strpos($name_lower, 'brizzi') !== false ||
+        strpos($name_lower, 'flazz') !== false ||
+        strpos($name_lower, 'e-toll') !== false ||
+        strpos($name_lower, 'mandiri e-money') !== false) return 'emoney';
     
-    // PLN
+    // PLN & Token Listrik
     if (strpos($name_lower, 'pln') !== false || 
         strpos($name_lower, 'listrik') !== false || 
-        strpos($name_lower, 'token') !== false) return 'pln';
+        strpos($name_lower, 'token') !== false ||
+        strpos($api_category_lower, 'pln') !== false) return 'pln';
     
-    // Voucher
+    // Streaming & TV
+    if (strpos($name_lower, 'netflix') !== false ||
+        strpos($name_lower, 'disney') !== false ||
+        strpos($name_lower, 'vidio') !== false ||
+        strpos($name_lower, 'spotify') !== false ||
+        strpos($name_lower, 'youtube premium') !== false ||
+        strpos($name_lower, 'amazon prime') !== false ||
+        strpos($name_lower, 'viu') !== false ||
+        strpos($name_lower, 'wetv') !== false ||
+        strpos($name_lower, 'iqiyi') !== false ||
+        strpos($name_lower, 'apple music') !== false ||
+        strpos($name_lower, 'hbo') !== false ||
+        strpos($name_lower, 'mola tv') !== false ||
+        strpos($name_lower, 'vision+') !== false) return 'streaming';
+    
+    // PDAM & Air
+    if (strpos($name_lower, 'pdam') !== false ||
+        strpos($name_lower, 'air') !== false ||
+        strpos($name_lower, 'aetra') !== false ||
+        strpos($name_lower, 'palyja') !== false ||
+        strpos($api_category_lower, 'pdam') !== false) return 'pdam';
+    
+    // Gas PGN
+    if (strpos($name_lower, 'gas') !== false ||
+        strpos($name_lower, 'pgn') !== false) return 'gas';
+    
+    // Voucher Google Play, Apple, dll
     if (strpos($name_lower, 'voucher') !== false ||
-        strpos($name_lower, 'google play') !== false) return 'voucher';
+        strpos($name_lower, 'google play') !== false ||
+        strpos($name_lower, 'apple') !== false ||
+        strpos($name_lower, 'itunes') !== false) return 'voucher';
     
     // SMS & Telepon
     if (strpos($name_lower, 'sms') !== false || 
@@ -108,6 +160,50 @@ function categorizeProduct($product_name, $api_category = '', $api_type = '') {
         strpos($name_lower, 'paket telepon') !== false ||
         strpos($name_lower, 'paket telpon') !== false ||
         strpos($name_lower, 'unlimited telpon') !== false) return 'sms_telpon';
+    
+    // Media Sosial
+    if (strpos($name_lower, 'facebook') !== false ||
+        strpos($name_lower, 'instagram') !== false ||
+        strpos($name_lower, 'twitter') !== false ||
+        strpos($name_lower, 'tiktok') !== false ||
+        strpos($name_lower, 'whatsapp') !== false) return 'media_sosial';
+    
+    // Aktivasi & Masa Aktif
+    if (strpos($name_lower, 'aktivasi') !== false ||
+        strpos($name_lower, 'masa aktif') !== false ||
+        strpos($name_lower, 'extend') !== false) return 'aktivasi';
+    
+    // eSIM
+    if (strpos($name_lower, 'esim') !== false ||
+        strpos($name_lower, 'e-sim') !== false) return 'esim';
+    
+    // Bundling Packages
+    if (strpos($name_lower, 'bundling') !== false ||
+        strpos($name_lower, 'combo') !== false) return 'bundling';
+    
+    // Pascabayar categories
+    if (strpos($api_category_lower, 'pascabayar') !== false ||
+        strpos($api_type_lower, 'postpaid') !== false ||
+        strpos($name_lower, 'pascabayar') !== false ||
+        strpos($name_lower, 'tagihan') !== false) {
+        
+        if (strpos($name_lower, 'pln') !== false) return 'pln_pascabayar';
+        if (strpos($name_lower, 'pdam') !== false) return 'pdam';
+        if (strpos($name_lower, 'bpjs') !== false) return 'bpjs';
+        if (strpos($name_lower, 'multifinance') !== false) return 'multifinance';
+        if (strpos($name_lower, 'pbb') !== false) return 'pbb';
+        if (strpos($name_lower, 'samsat') !== false) return 'samsat';
+        
+        return 'pascabayar';
+    }
+    
+    // International Top Up
+    if (strpos($name_lower, 'china') !== false) return 'china_topup';
+    if (strpos($name_lower, 'malaysia') !== false) return 'malaysia_topup';
+    if (strpos($name_lower, 'philippines') !== false) return 'philippines_topup';
+    if (strpos($name_lower, 'singapore') !== false) return 'singapore_topup';
+    if (strpos($name_lower, 'thailand') !== false) return 'thailand_topup';
+    if (strpos($name_lower, 'vietnam') !== false) return 'vietnam_topup';
     
     return 'lainnya';
 }

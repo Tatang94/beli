@@ -67,7 +67,7 @@ if ($pdo) {
     }
 }
 
-// Category icons
+// Category icons (berdasarkan dokumentasi Digiflazz lengkap)
 $cat_icons = [
     'pulsa' => '📱',
     'data' => '🌐', 
@@ -75,7 +75,26 @@ $cat_icons = [
     'emoney' => '💳',
     'pln' => '⚡',
     'voucher' => '🎫',
+    'streaming' => '📺',
     'sms_telpon' => '📞',
+    'pdam' => '💧',
+    'gas' => '🔥',
+    'media_sosial' => '📱',
+    'aktivasi' => '🔑',
+    'esim' => '📱',
+    'bundling' => '📦',
+    'pascabayar' => '💳',
+    'pln_pascabayar' => '⚡',
+    'bpjs' => '🏥',
+    'multifinance' => '🏦',
+    'pbb' => '🏠',
+    'samsat' => '🚗',
+    'china_topup' => '🇨🇳',
+    'malaysia_topup' => '🇲🇾',
+    'philippines_topup' => '🇵🇭',
+    'singapore_topup' => '🇸🇬',
+    'thailand_topup' => '🇹🇭',
+    'vietnam_topup' => '🇻🇳',
     'lainnya' => '📦'
 ];
 
