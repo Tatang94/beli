@@ -9,10 +9,17 @@ import logging
 import asyncio
 from datetime import datetime
 
+try:
+    from telegram.ext import Application, CommandHandler, MessageHandler, filters
+    from telegram import InlineKeyboardButton, InlineKeyboardMarkup
+except ImportError:
+    InlineKeyboardButton = None
+    InlineKeyboardMarkup = None
+
 # Bot configuration with environment variables
-TOKEN = os.getenv("TELEGRAM_BOT_TOKEN") or "8216106872:AAEQ_DxjYtZL0t6vD-y4Pfj90c94wHgXDcc"
-DIGIFLAZZ_USERNAME = os.getenv("DIGIFLAZZ_USERNAME") or "miwewogwOZ2g"
-DIGIFLAZZ_KEY = os.getenv("DIGIFLAZZ_KEY") or "8c2f1f52-6e36-56de-a1cd-3662bd5eb375"
+TOKEN = os.getenv("TELEGRAM_BOT_TOKEN")
+DIGIFLAZZ_USERNAME = os.getenv("DIGIFLAZZ_USERNAME")
+DIGIFLAZZ_KEY = os.getenv("DIGIFLAZZ_KEY")
 
 # Setup logging
 logging.basicConfig(
@@ -50,16 +57,19 @@ Ketik /menu untuk melihat layanan lengkap!
 async def menu_command(update, context):
     """Handle /menu command"""
     
-    keyboard = [
-        [InlineKeyboardButton("📱 Pulsa", callback_data='pulsa'),
-         InlineKeyboardButton("🌐 Data", callback_data='data')],
-        [InlineKeyboardButton("🎮 Game", callback_data='games'),
-         InlineKeyboardButton("💳 E-Money", callback_data='emoney')],
-        [InlineKeyboardButton("🌐 Web Interface", url='http://your-replit-url.replit.app')],
-    ]
-    
-    reply_markup = InlineKeyboardMarkup(keyboard)
-    await update.message.reply_text("🏪 *PILIH LAYANAN:*", reply_markup=reply_markup, parse_mode='Markdown')
+    if InlineKeyboardButton and InlineKeyboardMarkup:
+        keyboard = [
+            [InlineKeyboardButton("📱 Pulsa", callback_data='pulsa'),
+             InlineKeyboardButton("🌐 Data", callback_data='data')],
+            [InlineKeyboardButton("🎮 Game", callback_data='games'),
+             InlineKeyboardButton("💳 E-Money", callback_data='emoney')],
+            [InlineKeyboardButton("🌐 Web Interface", url='https://your-replit-url.replit.app')],
+        ]
+        
+        reply_markup = InlineKeyboardMarkup(keyboard)
+        await update.message.reply_text("🏪 *PILIH LAYANAN:*", reply_markup=reply_markup, parse_mode='Markdown')
+    else:
+        await update.message.reply_text("🏪 *PILIH LAYANAN:*\n\n📱 Pulsa\n🌐 Data\n🎮 Game\n💳 E-Money\n\nKetik layanan yang diinginkan!", parse_mode='Markdown')
 
 async def handle_text_message(update, context):
     """Handle general text messages"""
@@ -88,7 +98,7 @@ def main():
             from telegram.ext import Application, CommandHandler, MessageHandler, filters
             from telegram import InlineKeyboardButton, InlineKeyboardMarkup
             
-            if TOKEN and TOKEN != "YOUR_TELEGRAM_BOT_TOKEN":
+            if TOKEN:
                 application = Application.builder().token(TOKEN).build()
                 application.add_handler(CommandHandler("start", start_command))
                 application.add_handler(CommandHandler("menu", menu_command))

@@ -2,7 +2,7 @@ modules = ["php-8.2", "python-3.11"]
 
 [nix]
 channel = "stable-25_05"
-packages = ["sqlite", "php82"]
+packages = ["php82", "sqlite", "php", "php82Extensions.pdo", "php82Extensions.sqlite3"]
 
 [workflows]
 runButton = "Project"
@@ -32,25 +32,31 @@ author = "agent"
 task = "shell.exec"
 args = "python bot_working.py"
 
+[workflows.workflow.metadata]
+outputType = "console"
+
 [[workflows.workflow]]
 name = "Web Server"
 author = "agent"
 
 [[workflows.workflow.tasks]]
 task = "shell.exec"
-args = "php -S 0.0.0.0:5000 -t web_interface"
+args = "cd web_interface && php -S 0.0.0.0:5000"
 waitForPort = 5000
+
+[workflows.workflow.metadata]
+outputType = "webview"
 
 [[workflows.workflow]]
 name = "Product Auto Update"
 author = "agent"
 
-[[workflows.workflow.tasks]]
-task = "shell.exec"
-args = "cd web_interface && php cron_scheduler.php"
-
 [workflows.workflow.metadata]
 outputType = "console"
+
+[[workflows.workflow.tasks]]
+task = "shell.exec"
+args = "cd web_interface && while true; do php auto_update_products.php; sleep 1800; done"
 
 [agent]
 expertMode = true

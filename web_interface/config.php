@@ -4,12 +4,12 @@
  * Sesuaikan dengan pengaturan hosting cPanel Anda
  */
 
-// Konfigurasi Bot Token (WAJIB DIGANTI!)
-define('BOT_TOKEN', '8216106872:AAEQ_DxjYtZL0t6vD-y4Pfj90c94wHgXDcc');
+// Konfigurasi Bot Token - Menggunakan environment variables untuk keamanan
+define('BOT_TOKEN', $_ENV['TELEGRAM_BOT_TOKEN'] ?? '');
 
-// Konfigurasi Digiflazz API (WAJIB DIGANTI!)
-define('DIGIFLAZZ_USERNAME', 'miwewogwOZ2g');
-define('DIGIFLAZZ_KEY', '8c2f1f52-6e36-56de-a1cd-3662bd5eb375');
+// Konfigurasi Digiflazz API - Menggunakan environment variables untuk keamanan
+define('DIGIFLAZZ_USERNAME', $_ENV['DIGIFLAZZ_USERNAME'] ?? '');
+define('DIGIFLAZZ_KEY', $_ENV['DIGIFLAZZ_KEY'] ?? '');
 
 // ID Admin Telegram (WAJIB DIGANTI dengan ID Telegram Anda!)
 define('ADMIN_IDS', [7044289974]);
