@@ -140,22 +140,36 @@ function categorizeProduct($product_name, $api_category = '', $api_type = '') {
         strpos($name_lower, 'aov') !== false ||
         strpos($name_lower, 'call of duty') !== false ||
         strpos($name_lower, 'cod') !== false ||
-        strpos($name_lower, 'garena') !== false) return 'Game';
+        strpos($name_lower, 'garena') !== false ||
+        strpos($name_lower, 'super sus') !== false ||
+        strpos($name_lower, 'lita') !== false ||
+        strpos($name_lower, 'coins') !== false ||
+        strpos($name_lower, 'goldstar') !== false) return 'Game';
     
-    // E-Money & Digital Wallet (lebih lengkap)
+    // E-Money & Digital Wallet (semua brand dompet digital sesuai API)
     if (strpos($name_lower, 'ovo') !== false || 
         strpos($name_lower, 'dana') !== false ||
         strpos($name_lower, 'gopay') !== false ||
+        strpos($name_lower, 'go pay') !== false ||
         strpos($name_lower, 'shopee') !== false ||
         strpos($name_lower, 'linkaja') !== false ||
         strpos($name_lower, 'tcash') !== false ||
+        strpos($name_lower, 'tapcash') !== false ||
         strpos($name_lower, 'jenius') !== false ||
         strpos($name_lower, 'sakuku') !== false ||
         strpos($name_lower, 'isaku') !== false ||
+        strpos($name_lower, 'i.saku') !== false ||
         strpos($name_lower, 'brizzi') !== false ||
         strpos($name_lower, 'flazz') !== false ||
         strpos($name_lower, 'e-toll') !== false ||
-        strpos($name_lower, 'mandiri e-money') !== false) return 'E-Money';
+        strpos($name_lower, 'mandiri e-money') !== false ||
+        strpos($name_lower, 'grab') !== false ||
+        strpos($name_lower, 'maxim') !== false ||
+        strpos($name_lower, 'indriver') !== false ||
+        strpos($name_lower, 'doku') !== false ||
+        strpos($name_lower, 'astrapay') !== false ||
+        strpos($name_lower, 'kaspro') !== false ||
+        strpos($name_lower, 'm-tix') !== false) return 'E-Money';
     
     // PLN & Token Listrik
     if (strpos($name_lower, 'pln') !== false || 
@@ -163,7 +177,7 @@ function categorizeProduct($product_name, $api_category = '', $api_type = '') {
         strpos($name_lower, 'token') !== false ||
         strpos($api_category_lower, 'pln') !== false) return 'PLN';
     
-    // Streaming & TV
+    // Streaming & TV (semua brand streaming sesuai API)
     if (strpos($name_lower, 'netflix') !== false ||
         strpos($name_lower, 'disney') !== false ||
         strpos($name_lower, 'vidio') !== false ||
@@ -176,7 +190,10 @@ function categorizeProduct($product_name, $api_category = '', $api_type = '') {
         strpos($name_lower, 'apple music') !== false ||
         strpos($name_lower, 'hbo') !== false ||
         strpos($name_lower, 'mola tv') !== false ||
-        strpos($name_lower, 'vision+') !== false) return 'Streaming';
+        strpos($name_lower, 'vision+') !== false ||
+        strpos($name_lower, 'nex parabola') !== false ||
+        strpos($name_lower, 'k-vision') !== false ||
+        strpos($name_lower, 'transvision') !== false) return 'Streaming';
     
     // PDAM & Air
     if (strpos($name_lower, 'pdam') !== false ||
@@ -195,18 +212,21 @@ function categorizeProduct($product_name, $api_category = '', $api_type = '') {
         strpos($name_lower, 'apple') !== false ||
         strpos($name_lower, 'itunes') !== false) return 'Voucher';
     
-    // SMS TELPON - HANYA paket SMS dan telepon (tidak termasuk data/pulsa biasa)
-    if ((strpos($name_lower, 'sms') !== false || 
+    // SMS TELPON - HANYA paket SMS dan telepon, termasuk AnyNet
+    if (((strpos($name_lower, 'sms') !== false || 
          strpos($name_lower, 'telepon') !== false ||
          strpos($name_lower, 'telpon') !== false ||
          strpos($name_lower, 'voice') !== false ||
          strpos($name_lower, 'call') !== false ||
+         strpos($name_lower, 'menit') !== false ||
+         strpos($name_lower, 'anynet') !== false ||
          (strpos($name_lower, 'paket') !== false && 
           (strpos($name_lower, 'sms') !== false || 
            strpos($name_lower, 'telepon') !== false || 
            strpos($name_lower, 'telpon') !== false ||
            strpos($name_lower, 'voice') !== false ||
-           strpos($name_lower, 'call') !== false)) ||
+           strpos($name_lower, 'call') !== false ||
+           strpos($name_lower, 'menit') !== false)) ||
          (strpos($name_lower, 'unlimited') !== false && 
           (strpos($name_lower, 'telepon') !== false ||
            strpos($name_lower, 'telpon') !== false ||
@@ -218,7 +238,9 @@ function categorizeProduct($product_name, $api_category = '', $api_type = '') {
         strpos($name_lower, 'internet') === false &&
         strpos($name_lower, 'kuota') === false &&
         strpos($name_lower, 'gb') === false &&
-        strpos($name_lower, 'mb') === false) return 'SMS Telpon';
+        strpos($name_lower, 'mb') === false) ||
+        // Termasuk khusus AnyNet yang jelas SMS/Telpon
+        strpos($name_lower, 'anynet') !== false) return 'SMS Telpon';
     
     // Media Sosial
     if (strpos($name_lower, 'facebook') !== false ||
@@ -260,7 +282,7 @@ function categorizeProduct($product_name, $api_category = '', $api_type = '') {
         if (strpos($name_lower, 'pbb') !== false) return 'PBB';
         if (strpos($name_lower, 'samsat') !== false) return 'SAMSAT';
         
-        return 'Lainnya';
+        return 'Pascabayar';
     }
     
     // International Top Up
@@ -271,7 +293,13 @@ function categorizeProduct($product_name, $api_category = '', $api_type = '') {
     if (strpos($name_lower, 'thailand') !== false) return 'Thailand Topup';
     if (strpos($name_lower, 'vietnam') !== false) return 'Vietnam Topup';
     
-    return 'Lainnya';
+    // Default berdasarkan brand yang belum tercakup - kategorikan ke E-Money jika produk topup
+    if (strpos($name_lower, 'topup') !== false || 
+        strpos($name_lower, 'top up') !== false ||
+        strpos($api_category_lower, 'e-money') !== false) return 'E-Money';
+    
+    // Jika masih tidak ada kategori, masukkan ke Voucher
+    return 'Voucher';
 }
 
 // Function untuk ambil data produk dari Digiflazz API

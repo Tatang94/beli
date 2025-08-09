@@ -6,9 +6,9 @@ session_start();
 $admin_password = "admin123"; // Change this!
 
 if (!isset($_SESSION['admin_logged_in'])) {
-    if ($_POST['password'] === $admin_password) {
+    if (isset($_POST['password']) && $_POST['password'] === $admin_password) {
         $_SESSION['admin_logged_in'] = true;
-    } else if ($_POST['password']) {
+    } else if (isset($_POST['password']) && $_POST['password']) {
         $error = "Password salah!";
     }
 }
@@ -119,8 +119,9 @@ try {
     $total_products = array_sum(array_column($categories, 'count'));
     
     // Last update
-    $stmt = $db->query("SELECT MAX(updated_at) as last_update FROM products LIMIT 1");
+    $stmt = $db->query("SELECT MAX(last_updated) as last_update FROM products LIMIT 1");
     $last_update = $stmt->fetchColumn();
+    if (!$last_update) $last_update = date('Y-m-d H:i:s');
     
 } catch (PDOException $e) {
     $error = "Database error: " . $e->getMessage();
